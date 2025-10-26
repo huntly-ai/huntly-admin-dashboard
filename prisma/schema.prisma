@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  EMAIL_CAMPAIGN
+  COLD_CALL
+  EVENT
+  OTHER
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  CHURNED
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionCategory {
+  // Income categories
+  PROJECT_PAYMENT
+  CONSULTING
+  LICENSE
+  SUBSCRIPTION
+  OTHER_INCOME
+  
+  // Expense categories
+  SALARIES
+  INFRASTRUCTURE
+  SOFTWARE
+  MARKETING
+  OFFICE
+  TAXES
+  OTHER_EXPENSE
+}
+
+model Lead {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  phone       String?
+  company     String?
+  position    String?
+  status      LeadStatus  @default(NEW)
+  source      LeadSource  @default(OTHER)
+  notes       String?
+  estimatedValue Float?
+  
+  // Conversion tracking
+  convertedToClientId String?   @unique
+  convertedToClient   Client?   @relation(fields: [convertedToClientId], references: [id])
+  convertedAt         DateTime?
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@index([status])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model Client {
+  id          String        @id @default(cuid())
+  name        String
+  email       String        @unique
+  phone       String?
+  company     String?
+  position    String?
+  status      ClientStatus  @default(ACTIVE)
+  
+  // Business info
+  cnpj        String?       @unique
+  address     String?
+  website     String?
+  notes       String?
+  
+  // Relationship
+  projects    Project[]
+  transactions Transaction[]
+  
+  // Conversion info
+  leadId      String?       @unique
+  lead        Lead?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus   @default(PLANNING)
+  priority    ProjectPriority @default(MEDIUM)
+  
+  // Financial
+  budget      Float
+  actualCost  Float           @default(0)
+  
+  // Dates
+  startDate   DateTime?
+  endDate     DateTime?
+  deadline    DateTime?
+  
+  // Client relationship
+  clientId    String
+  client      Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  // Related transactions
+  transactions Transaction[]
+  
+  // Team and notes
+  teamMembers String?         // JSON array of team member names/emails
+  notes       String?
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  @@index([status])
+  @@index([priority])
+  @@index([clientId])
+  @@index([startDate])
+  @@index([deadline])
+}
+
+model Transaction {
+  id          String              @id @default(cuid())
+  type        TransactionType
+  category    TransactionCategory
+  amount      Float
+  description String
+  
+  // Relationships
+  projectId   String?
+  project     Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  clientId    String?
+  client      Client?             @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  // Date
+  date        DateTime            @default(now())
+  
+  // Additional info
+  invoiceNumber String?
+  paymentMethod String?
+  notes       String?
+  
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@index([projectId])
+  @@index([clientId])
+}
