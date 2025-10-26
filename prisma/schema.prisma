@@ -77,8 +77,8 @@ enum TransactionCategory {
 model Lead {
   id          String      @id @default(cuid())
   name        String
-  email       String      @unique
-  phone       String?
+  email       String?
+  phone       String
   company     String?
   position    String?
   status      LeadStatus  @default(NEW)

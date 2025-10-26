@@ -60,8 +60,8 @@ const statusColors: Record<string, string> = {
 interface Lead {
   id: string
   name: string
-  email: string
-  phone?: string
+  email?: string
+  phone: string
   company?: string
   position?: string
   status: string
@@ -176,8 +176,8 @@ export default function LeadsPage() {
     setEditingLead(lead)
     setFormData({
       name: lead.name,
-      email: lead.email,
-      phone: lead.phone || "",
+      email: lead.email || "",
+      phone: lead.phone,
       company: lead.company || "",
       position: lead.position || "",
       status: lead.status,
@@ -261,11 +261,10 @@ export default function LeadsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
-                      required
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -276,9 +275,10 @@ export default function LeadsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
+                    <Label htmlFor="phone">Telefone *</Label>
                     <Input
                       id="phone"
+                      required
                       value={formData.phone}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
