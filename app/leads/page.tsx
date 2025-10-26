@@ -76,7 +76,9 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false)
   const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [convertingLead, setConvertingLead] = useState<Lead | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -112,12 +114,15 @@ export default function LeadsPage() {
       const url = editingLead ? `/api/leads/${editingLead.id}` : "/api/leads"
       const method = editingLead ? "PUT" : "POST"
 
-      // Converter o valor de centavos (string de números) para decimal
+      // Preparar dados para envio
       const dataToSend = {
         ...formData,
+        // Remove formatação do telefone (envia apenas números)
+        phone: formData.phone.replace(/\D/g, ""),
+        // Converte valor de centavos para decimal, ou envia vazio (não null)
         estimatedValue: formData.estimatedValue 
           ? (parseFloat(formData.estimatedValue) / 100).toString()
-          : null
+          : ""
       }
 
       const response = await fetch(url, {
@@ -159,16 +164,22 @@ export default function LeadsPage() {
     }
   }
 
-  const handleConvert = async (id: string) => {
-    if (!confirm("Deseja converter este lead em cliente?")) return
+  const openConvertDialog = (lead: Lead) => {
+    setConvertingLead(lead)
+    setIsConvertDialogOpen(true)
+  }
+
+  const handleConvert = async () => {
+    if (!convertingLead) return
 
     try {
-      const response = await fetch(`/api/leads/${id}/convert`, {
+      const response = await fetch(`/api/leads/${convertingLead.id}/convert`, {
         method: "POST",
       })
 
       if (response.ok) {
-        alert("Lead convertido em cliente com sucesso!")
+        setIsConvertDialogOpen(false)
+        setConvertingLead(null)
         fetchLeads()
       } else {
         const error = await response.json()
@@ -401,6 +412,80 @@ export default function LeadsPage() {
               </form>
             </DialogContent>
           </Dialog>
+
+          {/* Dialog de Confirmação de Conversão */}
+          <Dialog open={isConvertDialogOpen} onOpenChange={setIsConvertDialogOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <UserCheck className="h-5 w-5 text-green-600" />
+                  Converter Lead em Cliente
+                </DialogTitle>
+                <DialogDescription>
+                  Esta ação irá converter o lead em um cliente ativo no sistema.
+                </DialogDescription>
+              </DialogHeader>
+              
+              {convertingLead && (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                    <div>
+                      <p className="text-sm text-gray-500">Nome</p>
+                      <p className="font-medium">{convertingLead.name}</p>
+                    </div>
+                    {convertingLead.email && (
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="font-medium">{convertingLead.email}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm text-gray-500">Telefone</p>
+                      <p className="font-medium">{formatPhone(convertingLead.phone)}</p>
+                    </div>
+                    {convertingLead.company && (
+                      <div>
+                        <p className="text-sm text-gray-500">Empresa</p>
+                        <p className="font-medium">{convertingLead.company}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>✨ O que acontecerá:</strong>
+                      <br />
+                      • O lead será marcado como convertido
+                      <br />
+                      • Um novo cliente será criado com estes dados
+                      <br />
+                      • Você poderá gerenciar projetos para este cliente
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsConvertDialogOpen(false)
+                        setConvertingLead(null)
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleConvert}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Confirmar Conversão
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card>
@@ -482,7 +567,7 @@ export default function LeadsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleConvert(lead.id)}
+                            onClick={() => openConvertDialog(lead)}
                             title="Converter em Cliente"
                           >
                             <UserCheck className="h-4 w-4" />

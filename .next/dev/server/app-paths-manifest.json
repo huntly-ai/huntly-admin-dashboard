@@ -1,9 +1,0 @@
-{
-  "/api/clientes/route": "app/api/clientes/route.js",
-  "/api/financeiro/route": "app/api/financeiro/route.js",
-  "/api/leads/route": "app/api/leads/route.js",
-  "/api/projetos/route": "app/api/projetos/route.js",
-  "/clientes/page": "app/clientes/page.js",
-  "/financeiro/page": "app/financeiro/page.js",
-  "/leads/page": "app/leads/page.js"
-}
