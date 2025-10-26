@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, UserCheck } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { formatPhone, formatCurrencyInput, unformatCurrency, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 
 const statusLabels: Record<string, string> = {
   NEW: "Novo",
@@ -183,7 +184,7 @@ export default function LeadsPage() {
       status: lead.status,
       source: lead.source,
       notes: lead.notes || "",
-      estimatedValue: lead.estimatedValue?.toString() || "",
+      estimatedValue: prepareValueForCurrencyInput(lead.estimatedValue),
     })
     setIsDialogOpen(true)
   }
@@ -279,10 +280,13 @@ export default function LeadsPage() {
                     <Input
                       id="phone"
                       required
+                      placeholder="+55 (11) 98765-4321"
                       value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const formatted = formatPhone(e.target.value)
+                        setFormData({ ...formData, phone: formatted })
+                      }}
+                      maxLength={19}
                     />
                   </div>
                   <div className="space-y-2">
@@ -352,15 +356,15 @@ export default function LeadsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="estimatedValue">Valor Estimado (R$)</Label>
+                  <Label htmlFor="estimatedValue">Valor Estimado</Label>
                   <Input
                     id="estimatedValue"
-                    type="number"
-                    step="0.01"
-                    value={formData.estimatedValue}
-                    onChange={(e) =>
-                      setFormData({ ...formData, estimatedValue: e.target.value })
-                    }
+                    placeholder="R$ 0,00"
+                    value={formData.estimatedValue ? formatCurrencyInput(formData.estimatedValue) : ""}
+                    onChange={(e) => {
+                      const unformatted = unformatCurrency(e.target.value)
+                      setFormData({ ...formData, estimatedValue: unformatted })
+                    }}
                   />
                 </div>
 
