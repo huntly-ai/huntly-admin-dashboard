@@ -42,8 +42,7 @@ const sourceLabels: Record<string, string> = {
   WEBSITE: "Website",
   REFERRAL: "Indicação",
   SOCIAL_MEDIA: "Redes Sociais",
-  EMAIL_CAMPAIGN: "Campanha de Email",
-  COLD_CALL: "Ligação Fria",
+  ZEROS_A_DIREITA: "Zeros à Direita",
   EVENT: "Evento",
   OTHER: "Outro",
 }
