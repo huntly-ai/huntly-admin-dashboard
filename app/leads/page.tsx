@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, UserCheck } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { formatPhone, formatCurrencyInput, unformatCurrency, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
+import { formatPhone, formatCurrencyInput, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 
 const statusLabels: Record<string, string> = {
   NEW: "Novo",
@@ -112,10 +112,18 @@ export default function LeadsPage() {
       const url = editingLead ? `/api/leads/${editingLead.id}` : "/api/leads"
       const method = editingLead ? "PUT" : "POST"
 
+      // Converter o valor de centavos (string de números) para decimal
+      const dataToSend = {
+        ...formData,
+        estimatedValue: formData.estimatedValue 
+          ? (parseFloat(formData.estimatedValue) / 100).toString()
+          : null
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -359,10 +367,11 @@ export default function LeadsPage() {
                   <Input
                     id="estimatedValue"
                     placeholder="R$ 0,00"
-                    value={formData.estimatedValue ? formatCurrencyInput(formData.estimatedValue) : ""}
+                    value={formatCurrencyInput(formData.estimatedValue)}
                     onChange={(e) => {
-                      const unformatted = unformatCurrency(e.target.value)
-                      setFormData({ ...formData, estimatedValue: unformatted })
+                      // Remove tudo que não é dígito
+                      const onlyNumbers = e.target.value.replace(/\D/g, "")
+                      setFormData({ ...formData, estimatedValue: onlyNumbers })
                     }}
                   />
                 </div>
