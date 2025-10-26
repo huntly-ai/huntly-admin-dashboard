@@ -1,0 +1,581 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { DashboardLayout } from "@/components/dashboard-layout"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Plus, Edit, Trash2 } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+
+const statusLabels: Record<string, string> = {
+  PLANNING: "Planejamento",
+  IN_PROGRESS: "Em Andamento",
+  ON_HOLD: "Pausado",
+  COMPLETED: "Concluído",
+  CANCELLED: "Cancelado",
+}
+
+const priorityLabels: Record<string, string> = {
+  LOW: "Baixa",
+  MEDIUM: "Média",
+  HIGH: "Alta",
+  URGENT: "Urgente",
+}
+
+const statusColors: Record<string, string> = {
+  PLANNING: "bg-blue-100 text-blue-800",
+  IN_PROGRESS: "bg-green-100 text-green-800",
+  ON_HOLD: "bg-yellow-100 text-yellow-800",
+  COMPLETED: "bg-purple-100 text-purple-800",
+  CANCELLED: "bg-red-100 text-red-800",
+}
+
+const priorityColors: Record<string, string> = {
+  LOW: "bg-gray-100 text-gray-800",
+  MEDIUM: "bg-blue-100 text-blue-800",
+  HIGH: "bg-orange-100 text-orange-800",
+  URGENT: "bg-red-100 text-red-800",
+}
+
+interface Client {
+  id: string
+  name: string
+  company?: string
+}
+
+interface Project {
+  id: string
+  name: string
+  description?: string
+  status: string
+  priority: string
+  budget: number
+  actualCost: number
+  startDate?: string
+  endDate?: string
+  deadline?: string
+  client: Client
+  clientId: string
+  teamMembers?: string
+  notes?: string
+  createdAt: string
+  _count?: {
+    transactions: number
+  }
+}
+
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    status: "PLANNING",
+    priority: "MEDIUM",
+    budget: "",
+    actualCost: "",
+    startDate: "",
+    endDate: "",
+    deadline: "",
+    clientId: "",
+    teamMembers: "",
+    notes: "",
+  })
+
+  useEffect(() => {
+    fetchProjects()
+    fetchClients()
+  }, [])
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("/api/projetos")
+      const data = await response.json()
+      setProjects(data)
+    } catch (error) {
+      console.error("Error fetching projects:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch("/api/clientes?status=ACTIVE")
+      const data = await response.json()
+      setClients(data)
+    } catch (error) {
+      console.error("Error fetching clients:", error)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      const url = editingProject
+        ? `/api/projetos/${editingProject.id}`
+        : "/api/projetos"
+      const method = editingProject ? "PUT" : "POST"
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setIsDialogOpen(false)
+        resetForm()
+        fetchProjects()
+      } else {
+        const error = await response.json()
+        alert(error.error || "Erro ao salvar projeto")
+      }
+    } catch (error) {
+      console.error("Error saving project:", error)
+      alert("Erro ao salvar projeto")
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este projeto?")) return
+
+    try {
+      const response = await fetch(`/api/projetos/${id}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        fetchProjects()
+      } else {
+        alert("Erro ao excluir projeto")
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error)
+      alert("Erro ao excluir projeto")
+    }
+  }
+
+  const handleEdit = (project: Project) => {
+    setEditingProject(project)
+    setFormData({
+      name: project.name,
+      description: project.description || "",
+      status: project.status,
+      priority: project.priority,
+      budget: project.budget.toString(),
+      actualCost: project.actualCost.toString(),
+      startDate: project.startDate ? format(new Date(project.startDate), "yyyy-MM-dd") : "",
+      endDate: project.endDate ? format(new Date(project.endDate), "yyyy-MM-dd") : "",
+      deadline: project.deadline ? format(new Date(project.deadline), "yyyy-MM-dd") : "",
+      clientId: project.clientId,
+      teamMembers: project.teamMembers || "",
+      notes: project.notes || "",
+    })
+    setIsDialogOpen(true)
+  }
+
+  const resetForm = () => {
+    setEditingProject(null)
+    setFormData({
+      name: "",
+      description: "",
+      status: "PLANNING",
+      priority: "MEDIUM",
+      budget: "",
+      actualCost: "",
+      startDate: "",
+      endDate: "",
+      deadline: "",
+      clientId: "",
+      teamMembers: "",
+      notes: "",
+    })
+  }
+
+  const handleDialogChange = (open: boolean) => {
+    setIsDialogOpen(open)
+    if (!open) {
+      resetForm()
+    }
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando projetos...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Projetos</h1>
+            <p className="text-gray-600 mt-1">Gerencie os projetos da empresa</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Projeto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingProject ? "Editar Projeto" : "Novo Projeto"}
+                </DialogTitle>
+                <DialogDescription>
+                  Preencha os dados do projeto abaixo
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome do Projeto *</Label>
+                  <Input
+                    id="name"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Textarea
+                    id="description"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="clientId">Cliente *</Label>
+                  <Select
+                    value={formData.clientId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, clientId: value })
+                    }
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name} {client.company && `(${client.company})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, status: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(statusLabels).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Prioridade</Label>
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, priority: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(priorityLabels).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="budget">Orçamento (R$) *</Label>
+                    <Input
+                      id="budget"
+                      type="number"
+                      step="0.01"
+                      required
+                      value={formData.budget}
+                      onChange={(e) =>
+                        setFormData({ ...formData, budget: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="actualCost">Custo Real (R$)</Label>
+                    <Input
+                      id="actualCost"
+                      type="number"
+                      step="0.01"
+                      value={formData.actualCost}
+                      onChange={(e) =>
+                        setFormData({ ...formData, actualCost: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">Data de Início</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, startDate: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="deadline">Prazo</Label>
+                    <Input
+                      id="deadline"
+                      type="date"
+                      value={formData.deadline}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deadline: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate">Data de Conclusão</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, endDate: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="teamMembers">Membros da Equipe</Label>
+                  <Input
+                    id="teamMembers"
+                    placeholder="Ex: João, Maria, Pedro"
+                    value={formData.teamMembers}
+                    onChange={(e) =>
+                      setFormData({ ...formData, teamMembers: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Observações</Label>
+                  <Textarea
+                    id="notes"
+                    rows={4}
+                    value={formData.notes}
+                    onChange={(e) =>
+                      setFormData({ ...formData, notes: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleDialogChange(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Salvar</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Lista de Projetos ({projects.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projects.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">
+                Nenhum projeto cadastrado ainda. Clique em &quot;Novo Projeto&quot; para começar.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg">{project.name}</h3>
+                          <Badge className={statusColors[project.status]}>
+                            {statusLabels[project.status]}
+                          </Badge>
+                          <Badge className={priorityColors[project.priority]}>
+                            {priorityLabels[project.priority]}
+                          </Badge>
+                        </div>
+                        {project.description && (
+                          <p className="text-sm text-gray-600 mb-3">
+                            {project.description}
+                          </p>
+                        )}
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
+                          <div>
+                            <span className="font-medium">Cliente:</span>{" "}
+                            {project.client.name}
+                            {project.client.company && ` (${project.client.company})`}
+                          </div>
+                          <div>
+                            <span className="font-medium">Orçamento:</span>{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(project.budget)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Custo Real:</span>{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(project.actualCost)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Margem:</span>{" "}
+                            <span
+                              className={
+                                project.budget - project.actualCost >= 0
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              }).format(project.budget - project.actualCost)}
+                            </span>
+                          </div>
+                          {project.startDate && (
+                            <div>
+                              <span className="font-medium">Início:</span>{" "}
+                              {format(new Date(project.startDate), "dd/MM/yyyy", {
+                                locale: ptBR,
+                              })}
+                            </div>
+                          )}
+                          {project.deadline && (
+                            <div>
+                              <span className="font-medium">Prazo:</span>{" "}
+                              {format(new Date(project.deadline), "dd/MM/yyyy", {
+                                locale: ptBR,
+                              })}
+                            </div>
+                          )}
+                          {project.teamMembers && (
+                            <div className="col-span-2">
+                              <span className="font-medium">Equipe:</span>{" "}
+                              {project.teamMembers}
+                            </div>
+                          )}
+                        </div>
+                        {project.notes && (
+                          <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                            {project.notes}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(project)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(project.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  )
+}
+
