@@ -24,6 +24,13 @@ export async function GET(request: NextRequest) {
             company: true,
           },
         },
+        transactions: {
+          select: {
+            id: true,
+            type: true,
+            amount: true,
+          },
+        },
         _count: {
           select: {
             transactions: true,
@@ -32,7 +39,38 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(projects)
+    // Calculate financial data for each project
+    const projectsWithFinancials = projects.map(project => {
+      const totalReceived = project.transactions
+        .filter(t => t.type === 'INCOME')
+        .reduce((sum, t) => sum + Number(t.amount), 0)
+      
+      const totalCost = project.transactions
+        .filter(t => t.type === 'EXPENSE')
+        .reduce((sum, t) => sum + Number(t.amount), 0)
+      
+      const profit = totalReceived - totalCost
+      const remaining = project.projectValue - totalReceived
+      const paymentProgress = project.projectValue > 0 
+        ? (totalReceived / project.projectValue) * 100 
+        : 0
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { transactions, ...projectData } = project
+
+      return {
+        ...projectData,
+        financials: {
+          totalReceived,
+          totalCost,
+          profit,
+          remaining,
+          paymentProgress,
+        },
+      }
+    })
+
+    return NextResponse.json(projectsWithFinancials)
   } catch (error) {
     console.error("Error fetching projects:", error)
     return NextResponse.json(

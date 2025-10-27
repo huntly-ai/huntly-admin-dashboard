@@ -56,7 +56,7 @@ interface MetricsData {
     id: string
     name: string
     status: string
-    budget: number
+    projectValue: number
     client: { name: string }
   }>
 }
@@ -277,7 +277,7 @@ export default function Home() {
                           {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
-                          }).format(project.budget)}
+                          }).format(project.projectValue)}
                         </p>
                       </div>
                       <Badge className={projectStatusColors[project.status]}>

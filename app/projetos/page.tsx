@@ -95,6 +95,13 @@ interface Project {
   _count?: {
     transactions: number
   }
+  financials?: {
+    totalReceived: number
+    totalCost: number
+    profit: number
+    remaining: number
+    paymentProgress: number
+  }
   projectMembers?: Array<{
     member: {
       id: string
@@ -626,39 +633,129 @@ export default function ProjectsPage() {
                             {project.description}
                           </p>
                         )}
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
-                          <div>
-                            <span className="font-medium">Cliente:</span>{" "}
-                            {project.client.name}
-                            {project.client.company && ` (${project.client.company})`}
-                          </div>
-                          <div>
-                            <span className="font-medium">Valor do Projeto:</span>{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            }).format(project.projectValue)}
-                          </div>
-                          {project.startDate && (
+                        <div className="space-y-4">
+                          {/* Basic Info */}
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
                             <div>
-                              <span className="font-medium">Início:</span>{" "}
-                              {format(new Date(project.startDate), "dd/MM/yyyy", {
-                                locale: ptBR,
-                              })}
+                              <span className="font-medium">Cliente:</span>{" "}
+                              {project.client.name}
+                              {project.client.company && ` (${project.client.company})`}
                             </div>
-                          )}
-                          {project.deadline && (
-                            <div>
-                              <span className="font-medium">Prazo:</span>{" "}
-                              {format(new Date(project.deadline), "dd/MM/yyyy", {
-                                locale: ptBR,
-                              })}
-                            </div>
-                          )}
-                          {project.teamMembers && (
-                            <div className="col-span-2">
-                              <span className="font-medium">Equipe:</span>{" "}
-                              {project.teamMembers}
+                            {project.startDate && (
+                              <div>
+                                <span className="font-medium">Início:</span>{" "}
+                                {format(new Date(project.startDate), "dd/MM/yyyy", {
+                                  locale: ptBR,
+                                })}
+                              </div>
+                            )}
+                            {project.deadline && (
+                              <div>
+                                <span className="font-medium">Prazo:</span>{" "}
+                                {format(new Date(project.deadline), "dd/MM/yyyy", {
+                                  locale: ptBR,
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Financial Summary */}
+                          {project.financials && (
+                            <div className="border-t pt-3 space-y-3">
+                              <div className="grid grid-cols-4 gap-4">
+                                <div className="bg-blue-50 rounded-lg p-3">
+                                  <p className="text-xs text-blue-600 mb-1">Valor do Projeto</p>
+                                  <p className="font-bold text-blue-900">
+                                    {new Intl.NumberFormat("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    }).format(project.projectValue)}
+                                  </p>
+                                </div>
+                                <div className="bg-green-50 rounded-lg p-3">
+                                  <p className="text-xs text-green-600 mb-1">Recebido</p>
+                                  <p className="font-bold text-green-700">
+                                    {new Intl.NumberFormat("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    }).format(project.financials.totalReceived)}
+                                  </p>
+                                </div>
+                                <div className="bg-red-50 rounded-lg p-3">
+                                  <p className="text-xs text-red-600 mb-1">Custos</p>
+                                  <p className="font-bold text-red-700">
+                                    {new Intl.NumberFormat("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    }).format(project.financials.totalCost)}
+                                  </p>
+                                </div>
+                                <div className={`rounded-lg p-3 ${
+                                  project.financials.profit >= 0 ? 'bg-emerald-50' : 'bg-orange-50'
+                                }`}>
+                                  <p className={`text-xs mb-1 ${
+                                    project.financials.profit >= 0 ? 'text-emerald-600' : 'text-orange-600'
+                                  }`}>
+                                    Lucro
+                                  </p>
+                                  <p className={`font-bold ${
+                                    project.financials.profit >= 0 ? 'text-emerald-700' : 'text-orange-700'
+                                  }`}>
+                                    {new Intl.NumberFormat("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    }).format(project.financials.profit)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Payment Progress Bar */}
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <div className="flex justify-between text-xs text-gray-600 mb-2">
+                                  <span className="font-medium">Progresso de Pagamento</span>
+                                  <span className="font-semibold">
+                                    {project.financials.paymentProgress.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                  <div
+                                    className={`h-3 transition-all ${
+                                      project.financials.paymentProgress >= 100
+                                        ? 'bg-green-600'
+                                        : project.financials.paymentProgress >= 50
+                                        ? 'bg-blue-600'
+                                        : 'bg-yellow-600'
+                                    }`}
+                                    style={{ 
+                                      width: `${Math.min(project.financials.paymentProgress, 100)}%` 
+                                    }}
+                                  />
+                                </div>
+                                <div className="mt-2 flex justify-between items-center text-xs">
+                                  {project.financials.remaining > 0 ? (
+                                    <p className="text-orange-600 font-medium">
+                                      Falta receber: {new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      }).format(project.financials.remaining)}
+                                    </p>
+                                  ) : project.financials.remaining < 0 ? (
+                                    <p className="text-blue-600 font-medium">
+                                      Recebido a mais: {new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      }).format(Math.abs(project.financials.remaining))}
+                                    </p>
+                                  ) : (
+                                    <p className="text-green-600 font-medium">
+                                      ✓ Pagamento completo
+                                    </p>
+                                  )}
+                                  <p className="text-gray-500">
+                                    {project._count?.transactions || 0} transações
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
