@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { formatCurrencyInput, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 
 const statusLabels: Record<string, string> = {
   PLANNING: "Planejamento",
@@ -160,10 +161,21 @@ export default function ProjectsPage() {
         : "/api/projetos"
       const method = editingProject ? "PUT" : "POST"
 
+      // Convert values from cents to decimal
+      const dataToSend = {
+        ...formData,
+        budget: formData.budget
+          ? (parseFloat(formData.budget) / 100).toString()
+          : "0",
+        actualCost: formData.actualCost
+          ? (parseFloat(formData.actualCost) / 100).toString()
+          : "0",
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -206,8 +218,8 @@ export default function ProjectsPage() {
       description: project.description || "",
       status: project.status,
       priority: project.priority,
-      budget: project.budget.toString(),
-      actualCost: project.actualCost.toString(),
+      budget: prepareValueForCurrencyInput(project.budget),
+      actualCost: prepareValueForCurrencyInput(project.actualCost),
       startDate: project.startDate ? format(new Date(project.startDate), "yyyy-MM-dd") : "",
       endDate: project.endDate ? format(new Date(project.endDate), "yyyy-MM-dd") : "",
       deadline: project.deadline ? format(new Date(project.deadline), "yyyy-MM-dd") : "",
@@ -285,6 +297,7 @@ export default function ProjectsPage() {
                   <Label htmlFor="name">Nome do Projeto *</Label>
                   <Input
                     id="name"
+                    placeholder="Gerador de Variações de Vídeos"
                     required
                     value={formData.name}
                     onChange={(e) =>
@@ -297,6 +310,7 @@ export default function ProjectsPage() {
                   <Label htmlFor="description">Descrição</Label>
                   <Textarea
                     id="description"
+                    placeholder="Descreva o escopo e objetivos do projeto"
                     rows={3}
                     value={formData.description}
                     onChange={(e) =>
@@ -375,25 +389,25 @@ export default function ProjectsPage() {
                     <Label htmlFor="budget">Orçamento (R$) *</Label>
                     <Input
                       id="budget"
-                      type="number"
-                      step="0.01"
+                      placeholder="R$ 0,00"
                       required
-                      value={formData.budget}
-                      onChange={(e) =>
-                        setFormData({ ...formData, budget: e.target.value })
-                      }
+                      value={formatCurrencyInput(formData.budget)}
+                      onChange={(e) => {
+                        const onlyNumbers = e.target.value.replace(/\D/g, "")
+                        setFormData({ ...formData, budget: onlyNumbers })
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="actualCost">Custo Real (R$)</Label>
                     <Input
                       id="actualCost"
-                      type="number"
-                      step="0.01"
-                      value={formData.actualCost}
-                      onChange={(e) =>
-                        setFormData({ ...formData, actualCost: e.target.value })
-                      }
+                      placeholder="R$ 0,00"
+                      value={formatCurrencyInput(formData.actualCost)}
+                      onChange={(e) => {
+                        const onlyNumbers = e.target.value.replace(/\D/g, "")
+                        setFormData({ ...formData, actualCost: onlyNumbers })
+                      }}
                     />
                   </div>
                 </div>
@@ -450,6 +464,7 @@ export default function ProjectsPage() {
                   <Label htmlFor="notes">Observações</Label>
                   <Textarea
                     id="notes"
+                    placeholder="Observações e anotações sobre o projeto"
                     rows={4}
                     value={formData.notes}
                     onChange={(e) =>
