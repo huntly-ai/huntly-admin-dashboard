@@ -34,6 +34,7 @@ import {
   Briefcase,
   Calendar,
   UserCheck,
+  ChevronDown,
   UserX,
 } from "lucide-react"
 import { format } from "date-fns"
@@ -560,6 +561,8 @@ function MembersList({
   onEdit: (member: Member) => void
   onDelete: (id: string) => void
 }) {
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
+  
   if (members.length === 0) {
     return (
       <Card>
@@ -572,11 +575,26 @@ function MembersList({
     )
   }
 
+  const toggleCardExpansion = (memberId: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(memberId)) {
+        newSet.delete(memberId)
+      } else {
+        newSet.add(memberId)
+      }
+      return newSet
+    })
+  }
+
+  const isExpanded = (memberId: string) => expandedCards.has(memberId)
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {members.map((member) => (
         <Card key={member.id} className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
+            {/* Header - Always Visible */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
@@ -592,85 +610,125 @@ function MembersList({
               </Badge>
             </div>
 
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Mail className="h-4 w-4" />
-                <span className="truncate">{member.email}</span>
-              </div>
-              {member.phone && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="h-4 w-4" />
-                  <span>{formatPhone(member.phone)}</span>
-                </div>
-              )}
-              {member.department && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Briefcase className="h-4 w-4" />
-                  <span>{member.department}</span>
-                </div>
-              )}
-              {member.hireDate && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    Desde {format(new Date(member.hireDate), "MMM yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {member.roles && JSON.parse(member.roles).length > 1 && (
-              <div className="mb-4 pb-4 border-b">
-                <p className="text-xs text-gray-500 mb-2 font-medium">Todos os Cargos:</p>
-                <div className="flex flex-wrap gap-1">
-                  {JSON.parse(member.roles).map((role: string, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {roleLabels[role]}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {member.skills && (
-              <div className="mb-4">
-                <p className="text-xs text-gray-500 mb-1">Habilidades:</p>
-                <div className="flex flex-wrap gap-1">
-                  {member.skills.split(",").slice(0, 3).map((skill, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {skill.trim()}
-                    </Badge>
-                  ))}
-                  {member.skills.split(",").length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{member.skills.split(",").length - 3}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-
+            {/* Quick Stats - Always Visible */}
             {member._count && (
-              <div className="flex gap-4 text-sm text-gray-600 mb-4 pt-2 border-t">
-                <div>
+              <div className="flex gap-4 text-sm text-gray-600 mb-4 pb-4 border-b">
+                <div className="flex items-center gap-1">
+                  <Briefcase className="h-4 w-4" />
                   <span className="font-medium">{member._count.projects}</span> projetos
                 </div>
-                <div>
+                <div className="flex items-center gap-1">
+                  <UsersIcon className="h-4 w-4" />
                   <span className="font-medium">{member._count.teamMemberships}</span> times
                 </div>
               </div>
             )}
 
+            {/* Expanded Content */}
+            {isExpanded(member.id) && (
+              <div className="space-y-4 mb-4">
+                {/* Contact Info */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Mail className="h-4 w-4" />
+                    <span className="truncate">{member.email}</span>
+                  </div>
+                  {member.phone && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Phone className="h-4 w-4" />
+                      <span>{formatPhone(member.phone)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Department & Hire Date */}
+                {(member.department || member.hireDate) && (
+                  <div className="space-y-2">
+                    {member.department && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Briefcase className="h-4 w-4" />
+                        <span>{member.department}</span>
+                      </div>
+                    )}
+                    {member.hireDate && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="h-4 w-4" />
+                        <span>
+                          Desde {format(new Date(member.hireDate), "MMM yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* All Roles */}
+                {member.roles && JSON.parse(member.roles).length > 1 && (
+                  <div className="pb-4 border-b">
+                    <p className="text-xs text-gray-500 mb-2 font-medium">Todos os Cargos:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {JSON.parse(member.roles).map((role: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {roleLabels[role]}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Skills */}
+                {member.skills && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2 font-medium">Habilidades:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {member.skills.split(",").map((skill, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {skill.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bio */}
+                {member.bio && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1 font-medium">Bio:</p>
+                    <p className="text-sm text-gray-600">{member.bio}</p>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {member.notes && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1 font-medium">Observações:</p>
+                    <p className="text-sm text-gray-600">{member.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Actions */}
             <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onEdit(member)}
+                onClick={() => toggleCardExpansion(member.id)}
                 className="flex-1"
+              >
+                <ChevronDown 
+                  className={`h-4 w-4 mr-1 transition-transform ${
+                    isExpanded(member.id) ? 'rotate-180' : ''
+                  }`} 
+                />
+                {isExpanded(member.id) ? 'Menos' : 'Mais'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onEdit(member)}
                 title="Editar Membro"
               >
-                <Edit className="h-4 w-4 mr-1" />
-                Editar
+                <Edit className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
