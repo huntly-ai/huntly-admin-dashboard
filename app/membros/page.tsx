@@ -584,27 +584,7 @@ function MembersList({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg truncate">{member.name}</h3>
-                  {member.roles ? (() => {
-                    const allRoles = JSON.parse(member.roles)
-                    const visibleRoles = allRoles.slice(0, 2)
-                    const remainingCount = allRoles.length - 2
-                    return (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {visibleRoles.map((role: string, index: number) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {roleLabels[role]}
-                          </Badge>
-                        ))}
-                        {remainingCount > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{remainingCount}
-                          </Badge>
-                        )}
-                      </div>
-                    )
-                  })() : (
-                    <p className="text-sm text-gray-600">{roleLabels[member.role]}</p>
-                  )}
+                  <p className="text-sm text-gray-600">{roleLabels[member.role]}</p>
                 </div>
               </div>
               <Badge className={`${statusColors[member.status]} flex-shrink-0`}>
@@ -639,9 +619,9 @@ function MembersList({
               )}
             </div>
 
-            {member.roles && JSON.parse(member.roles).length > 2 && (
-              <div className="mb-4">
-                <p className="text-xs text-gray-500 mb-1">Todos os Cargos:</p>
+            {member.roles && JSON.parse(member.roles).length > 1 && (
+              <div className="mb-4 pb-4 border-b">
+                <p className="text-xs text-gray-500 mb-2 font-medium">Todos os Cargos:</p>
                 <div className="flex flex-wrap gap-1">
                   {JSON.parse(member.roles).map((role: string, index: number) => (
                     <Badge key={index} variant="outline" className="text-xs">
