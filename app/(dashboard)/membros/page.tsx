@@ -284,8 +284,8 @@ export default function MembersPage() {
             <p className="text-gray-600 mt-1">
               Gerencie os membros da equipe Huntly
             </p>
-          </div>
-          
+                </div>
+
           <MemberFormDialog
             isOpen={isDialogOpen}
             onOpenChange={(open) => {
@@ -311,55 +311,55 @@ export default function MembersPage() {
             onPasswordChange={setUserPassword}
             onConfirmPasswordChange={setUserConfirmPassword}
             onSubmit={handleUserSubmit}
-          />
-        </div>
-
+                  />
+                </div>
+                
         <MembersStats
           totalMembers={members.length}
           activeMembers={activeMembers.length}
           inactiveMembers={inactiveMembers.length}
         />
 
-        <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">
-              Todos ({members.length})
-            </TabsTrigger>
-            <TabsTrigger value="active">
-              Ativos ({activeMembers.length})
-            </TabsTrigger>
-            <TabsTrigger value="inactive">
-              Inativos ({inactiveMembers.length})
-            </TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="all" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all">
+                Todos ({members.length})
+              </TabsTrigger>
+              <TabsTrigger value="active">
+                Ativos ({activeMembers.length})
+              </TabsTrigger>
+              <TabsTrigger value="inactive">
+                Inativos ({inactiveMembers.length})
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="all" className="space-y-4">
-            <MembersList 
-              members={members} 
-              onEdit={handleEdit} 
-              onDelete={handleDelete}
-              onCreateUser={handleCreateUser}
-            />
-          </TabsContent>
+            <TabsContent value="all" className="space-y-4">
+              <MembersList 
+                members={members} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
+              />
+            </TabsContent>
 
-          <TabsContent value="active" className="space-y-4">
-            <MembersList 
-              members={activeMembers} 
-              onEdit={handleEdit} 
-              onDelete={handleDelete}
-              onCreateUser={handleCreateUser}
-            />
-          </TabsContent>
+            <TabsContent value="active" className="space-y-4">
+              <MembersList 
+                members={activeMembers} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
+              />
+            </TabsContent>
 
-          <TabsContent value="inactive" className="space-y-4">
-            <MembersList 
-              members={inactiveMembers} 
-              onEdit={handleEdit} 
-              onDelete={handleDelete}
-              onCreateUser={handleCreateUser}
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="inactive" className="space-y-4">
+              <MembersList 
+                members={inactiveMembers} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
+              />
+            </TabsContent>
+          </Tabs>
       </div>
     </>
   )

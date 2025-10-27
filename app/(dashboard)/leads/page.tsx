@@ -1,60 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, UserCheck } from "lucide-react"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
-import { formatPhone, formatCurrencyInput, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
-
-const statusLabels: Record<string, string> = {
-  NEW: "Novo",
-  CONTACTED: "Contactado",
-  QUALIFIED: "Qualificado",
-  PROPOSAL_SENT: "Proposta Enviada",
-  NEGOTIATION: "Negociação",
-  WON: "Ganho",
-  LOST: "Perdido",
-}
-
-const sourceLabels: Record<string, string> = {
-  WEBSITE: "Website",
-  REFERRAL: "Indicação",
-  SOCIAL_MEDIA: "Redes Sociais",
-  ZEROS_A_DIREITA: "Zeros à Direita",
-  EVENT: "Evento",
-  OTHER: "Outro",
-}
-
-const statusColors: Record<string, string> = {
-  NEW: "bg-blue-100 text-blue-800",
-  CONTACTED: "bg-purple-100 text-purple-800",
-  QUALIFIED: "bg-green-100 text-green-800",
-  PROPOSAL_SENT: "bg-yellow-100 text-yellow-800",
-  NEGOTIATION: "bg-orange-100 text-orange-800",
-  WON: "bg-emerald-100 text-emerald-800",
-  LOST: "bg-red-100 text-red-800",
-}
+import { formatPhone, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
+import { LeadsList } from "./components/leads-list"
+import { LeadFormDialog } from "./components/lead-form-dialog"
+import { ConvertLeadDialog } from "./components/convert-lead-dialog"
+import { LeadsStats } from "./components/leads-stats"
 
 interface Lead {
   id: string
@@ -90,11 +42,7 @@ export default function LeadsPage() {
     estimatedValue: "",
   })
 
-  useEffect(() => {
-    fetchLeads()
-  }, [])
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const response = await fetch("/api/leads")
       const data = await response.json()
@@ -104,24 +52,43 @@ export default function LeadsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchLeads()
+  }, [fetchLeads])
+
+  const resetForm = useCallback(() => {
+    setEditingLead(null)
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+      position: "",
+      status: "NEW",
+      source: "OTHER",
+      notes: "",
+      estimatedValue: "",
+    })
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
-      const url = editingLead ? `/api/leads/${editingLead.id}` : "/api/leads"
+      const url = editingLead
+        ? `/api/leads/${editingLead.id}`
+        : "/api/leads"
       const method = editingLead ? "PUT" : "POST"
 
-      // Preparar dados para envio
+      // Unformat phone
       const dataToSend = {
         ...formData,
-        // Remove formatação do telefone (envia apenas números)
         phone: formData.phone.replace(/\D/g, ""),
-        // Converte valor de centavos para decimal, ou envia vazio (não null)
-        estimatedValue: formData.estimatedValue 
-          ? (parseFloat(formData.estimatedValue) / 100).toString()
-          : ""
+        estimatedValue: formData.estimatedValue
+          ? (parseFloat(formData.estimatedValue) / 100).toFixed(2)
+          : "",
       }
 
       const response = await fetch(url, {
@@ -142,9 +109,9 @@ export default function LeadsPage() {
       console.error("Error saving lead:", error)
       alert("Erro ao salvar lead")
     }
-  }
+  }, [editingLead, formData, fetchLeads, resetForm])
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este lead?")) return
 
     try {
@@ -155,20 +122,39 @@ export default function LeadsPage() {
       if (response.ok) {
         fetchLeads()
       } else {
-        alert("Erro ao excluir lead")
+        const error = await response.json()
+        alert(error.error || "Erro ao excluir lead")
       }
     } catch (error) {
       console.error("Error deleting lead:", error)
       alert("Erro ao excluir lead")
     }
-  }
+  }, [fetchLeads])
 
-  const openConvertDialog = (lead: Lead) => {
+  const handleEdit = useCallback((lead: Lead) => {
+    setEditingLead(lead)
+    setFormData({
+      name: lead.name,
+      email: lead.email || "",
+      phone: formatPhone(lead.phone),
+      company: lead.company || "",
+      position: lead.position || "",
+      status: lead.status,
+      source: lead.source,
+      notes: lead.notes || "",
+      estimatedValue: lead.estimatedValue
+        ? prepareValueForCurrencyInput(lead.estimatedValue)
+        : "",
+    })
+    setIsDialogOpen(true)
+  }, [])
+
+  const handleConvert = useCallback((lead: Lead) => {
     setConvertingLead(lead)
     setIsConvertDialogOpen(true)
-  }
+  }, [])
 
-  const handleConvert = async () => {
+  const confirmConvert = useCallback(async () => {
     if (!convertingLead) return
 
     try {
@@ -177,9 +163,8 @@ export default function LeadsPage() {
       })
 
       if (response.ok) {
-        setIsConvertDialogOpen(false)
-        setConvertingLead(null)
         fetchLeads()
+        alert("Lead convertido em cliente com sucesso!")
       } else {
         const error = await response.json()
         alert(error.error || "Erro ao converter lead")
@@ -188,56 +173,42 @@ export default function LeadsPage() {
       console.error("Error converting lead:", error)
       alert("Erro ao converter lead")
     }
-  }
+  }, [convertingLead, fetchLeads])
 
-  const handleEdit = (lead: Lead) => {
-    setEditingLead(lead)
-    setFormData({
-      name: lead.name,
-      email: lead.email || "",
-      phone: lead.phone,
-      company: lead.company || "",
-      position: lead.position || "",
-      status: lead.status,
-      source: lead.source,
-      notes: lead.notes || "",
-      estimatedValue: prepareValueForCurrencyInput(lead.estimatedValue),
-    })
-    setIsDialogOpen(true)
-  }
+  const handleFormChange = useCallback((field: keyof typeof formData, value: string) => {
+    if (field === "phone") {
+      setFormData(prev => ({ ...prev, [field]: formatPhone(value) }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
+  }, [])
 
-  const resetForm = () => {
-    setEditingLead(null)
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      position: "",
-      status: "NEW",
-      source: "OTHER",
-      notes: "",
-      estimatedValue: "",
-    })
-  }
-
-  const handleDialogChange = (open: boolean) => {
+  const handleDialogChange = useCallback((open: boolean) => {
     setIsDialogOpen(open)
     if (!open) {
       resetForm()
     }
-  }
+  }, [resetForm])
+
+  // Memoized calculations
+  const qualifiedLeads = useMemo(
+    () => leads.filter(l => l.status === "QUALIFIED" || l.status === "PROPOSAL_SENT" || l.status === "NEGOTIATION").length,
+    [leads]
+  )
+
+  const convertedLeads = useMemo(
+    () => leads.filter(l => l.status === "WON" || l.convertedToClientId).length,
+    [leads]
+  )
 
   if (loading) {
     return (
-      <>
-        <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Carregando leads...</p>
-          </div>
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando leads...</p>
         </div>
-      </>
+      </div>
     )
   }
 
@@ -246,357 +217,48 @@ export default function LeadsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
-            <p className="text-gray-600 mt-1">Gerencie seus leads e potenciais clientes</p>
+            <h1 className="text-3xl font-bold">Leads</h1>
+            <p className="text-gray-500 mt-1">
+              Gerencie seus leads e oportunidades
+            </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Lead
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingLead ? "Editar Lead" : "Novo Lead"}
-                </DialogTitle>
-                <DialogDescription>
-                  Preencha os dados do lead abaixo
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome *</Label>
-                    <Input
-                      id="name"
-                      required
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone *</Label>
-                    <Input
-                      id="phone"
-                      required
-                      placeholder="+55 (11) 98765-4321"
-                      value={formData.phone}
-                      onChange={(e) => {
-                        const formatted = formatPhone(e.target.value)
-                        setFormData({ ...formData, phone: formatted })
-                      }}
-                      maxLength={19}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Empresa</Label>
-                    <Input
-                      id="company"
-                      value={formData.company}
-                      onChange={(e) =>
-                        setFormData({ ...formData, company: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="position">Cargo</Label>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) =>
-                      setFormData({ ...formData, position: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, status: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(statusLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="source">Origem</Label>
-                    <Select
-                      value={formData.source}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, source: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(sourceLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="estimatedValue">Valor Estimado</Label>
-                  <Input
-                    id="estimatedValue"
-                    placeholder="R$ 0,00"
-                    value={formatCurrencyInput(formData.estimatedValue)}
-                    onChange={(e) => {
-                      // Remove tudo que não é dígito
-                      const onlyNumbers = e.target.value.replace(/\D/g, "")
-                      setFormData({ ...formData, estimatedValue: onlyNumbers })
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    rows={4}
-                    value={formData.notes}
-                    onChange={(e) =>
-                      setFormData({ ...formData, notes: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDialogChange(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="submit">Salvar</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Dialog de Confirmação de Conversão */}
-          <Dialog open={isConvertDialogOpen} onOpenChange={setIsConvertDialogOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <UserCheck className="h-5 w-5 text-green-600" />
-                  Converter Lead em Cliente
-                </DialogTitle>
-                <DialogDescription>
-                  Esta ação irá converter o lead em um cliente ativo no sistema.
-                </DialogDescription>
-              </DialogHeader>
-              
-              {convertingLead && (
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                    <div>
-                      <p className="text-sm text-gray-500">Nome</p>
-                      <p className="font-medium">{convertingLead.name}</p>
-                    </div>
-                    {convertingLead.email && (
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">{convertingLead.email}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm text-gray-500">Telefone</p>
-                      <p className="font-medium">{formatPhone(convertingLead.phone)}</p>
-                    </div>
-                    {convertingLead.company && (
-                      <div>
-                        <p className="text-sm text-gray-500">Empresa</p>
-                        <p className="font-medium">{convertingLead.company}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>✨ O que acontecerá:</strong>
-                      <br />
-                      • O lead será marcado como convertido
-                      <br />
-                      • Um novo cliente será criado com estes dados
-                      <br />
-                      • Você poderá gerenciar projetos para este cliente
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsConvertDialogOpen(false)
-                        setConvertingLead(null)
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleConvert}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <UserCheck className="h-4 w-4 mr-2" />
-                      Confirmar Conversão
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+          <LeadFormDialog
+            isOpen={isDialogOpen}
+            onOpenChange={handleDialogChange}
+            editingLead={editingLead}
+            formData={formData}
+            onFormChange={handleFormChange}
+            onSubmit={handleSubmit}
+          />
         </div>
+
+        <LeadsStats
+          totalLeads={leads.length}
+          qualifiedLeads={qualifiedLeads}
+          convertedLeads={convertedLeads}
+        />
 
         <Card>
           <CardHeader>
             <CardTitle>Lista de Leads ({leads.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            {leads.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
-                Nenhum lead cadastrado ainda. Clique em &quot;Novo Lead&quot; para começar.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {leads.map((lead) => (
-                  <div
-                    key={lead.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-lg">{lead.name}</h3>
-                          <Badge className={statusColors[lead.status]}>
-                            {statusLabels[lead.status]}
-                          </Badge>
-                          {lead.convertedToClientId && (
-                            <Badge className="bg-green-100 text-green-800">
-                              Convertido
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
-                          <div>
-                            <span className="font-medium">Email:</span> {lead.email}
-                          </div>
-                          {lead.phone && (
-                            <div>
-                              <span className="font-medium">Telefone:</span> {lead.phone}
-                            </div>
-                          )}
-                          {lead.company && (
-                            <div>
-                              <span className="font-medium">Empresa:</span> {lead.company}
-                            </div>
-                          )}
-                          {lead.position && (
-                            <div>
-                              <span className="font-medium">Cargo:</span> {lead.position}
-                            </div>
-                          )}
-                          <div>
-                            <span className="font-medium">Origem:</span>{" "}
-                            {sourceLabels[lead.source]}
-                          </div>
-                          {lead.estimatedValue && (
-                            <div>
-                              <span className="font-medium">Valor Estimado:</span>{" "}
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              }).format(lead.estimatedValue)}
-                            </div>
-                          )}
-                          <div>
-                            <span className="font-medium">Cadastrado em:</span>{" "}
-                            {format(new Date(lead.createdAt), "dd/MM/yyyy", {
-                              locale: ptBR,
-                            })}
-                          </div>
-                        </div>
-                        {lead.notes && (
-                          <p className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            {lead.notes}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        {!lead.convertedToClientId && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openConvertDialog(lead)}
-                            title="Converter em Cliente"
-                          >
-                            <UserCheck className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(lead)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(lead.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <LeadsList
+              leads={leads}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onConvert={handleConvert}
+            />
           </CardContent>
         </Card>
+
+        <ConvertLeadDialog
+          isOpen={isConvertDialogOpen}
+          onOpenChange={setIsConvertDialogOpen}
+          lead={convertingLead}
+          onConfirm={confirmConvert}
+        />
       </div>
     </>
   )
 }
-
