@@ -73,6 +73,21 @@ enum TransactionCategory {
   OTHER_EXPENSE
 }
 
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  LATE
+  CANCELLED
+}
+
 model Lead {
   id          String      @id @default(cuid())
   name        String
@@ -116,6 +131,7 @@ model Client {
   // Relationship
   projects    Project[]
   transactions Transaction[]
+  contracts   Contract[]
   
   // Conversion info
   leadId      String?       @unique
@@ -150,6 +166,9 @@ model Project {
   
   // Related transactions
   transactions Transaction[]
+  
+  // Related contracts
+  contractProjects ContractProject[]
   
   // Team and notes
   teamMembers String?         // JSON array of team member names/emails
@@ -195,4 +214,86 @@ model Transaction {
   @@index([date])
   @@index([projectId])
   @@index([clientId])
+}
+
+model Contract {
+  id              String          @id @default(cuid())
+  contractNumber  String          @unique
+  title           String
+  description     String?
+  status          ContractStatus  @default(DRAFT)
+  
+  // Financial
+  totalValue      Float
+  
+  // Dates
+  startDate       DateTime
+  endDate         DateTime
+  signedDate      DateTime?
+  
+  // Client relationship
+  clientId        String
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  // Related projects (many-to-many)
+  contractProjects ContractProject[]
+  
+  // Payments
+  payments        ContractPayment[]
+  
+  // Legal
+  terms           String?         // Contract terms and conditions
+  attachments     String?         // JSON array of file URLs/paths
+  
+  // Additional info
+  notes           String?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([status])
+  @@index([clientId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model ContractProject {
+  id          String    @id @default(cuid())
+  contractId  String
+  projectId   String
+  
+  contract    Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  
+  @@unique([contractId, projectId])
+  @@index([contractId])
+  @@index([projectId])
+}
+
+model ContractPayment {
+  id              String        @id @default(cuid())
+  contractId      String
+  contract        Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  installmentNumber Int         // 1, 2, 3, etc.
+  amount          Float
+  dueDate         DateTime
+  paymentDate     DateTime?
+  status          PaymentStatus @default(PENDING)
+  
+  // Payment info
+  paymentMethod   String?
+  transactionId   String?       // Reference to Transaction if payment is completed
+  invoiceNumber   String?
+  
+  notes           String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([contractId])
+  @@index([status])
+  @@index([dueDate])
 }

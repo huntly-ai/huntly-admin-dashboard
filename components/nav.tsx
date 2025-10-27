@@ -9,6 +9,7 @@ import {
   UserPlus, 
   FolderKanban, 
   DollarSign,
+  FileText,
   Menu
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,11 @@ const navItems = [
     title: "Projetos",
     href: "/projetos",
     icon: FolderKanban,
+  },
+  {
+    title: "Contratos",
+    href: "/contratos",
+    icon: FileText,
   },
   {
     title: "Financeiro",
