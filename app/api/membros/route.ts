@@ -8,12 +8,24 @@ export async function GET() {
       include: {
         teamMemberships: {
           include: {
-            team: true,
+            team: {
+              include: {
+                projectTeams: {
+                  select: {
+                    projectId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        projectMembers: {
+          select: {
+            projectId: true,
           },
         },
         _count: {
           select: {
-            projectMembers: true,
             teamMemberships: true,
           },
         },
@@ -23,7 +35,29 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(members)
+    // Calculate total unique projects for each member
+    const membersWithProjectCount = members.map(member => {
+      // Get direct project IDs
+      const directProjectIds = member.projectMembers.map(pm => pm.projectId)
+      
+      // Get project IDs from teams
+      const teamProjectIds = member.teamMemberships.flatMap(tm => 
+        tm.team.projectTeams.map(pt => pt.projectId)
+      )
+      
+      // Combine and deduplicate
+      const allProjectIds = [...new Set([...directProjectIds, ...teamProjectIds])]
+      
+      return {
+        ...member,
+        _count: {
+          ...member._count,
+          projects: allProjectIds.length,
+        },
+      }
+    })
+
+    return NextResponse.json(membersWithProjectCount)
   } catch (error) {
     console.error("Error fetching members:", error)
     return NextResponse.json(

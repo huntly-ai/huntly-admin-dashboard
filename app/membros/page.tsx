@@ -93,7 +93,7 @@ interface Member {
   teamMemberships: TeamMembership[]
   createdAt: string
   _count?: {
-    projectMembers: number
+    projects: number
     teamMemberships: number
   }
 }
@@ -653,7 +653,7 @@ function MembersList({
             {member._count && (
               <div className="flex gap-4 text-sm text-gray-600 mb-4 pt-2 border-t">
                 <div>
-                  <span className="font-medium">{member._count.projectMembers}</span> projetos
+                  <span className="font-medium">{member._count.projects}</span> projetos
                 </div>
                 <div>
                   <span className="font-medium">{member._count.teamMemberships}</span> times
