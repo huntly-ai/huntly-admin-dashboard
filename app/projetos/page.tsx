@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -65,6 +66,17 @@ interface Client {
   company?: string
 }
 
+interface Member {
+  id: string
+  name: string
+  role: string
+}
+
+interface Team {
+  id: string
+  name: string
+}
+
 interface Project {
   id: string
   name: string
@@ -84,15 +96,32 @@ interface Project {
   _count?: {
     transactions: number
   }
+  projectMembers?: Array<{
+    member: {
+      id: string
+      name: string
+      role: string
+    }
+  }>
+  projectTeams?: Array<{
+    team: {
+      id: string
+      name: string
+    }
+  }>
 }
 
 export default function ProjectsPage() {
   const searchParams = useSearchParams()
   const [projects, setProjects] = useState<Project[]>([])
   const [clients, setClients] = useState<Client[]>([])
+  const [members, setMembers] = useState<Member[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
+  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([])
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -111,6 +140,8 @@ export default function ProjectsPage() {
   useEffect(() => {
     fetchProjects()
     fetchClients()
+    fetchMembers()
+    fetchTeams()
   }, [])
 
   // Handle URL parameters (clientId and clientName from client page)
@@ -152,6 +183,26 @@ export default function ProjectsPage() {
     }
   }
 
+  const fetchMembers = async () => {
+    try {
+      const response = await fetch("/api/membros?status=ACTIVE")
+      const data = await response.json()
+      setMembers(data)
+    } catch (error) {
+      console.error("Error fetching members:", error)
+    }
+  }
+
+  const fetchTeams = async () => {
+    try {
+      const response = await fetch("/api/times")
+      const data = await response.json()
+      setTeams(data)
+    } catch (error) {
+      console.error("Error fetching teams:", error)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -170,6 +221,8 @@ export default function ProjectsPage() {
         actualCost: formData.actualCost
           ? (parseFloat(formData.actualCost) / 100).toString()
           : "0",
+        memberIds: selectedMemberIds,
+        teamIds: selectedTeamIds,
       }
 
       const response = await fetch(url, {
@@ -227,6 +280,15 @@ export default function ProjectsPage() {
       teamMembers: project.teamMembers || "",
       notes: project.notes || "",
     })
+    
+    // Load member and team IDs
+    setSelectedMemberIds(
+      project.projectMembers?.map((pm) => pm.member.id) || []
+    )
+    setSelectedTeamIds(
+      project.projectTeams?.map((pt) => pt.team.id) || []
+    )
+    
     setIsDialogOpen(true)
   }
 
@@ -246,6 +308,8 @@ export default function ProjectsPage() {
       teamMembers: "",
       notes: "",
     })
+    setSelectedMemberIds([])
+    setSelectedTeamIds([])
   }
 
   const handleDialogChange = (open: boolean) => {
@@ -448,16 +512,76 @@ export default function ProjectsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="teamMembers">Membros da Equipe</Label>
-                  <Input
-                    id="teamMembers"
-                    placeholder="Ex: João, Maria, Pedro"
-                    value={formData.teamMembers}
-                    onChange={(e) =>
-                      setFormData({ ...formData, teamMembers: e.target.value })
-                    }
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Membros da Equipe</Label>
+                    <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                      {members.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Nenhum membro cadastrado</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {members.map((member) => (
+                            <div key={member.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`member-${member.id}`}
+                                checked={selectedMemberIds.includes(member.id)}
+                                onCheckedChange={(checked: boolean) => {
+                                  if (checked) {
+                                    setSelectedMemberIds([...selectedMemberIds, member.id])
+                                  } else {
+                                    setSelectedMemberIds(
+                                      selectedMemberIds.filter((id) => id !== member.id)
+                                    )
+                                  }
+                                }}
+                              />
+                              <Label
+                                htmlFor={`member-${member.id}`}
+                                className="text-sm font-normal cursor-pointer"
+                              >
+                                {member.name} <span className="text-muted-foreground">({member.role})</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Times Alocados</Label>
+                    <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                      {teams.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Nenhum time cadastrado</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {teams.map((team) => (
+                            <div key={team.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`team-${team.id}`}
+                                checked={selectedTeamIds.includes(team.id)}
+                                onCheckedChange={(checked: boolean) => {
+                                  if (checked) {
+                                    setSelectedTeamIds([...selectedTeamIds, team.id])
+                                  } else {
+                                    setSelectedTeamIds(
+                                      selectedTeamIds.filter((id) => id !== team.id)
+                                    )
+                                  }
+                                }}
+                              />
+                              <Label
+                                htmlFor={`team-${team.id}`}
+                                className="text-sm font-normal cursor-pointer"
+                              >
+                                {team.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

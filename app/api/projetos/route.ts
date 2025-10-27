@@ -46,30 +46,79 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    const project = await prisma.project.create({
-      data: {
-        name: body.name,
-        description: body.description,
-        status: body.status || "PLANNING",
-        priority: body.priority || "MEDIUM",
-        budget: parseFloat(body.budget),
-        actualCost: body.actualCost ? parseFloat(body.actualCost) : 0,
-        startDate: body.startDate ? new Date(body.startDate) : null,
-        endDate: body.endDate ? new Date(body.endDate) : null,
-        deadline: body.deadline ? new Date(body.deadline) : null,
-        clientId: body.clientId,
-        teamMembers: body.teamMembers,
-        notes: body.notes,
-      },
-      include: {
-        client: {
-          select: {
-            id: true,
-            name: true,
-            company: true,
+    // Use transaction to create project and relationships
+    const project = await prisma.$transaction(async (tx) => {
+      // Create the project
+      const newProject = await tx.project.create({
+        data: {
+          name: body.name,
+          description: body.description,
+          status: body.status || "PLANNING",
+          priority: body.priority || "MEDIUM",
+          budget: parseFloat(body.budget),
+          actualCost: body.actualCost ? parseFloat(body.actualCost) : 0,
+          startDate: body.startDate ? new Date(body.startDate) : null,
+          endDate: body.endDate ? new Date(body.endDate) : null,
+          deadline: body.deadline ? new Date(body.deadline) : null,
+          clientId: body.clientId,
+          notes: body.notes,
+        },
+      })
+
+      // Create ProjectMember relationships
+      if (body.memberIds && body.memberIds.length > 0) {
+        await tx.projectMember.createMany({
+          data: body.memberIds.map((memberId: string) => ({
+            projectId: newProject.id,
+            memberId: memberId,
+          })),
+        })
+      }
+
+      // Create ProjectTeam relationships
+      if (body.teamIds && body.teamIds.length > 0) {
+        await tx.projectTeam.createMany({
+          data: body.teamIds.map((teamId: string) => ({
+            projectId: newProject.id,
+            teamId: teamId,
+          })),
+        })
+      }
+
+      // Fetch the complete project with relationships
+      return await tx.project.findUnique({
+        where: { id: newProject.id },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+              company: true,
+            },
+          },
+          projectMembers: {
+            include: {
+              member: {
+                select: {
+                  id: true,
+                  name: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          projectTeams: {
+            include: {
+              team: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
           },
         },
-      },
+      })
     })
 
     return NextResponse.json(project, { status: 201 })
