@@ -157,10 +157,17 @@ export default function FinanceiroPage() {
         : "/api/financeiro"
       const method = editingTransaction ? "PUT" : "POST"
 
+      // Convert empty strings to null for optional fields
+      const dataToSend = {
+        ...formData,
+        clientId: formData.clientId || null,
+        projectId: formData.projectId || null,
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -389,7 +396,6 @@ export default function FinanceiroPage() {
                         <SelectValue placeholder="Selecione (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
                         {clients.map((client) => (
                           <SelectItem key={client.id} value={client.id}>
                             {client.name}
@@ -410,7 +416,6 @@ export default function FinanceiroPage() {
                         <SelectValue placeholder="Selecione (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
