@@ -1,9 +1,10 @@
 "use client"
 
 import { memo } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2 } from "lucide-react"
+import { Edit, Trash2, Kanban } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -94,6 +95,8 @@ function ProjectsListComponent({
   onEdit,
   onDelete,
 }: ProjectsListProps) {
+  const router = useRouter()
+
   if (projects.length === 0) {
     return (
       <p className="text-center text-gray-500 py-8">
@@ -113,20 +116,30 @@ function ProjectsListComponent({
       {projects.map((project) => (
         <div
           key={project.id}
-          className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white"
+          className="border rounded-lg p-5 hover:shadow-lg transition-shadow bg-white"
         >
+          {/* Header with title and actions */}
           <div className="flex items-start justify-between mb-3">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">{project.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg mb-1 pr-2">{project.name}</h3>
               <p className="text-sm text-gray-600">
                 {project.client.name}
                 {project.client.company && ` (${project.client.company})`}
               </p>
             </div>
-            <div className="flex gap-1 ml-2">
+            <div className="flex gap-1 flex-shrink-0">
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
+                onClick={() => router.push(`/projetos/${project.id}`)}
+                title="Ver Kanban"
+                className="hover:bg-blue-50"
+              >
+                <Kanban className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={() => onEdit(project)}
                 title="Editar Projeto"
               >
@@ -134,9 +147,9 @@ function ProjectsListComponent({
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onDelete(project.id)}
-                className="text-red-600 hover:text-red-700"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 title="Excluir Projeto"
               >
                 <Trash2 className="h-4 w-4" />
@@ -144,7 +157,8 @@ function ProjectsListComponent({
             </div>
           </div>
 
-          <div className="flex gap-2 mb-3">
+          {/* Status and Priority badges */}
+          <div className="flex flex-wrap gap-2 mb-4">
             <Badge className={statusColors[project.status]}>
               {statusLabels[project.status]}
             </Badge>
@@ -153,15 +167,16 @@ function ProjectsListComponent({
             </Badge>
           </div>
 
+          {/* Description */}
           {project.description && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
               {project.description}
             </p>
           )}
 
           {/* Financial Summary */}
           {project.financials && (
-            <div className="bg-gray-50 rounded-lg p-3 mb-3 space-y-2">
+            <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Valor do Projeto:</span>
                 <span className="font-semibold text-blue-600">
@@ -209,8 +224,8 @@ function ProjectsListComponent({
 
           {/* Team Members */}
           {project.projectMembers && project.projectMembers.length > 0 && (
-            <div className="mb-2">
-              <p className="text-xs text-gray-500 mb-1">Membros:</p>
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-500 mb-2">Membros:</p>
               <div className="flex flex-wrap gap-1">
                 {project.projectMembers.slice(0, 3).map((pm) => (
                   <Badge key={pm.member.id} variant="secondary" className="text-xs">
@@ -228,8 +243,8 @@ function ProjectsListComponent({
 
           {/* Teams */}
           {project.projectTeams && project.projectTeams.length > 0 && (
-            <div className="mb-2">
-              <p className="text-xs text-gray-500 mb-1">Times:</p>
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-500 mb-2">Times:</p>
               <div className="flex flex-wrap gap-1">
                 {project.projectTeams.map((pt) => (
                   <Badge key={pt.team.id} variant="outline" className="text-xs">
@@ -241,7 +256,7 @@ function ProjectsListComponent({
           )}
 
           {/* Dates */}
-          <div className="text-xs text-gray-500 space-y-1 mt-3">
+          <div className="text-xs text-gray-500 space-y-1 pt-3 border-t border-gray-100">
             {project.startDate && (
               <div>
                 Início: {format(new Date(project.startDate), "dd/MM/yyyy", { locale: ptBR })}

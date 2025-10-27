@@ -195,6 +195,9 @@ model Project {
   projectTeams ProjectTeam[]
   projectMembers ProjectMember[]
   
+  // Tasks
+  tasks       Task[]
+  
   // Notes
   notes       String?
   
@@ -357,6 +360,7 @@ model TeamMember {
   // Relationships
   teamMemberships TeamMembership[]
   projectMembers  ProjectMember[]
+  taskMembers     TaskMember[]
   
   notes           String?
   
@@ -378,6 +382,7 @@ model Team {
   // Relationships
   teamMemberships TeamMembership[]
   projectTeams    ProjectTeam[]
+  taskTeams       TaskTeam[]
   
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -429,4 +434,85 @@ model ProjectMember {
   @@unique([projectId, memberId])
   @@index([projectId])
   @@index([memberId])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id              String        @id @default(cuid())
+  title           String
+  description     String?
+  status          TaskStatus    @default(TODO)
+  priority        TaskPriority  @default(MEDIUM)
+  
+  // Project relationship
+  projectId       String
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  // Task assignments
+  taskMembers     TaskMember[]
+  taskTeams       TaskTeam[]
+  
+  // Dates
+  dueDate         DateTime?
+  completedAt     DateTime?
+  
+  // Order in kanban column
+  order           Int           @default(0)
+  
+  // Additional info
+  estimatedHours  Float?
+  actualHours     Float?
+  tags            String?       // JSON array of tags
+  attachments     String?       // JSON array of file URLs
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([projectId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+}
+
+model TaskMember {
+  id              String        @id @default(cuid())
+  taskId          String
+  memberId        String
+  
+  task            Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  member          TeamMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  assignedAt      DateTime      @default(now())
+  
+  @@unique([taskId, memberId])
+  @@index([taskId])
+  @@index([memberId])
+}
+
+model TaskTeam {
+  id              String        @id @default(cuid())
+  taskId          String
+  teamId          String
+  
+  task            Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  team            Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  assignedAt      DateTime      @default(now())
+  
+  @@unique([taskId, teamId])
+  @@index([taskId])
+  @@index([teamId])
 }
