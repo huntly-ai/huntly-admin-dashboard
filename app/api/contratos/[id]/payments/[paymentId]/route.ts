@@ -8,7 +8,6 @@ export async function PUT(
 ) {
   try {
     const params = await props.params
-    const { id } = params
     const { paymentId } = params
     const body = await request.json()
 
@@ -43,7 +42,6 @@ export async function DELETE(
 ) {
   try {
     const params = await props.params
-    const { id } = params
     const { paymentId } = params
 
     await prisma.contractPayment.delete({
