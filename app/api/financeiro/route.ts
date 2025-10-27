@@ -83,21 +83,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Update project actual cost if it's a project-related expense
-    if (body.projectId && body.type === "EXPENSE") {
-      const project = await prisma.project.findUnique({
-        where: { id: body.projectId },
-      })
-      if (project) {
-        await prisma.project.update({
-          where: { id: body.projectId },
-          data: {
-            actualCost: project.actualCost + parseFloat(body.amount),
-          },
-        })
-      }
-    }
-
     return NextResponse.json(transaction, { status: 201 })
   } catch (error: unknown) {
     console.error("Error creating transaction:", error)

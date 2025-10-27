@@ -83,8 +83,7 @@ interface Project {
   description?: string
   status: string
   priority: string
-  budget: number
-  actualCost: number
+  projectValue: number
   startDate?: string
   endDate?: string
   deadline?: string
@@ -127,8 +126,7 @@ export default function ProjectsPage() {
     description: "",
     status: "PLANNING",
     priority: "MEDIUM",
-    budget: "",
-    actualCost: "",
+    projectValue: "",
     startDate: "",
     endDate: "",
     deadline: "",
@@ -215,11 +213,8 @@ export default function ProjectsPage() {
       // Convert values from cents to decimal
       const dataToSend = {
         ...formData,
-        budget: formData.budget
-          ? (parseFloat(formData.budget) / 100).toString()
-          : "0",
-        actualCost: formData.actualCost
-          ? (parseFloat(formData.actualCost) / 100).toString()
+        projectValue: formData.projectValue
+          ? (parseFloat(formData.projectValue) / 100).toString()
           : "0",
         memberIds: selectedMemberIds,
         teamIds: selectedTeamIds,
@@ -271,8 +266,7 @@ export default function ProjectsPage() {
       description: project.description || "",
       status: project.status,
       priority: project.priority,
-      budget: prepareValueForCurrencyInput(project.budget),
-      actualCost: prepareValueForCurrencyInput(project.actualCost),
+      projectValue: prepareValueForCurrencyInput(project.projectValue),
       startDate: project.startDate ? format(new Date(project.startDate), "yyyy-MM-dd") : "",
       endDate: project.endDate ? format(new Date(project.endDate), "yyyy-MM-dd") : "",
       deadline: project.deadline ? format(new Date(project.deadline), "yyyy-MM-dd") : "",
@@ -299,8 +293,7 @@ export default function ProjectsPage() {
       description: "",
       status: "PLANNING",
       priority: "MEDIUM",
-      budget: "",
-      actualCost: "",
+      projectValue: "",
       startDate: "",
       endDate: "",
       deadline: "",
@@ -448,32 +441,21 @@ export default function ProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="budget">Orçamento (R$) *</Label>
-                    <Input
-                      id="budget"
-                      placeholder="R$ 0,00"
-                      required
-                      value={formatCurrencyInput(formData.budget)}
-                      onChange={(e) => {
-                        const onlyNumbers = e.target.value.replace(/\D/g, "")
-                        setFormData({ ...formData, budget: onlyNumbers })
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="actualCost">Custo Real (R$)</Label>
-                    <Input
-                      id="actualCost"
-                      placeholder="R$ 0,00"
-                      value={formatCurrencyInput(formData.actualCost)}
-                      onChange={(e) => {
-                        const onlyNumbers = e.target.value.replace(/\D/g, "")
-                        setFormData({ ...formData, actualCost: onlyNumbers })
-                      }}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="projectValue">Valor do Projeto (R$) *</Label>
+                  <Input
+                    id="projectValue"
+                    placeholder="R$ 0,00"
+                    required
+                    value={formatCurrencyInput(formData.projectValue)}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, "")
+                      setFormData({ ...formData, projectValue: onlyNumbers })
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Valor total cobrado do cliente por este projeto
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -651,33 +633,11 @@ export default function ProjectsPage() {
                             {project.client.company && ` (${project.client.company})`}
                           </div>
                           <div>
-                            <span className="font-medium">Orçamento:</span>{" "}
+                            <span className="font-medium">Valor do Projeto:</span>{" "}
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
-                            }).format(project.budget)}
-                          </div>
-                          <div>
-                            <span className="font-medium">Custo Real:</span>{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            }).format(project.actualCost)}
-                          </div>
-                          <div>
-                            <span className="font-medium">Margem:</span>{" "}
-                            <span
-                              className={
-                                project.budget - project.actualCost >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
-                            >
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              }).format(project.budget - project.actualCost)}
-                            </span>
+                            }).format(project.projectValue)}
                           </div>
                           {project.startDate && (
                             <div>

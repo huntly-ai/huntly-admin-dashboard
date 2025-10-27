@@ -174,8 +174,7 @@ model Project {
   priority    ProjectPriority @default(MEDIUM)
   
   // Financial
-  budget      Float
-  actualCost  Float           @default(0)
+  projectValue Float          // Valor total cobrado do cliente
   
   // Dates
   startDate   DateTime?

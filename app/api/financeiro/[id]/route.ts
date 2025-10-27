@@ -40,18 +40,6 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
 
-    // Get old transaction to check if amount/type changed
-    const oldTransaction = await prisma.transaction.findUnique({
-      where: { id },
-    })
-
-    if (!oldTransaction) {
-      return NextResponse.json(
-        { error: "Transaction not found" },
-        { status: 404 }
-      )
-    }
-
     const transaction = await prisma.transaction.update({
       where: { id },
       data: {
@@ -81,43 +69,6 @@ export async function PUT(
         },
       },
     })
-
-    // Update project actual cost if necessary
-    if (oldTransaction.projectId && oldTransaction.type === "EXPENSE") {
-      const project = await prisma.project.findUnique({
-        where: { id: oldTransaction.projectId },
-      })
-      if (project) {
-        // Remove old amount and add new if still expense
-        let newCost = project.actualCost - oldTransaction.amount
-        if (body.projectId === oldTransaction.projectId && body.type === "EXPENSE") {
-          newCost += parseFloat(body.amount)
-        }
-        await prisma.project.update({
-          where: { id: oldTransaction.projectId },
-          data: { actualCost: Math.max(0, newCost) },
-        })
-      }
-    }
-
-    // If project changed and is expense, update new project
-    if (
-      body.projectId &&
-      body.projectId !== oldTransaction.projectId &&
-      body.type === "EXPENSE"
-    ) {
-      const project = await prisma.project.findUnique({
-        where: { id: body.projectId },
-      })
-      if (project) {
-        await prisma.project.update({
-          where: { id: body.projectId },
-          data: {
-            actualCost: project.actualCost + parseFloat(body.amount),
-          },
-        })
-      }
-    }
 
     return NextResponse.json(transaction)
   } catch (error: unknown) {
@@ -152,25 +103,6 @@ export async function DELETE(
   try {
     const { id } = await params
     
-    // Get transaction to update project if necessary
-    const transaction = await prisma.transaction.findUnique({
-      where: { id },
-    })
-
-    if (transaction && transaction.projectId && transaction.type === "EXPENSE") {
-      const project = await prisma.project.findUnique({
-        where: { id: transaction.projectId },
-      })
-      if (project) {
-        await prisma.project.update({
-          where: { id: transaction.projectId },
-          data: {
-            actualCost: Math.max(0, project.actualCost - transaction.amount),
-          },
-        })
-      }
-    }
-
     await prisma.transaction.delete({
       where: { id },
     })
