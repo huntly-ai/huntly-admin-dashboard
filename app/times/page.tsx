@@ -121,10 +121,16 @@ export default function TeamsPage() {
         : "/api/times"
       const method = editingTeam ? "PUT" : "POST"
 
+      // Prepare data, converting empty leadId to null
+      const dataToSend = {
+        ...formData,
+        leadId: formData.leadId || null,
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -256,7 +262,6 @@ export default function TeamsPage() {
                       <SelectValue placeholder="Selecione um líder (opcional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
                       {activeMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.name} - {roleLabels[member.role]}
