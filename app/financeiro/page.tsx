@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { formatCurrencyInput, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 
 const typeLabels: Record<string, string> = {
   INCOME: "Receita",
@@ -158,8 +159,12 @@ export default function FinanceiroPage() {
       const method = editingTransaction ? "PUT" : "POST"
 
       // Convert empty strings to null for optional fields
+      // Convert amount from cents to decimal
       const dataToSend = {
         ...formData,
+        amount: formData.amount
+          ? (parseFloat(formData.amount) / 100).toString()
+          : "0",
         clientId: formData.clientId || null,
         projectId: formData.projectId || null,
       }
@@ -208,7 +213,7 @@ export default function FinanceiroPage() {
     setFormData({
       type: transaction.type,
       category: transaction.category,
-      amount: transaction.amount.toString(),
+      amount: prepareValueForCurrencyInput(transaction.amount),
       description: transaction.description,
       date: format(new Date(transaction.date), "yyyy-MM-dd"),
       clientId: transaction.client?.id || "",
@@ -348,13 +353,13 @@ export default function FinanceiroPage() {
                     <Label htmlFor="amount">Valor (R$) *</Label>
                     <Input
                       id="amount"
-                      type="number"
-                      step="0.01"
+                      placeholder="R$ 0,00"
                       required
-                      value={formData.amount}
-                      onChange={(e) =>
-                        setFormData({ ...formData, amount: e.target.value })
-                      }
+                      value={formatCurrencyInput(formData.amount)}
+                      onChange={(e) => {
+                        const onlyNumbers = e.target.value.replace(/\D/g, "")
+                        setFormData({ ...formData, amount: onlyNumbers })
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -375,6 +380,7 @@ export default function FinanceiroPage() {
                   <Label htmlFor="description">Descrição *</Label>
                   <Input
                     id="description"
+                    placeholder="Descreva a transação"
                     required
                     value={formData.description}
                     onChange={(e) =>
@@ -431,6 +437,7 @@ export default function FinanceiroPage() {
                     <Label htmlFor="invoiceNumber">Número da Nota</Label>
                     <Input
                       id="invoiceNumber"
+                      placeholder="Ex: NF-2025/001"
                       value={formData.invoiceNumber}
                       onChange={(e) =>
                         setFormData({ ...formData, invoiceNumber: e.target.value })
@@ -454,6 +461,7 @@ export default function FinanceiroPage() {
                   <Label htmlFor="notes">Observações</Label>
                   <Textarea
                     id="notes"
+                    placeholder="Observações adicionais sobre a transação"
                     rows={3}
                     value={formData.notes}
                     onChange={(e) =>
