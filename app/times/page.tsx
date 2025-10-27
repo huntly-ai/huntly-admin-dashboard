@@ -66,6 +66,7 @@ const roleLabels: Record<string, string> = {
   DEVOPS: "DevOps",
   DATA_SCIENTIST: "Cientista de Dados",
   BUSINESS_ANALYST: "Analista de Negócios",
+  FOUNDER: "Fundador",
   CEO: "CEO",
   CTO: "CTO",
   CFO: "CFO",

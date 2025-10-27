@@ -49,6 +49,7 @@ const roleLabels: Record<string, string> = {
   DEVOPS: "DevOps",
   DATA_SCIENTIST: "Cientista de Dados",
   BUSINESS_ANALYST: "Analista de Negócios",
+  FOUNDER: "Fundador",
   CEO: "CEO",
   CTO: "CTO",
   CFO: "CFO",
@@ -81,6 +82,7 @@ interface Member {
   email: string
   phone?: string
   role: string
+  roles?: string
   status: string
   department?: string
   hireDate?: string
@@ -101,6 +103,7 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<Member | null>(null)
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(["DEVELOPER"])
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -142,6 +145,7 @@ export default function MembersPage() {
       const dataToSend = {
         ...formData,
         phone: formData.phone.replace(/\D/g, ""),
+        roles: JSON.stringify(selectedRoles),
       }
 
       const response = await fetch(url, {
@@ -186,6 +190,11 @@ export default function MembersPage() {
 
   const handleEdit = (member: Member) => {
     setEditingMember(member)
+    
+    // Parse roles from JSON
+    const memberRoles = member.roles ? JSON.parse(member.roles) : [member.role]
+    setSelectedRoles(memberRoles)
+    
     setFormData({
       name: member.name,
       email: member.email,
@@ -203,6 +212,7 @@ export default function MembersPage() {
 
   const resetForm = () => {
     setEditingMember(null)
+    setSelectedRoles(["DEVELOPER"])
     setFormData({
       name: "",
       email: "",
@@ -215,6 +225,22 @@ export default function MembersPage() {
       skills: "",
       notes: "",
     })
+  }
+  
+  const toggleRole = (role: string) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(role)) {
+        // Don't allow removing the last role
+        if (prev.length === 1) return prev
+        return prev.filter(r => r !== role)
+      }
+      return [...prev, role]
+    })
+    
+    // Update primary role if needed
+    if (!selectedRoles.includes(formData.role)) {
+      setFormData(prev => ({ ...prev, role: selectedRoles[0] || role }))
+    }
   }
 
   const activeMembers = members.filter(m => m.status === "ACTIVE")
@@ -308,6 +334,31 @@ export default function MembersPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Todos os Cargos</Label>
+                  <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(roleLabels).map(([key, label]) => (
+                        <label
+                          key={key}
+                          className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedRoles.includes(key)}
+                            onChange={() => toggleRole(key)}
+                            className="rounded"
+                          />
+                          <span className="text-sm">{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Selecione todos os cargos deste membro (obrigatório ter pelo menos 1)
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -533,7 +584,17 @@ function MembersList({
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{member.name}</h3>
-                  <p className="text-sm text-gray-600">{roleLabels[member.role]}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {member.roles ? (
+                      JSON.parse(member.roles).map((role: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {roleLabels[role]}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-600">{roleLabels[member.role]}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               <Badge className={statusColors[member.status]}>

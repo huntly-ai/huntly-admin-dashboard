@@ -97,6 +97,7 @@ enum MemberRole {
   DEVOPS
   DATA_SCIENTIST
   BUSINESS_ANALYST
+  FOUNDER
   CEO
   CTO
   CFO
@@ -327,7 +328,8 @@ model TeamMember {
   name            String
   email           String        @unique
   phone           String?
-  role            MemberRole
+  role            MemberRole    // Primary role
+  roles           String?       // JSON array of all roles (including primary)
   status          MemberStatus  @default(ACTIVE)
   
   // Additional info

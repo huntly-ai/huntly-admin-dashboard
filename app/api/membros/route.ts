@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         email: body.email,
         phone: body.phone,
         role: body.role as MemberRole,
+        roles: body.roles,
         status: (body.status as MemberStatus) || "ACTIVE",
         department: body.department,
         hireDate: body.hireDate ? new Date(body.hireDate) : null,

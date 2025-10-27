@@ -63,6 +63,7 @@ export async function PUT(
         email: body.email,
         phone: body.phone,
         role: body.role as MemberRole,
+        roles: body.roles,
         status: body.status as MemberStatus,
         department: body.department,
         hireDate: body.hireDate ? new Date(body.hireDate) : null,
