@@ -6,6 +6,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
+    const { id } = params
     const { id } = await params
     
     // Get the lead

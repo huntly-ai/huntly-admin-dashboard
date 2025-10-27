@@ -4,9 +4,10 @@ import { PaymentStatus } from "@prisma/client"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const { id } = params
 
     const payments = await prisma.contractPayment.findMany({
@@ -28,9 +29,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const { id } = params
     const body = await request.json()
 

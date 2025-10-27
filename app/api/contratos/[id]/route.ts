@@ -4,9 +4,10 @@ import { ContractStatus } from "@prisma/client"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const { id } = params
 
     const contract = await prisma.contract.findUnique({
@@ -45,9 +46,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const { id } = params
     const body = await request.json()
 
@@ -106,9 +108,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const { id } = params
 
     await prisma.contract.delete({
