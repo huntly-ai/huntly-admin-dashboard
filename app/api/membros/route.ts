@@ -6,6 +6,12 @@ export async function GET() {
   try {
     const members = await prisma.teamMember.findMany({
       include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
         teamMemberships: {
           include: {
             team: {

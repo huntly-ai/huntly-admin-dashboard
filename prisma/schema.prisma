@@ -322,6 +322,19 @@ model ContractPayment {
   @@index([dueDate])
 }
 
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  password        String        // Hashed password
+  memberId        String?       @unique
+  member          TeamMember?   @relation(fields: [memberId], references: [id])
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([email])
+}
+
 model TeamMember {
   id              String        @id @default(cuid())
   name            String
@@ -330,6 +343,9 @@ model TeamMember {
   role            MemberRole    // Primary role
   roles           String?       // JSON array of all roles (including primary)
   status          MemberStatus  @default(ACTIVE)
+  
+  // User account relationship
+  user            User?
   
   // Additional info
   department      String?

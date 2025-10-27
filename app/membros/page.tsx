@@ -93,6 +93,10 @@ interface Member {
   notes?: string
   teamMemberships: TeamMembership[]
   createdAt: string
+  user?: {
+    id: string
+    email: string
+  }
   _count?: {
     projects: number
     teamMemberships: number
@@ -117,6 +121,13 @@ export default function MembersPage() {
     skills: "",
     notes: "",
   })
+  
+  // User creation dialog states
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false)
+  const [selectedMemberForUser, setSelectedMemberForUser] = useState<Member | null>(null)
+  const [userPassword, setUserPassword] = useState("")
+  const [userConfirmPassword, setUserConfirmPassword] = useState("")
+  const [userError, setUserError] = useState("")
 
   useEffect(() => {
     fetchMembers()
@@ -241,6 +252,56 @@ export default function MembersPage() {
     // Update primary role if needed
     if (!selectedRoles.includes(formData.role)) {
       setFormData(prev => ({ ...prev, role: selectedRoles[0] || role }))
+    }
+  }
+  
+  const handleCreateUser = (member: Member) => {
+    setSelectedMemberForUser(member)
+    setUserPassword("")
+    setUserConfirmPassword("")
+    setUserError("")
+    setIsUserDialogOpen(true)
+  }
+  
+  const handleUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setUserError("")
+    
+    if (!selectedMemberForUser) return
+    
+    if (userPassword !== userConfirmPassword) {
+      setUserError("As senhas não coincidem")
+      return
+    }
+    
+    if (userPassword.length < 6) {
+      setUserError("A senha deve ter pelo menos 6 caracteres")
+      return
+    }
+    
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: selectedMemberForUser.email,
+          password: userPassword,
+          memberId: selectedMemberForUser.id,
+        }),
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        setUserError(data.error || "Erro ao criar usuário")
+        return
+      }
+      
+      setIsUserDialogOpen(false)
+      fetchMembers() // Refresh to show user is now linked
+      alert("Usuário criado com sucesso!")
+    } catch {
+      setUserError("Erro ao conectar com o servidor")
     }
   }
 
@@ -463,6 +524,74 @@ export default function MembersPage() {
               </form>
             </DialogContent>
           </Dialog>
+          
+          {/* Create User Dialog */}
+          <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Usuário de Acesso</DialogTitle>
+                <DialogDescription>
+                  Crie uma conta de acesso ao sistema para {selectedMemberForUser?.name}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUserSubmit} className="space-y-4">
+                {userError && (
+                  <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded text-sm">
+                    {userError}
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input
+                    value={selectedMemberForUser?.email || ""}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                  <p className="text-xs text-gray-500">
+                    O email do membro será usado para login
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="userPassword">Senha</Label>
+                  <Input
+                    id="userPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={userPassword}
+                    onChange={(e) => setUserPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="userConfirmPassword">Confirmar Senha</Label>
+                  <Input
+                    id="userConfirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={userConfirmPassword}
+                    onChange={(e) => setUserConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsUserDialogOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    Criar Usuário
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats Cards */}
@@ -526,7 +655,8 @@ export default function MembersPage() {
               <MembersList 
                 members={members} 
                 onEdit={handleEdit} 
-                onDelete={handleDelete} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
               />
             </TabsContent>
 
@@ -534,7 +664,8 @@ export default function MembersPage() {
               <MembersList 
                 members={activeMembers} 
                 onEdit={handleEdit} 
-                onDelete={handleDelete} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
               />
             </TabsContent>
 
@@ -542,7 +673,8 @@ export default function MembersPage() {
               <MembersList 
                 members={inactiveMembers} 
                 onEdit={handleEdit} 
-                onDelete={handleDelete} 
+                onDelete={handleDelete}
+                onCreateUser={handleCreateUser}
               />
             </TabsContent>
           </Tabs>
@@ -556,10 +688,12 @@ function MembersList({
   members,
   onEdit,
   onDelete,
+  onCreateUser,
 }: {
   members: Member[]
   onEdit: (member: Member) => void
   onDelete: (id: string) => void
+  onCreateUser: (member: Member) => void
 }) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
   
@@ -632,6 +766,15 @@ function MembersList({
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Mail className="h-4 w-4" />
                     <span className="truncate">{member.email}</span>
+                    {member.user ? (
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                        Com acesso
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                        Sem acesso
+                      </Badge>
+                    )}
                   </div>
                   {member.phone && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -722,6 +865,17 @@ function MembersList({
                 />
                 {isExpanded(member.id) ? 'Menos' : 'Mais'}
               </Button>
+              {!member.user && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onCreateUser(member)}
+                  className="text-blue-600 hover:text-blue-700"
+                  title="Criar Usuário de Acesso"
+                >
+                  <UserCheck className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
