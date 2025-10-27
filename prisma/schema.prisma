@@ -88,6 +88,27 @@ enum PaymentStatus {
   CANCELLED
 }
 
+enum MemberRole {
+  DEVELOPER
+  DESIGNER
+  PROJECT_MANAGER
+  PRODUCT_MANAGER
+  QA_ENGINEER
+  DEVOPS
+  DATA_SCIENTIST
+  BUSINESS_ANALYST
+  CEO
+  CTO
+  CFO
+  OTHER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
 model Lead {
   id          String      @id @default(cuid())
   name        String
@@ -170,8 +191,11 @@ model Project {
   // Related contracts
   contractProjects ContractProject[]
   
-  // Team and notes
-  teamMembers String?         // JSON array of team member names/emails
+  // Team allocation
+  projectTeams ProjectTeam[]
+  projectMembers ProjectMember[]
+  
+  // Notes
   notes       String?
   
   createdAt   DateTime        @default(now())
@@ -296,4 +320,96 @@ model ContractPayment {
   @@index([contractId])
   @@index([status])
   @@index([dueDate])
+}
+
+model TeamMember {
+  id              String        @id @default(cuid())
+  name            String
+  email           String        @unique
+  phone           String?
+  role            MemberRole
+  status          MemberStatus  @default(ACTIVE)
+  
+  // Additional info
+  department      String?
+  hireDate        DateTime?
+  avatar          String?       // URL to avatar image
+  bio             String?
+  skills          String?       // JSON array of skills
+  
+  // Relationships
+  teamMemberships TeamMembership[]
+  projectMembers  ProjectMember[]
+  
+  notes           String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([status])
+  @@index([role])
+}
+
+model Team {
+  id              String        @id @default(cuid())
+  name            String
+  description     String?
+  
+  // Team lead
+  leadId          String?
+  
+  // Relationships
+  teamMemberships TeamMembership[]
+  projectTeams    ProjectTeam[]
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model TeamMembership {
+  id              String        @id @default(cuid())
+  teamId          String
+  memberId        String
+  
+  team            Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  member          TeamMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  joinedAt        DateTime      @default(now())
+  
+  @@unique([teamId, memberId])
+  @@index([teamId])
+  @@index([memberId])
+}
+
+model ProjectTeam {
+  id              String        @id @default(cuid())
+  projectId       String
+  teamId          String
+  
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team            Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  assignedAt      DateTime      @default(now())
+  
+  @@unique([projectId, teamId])
+  @@index([projectId])
+  @@index([teamId])
+}
+
+model ProjectMember {
+  id              String        @id @default(cuid())
+  projectId       String
+  memberId        String
+  
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  member          TeamMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  // Role in this specific project (can be different from their main role)
+  projectRole     String?
+  
+  assignedAt      DateTime      @default(now())
+  
+  @@unique([projectId, memberId])
+  @@index([projectId])
+  @@index([memberId])
 }

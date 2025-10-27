@@ -10,6 +10,8 @@ import {
   FolderKanban, 
   DollarSign,
   FileText,
+  UserCog,
+  UsersRound,
   Menu
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -40,6 +42,16 @@ const navItems = [
     title: "Contratos",
     href: "/contratos",
     icon: FileText,
+  },
+  {
+    title: "Membros",
+    href: "/membros",
+    icon: UserCog,
+  },
+  {
+    title: "Times",
+    href: "/times",
+    icon: UsersRound,
   },
   {
     title: "Financeiro",
