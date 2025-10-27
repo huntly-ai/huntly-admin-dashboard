@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
+import { Plus, Edit, Trash2, TrendingUp, TrendingDown, DollarSign, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { formatCurrencyInput, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
@@ -97,7 +97,9 @@ export default function FinanceiroPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null)
   const [formData, setFormData] = useState({
     type: "INCOME",
     category: "PROJECT_PAYMENT",
@@ -189,15 +191,22 @@ export default function FinanceiroPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir esta transação?")) return
+  const handleDeleteClick = (transaction: Transaction) => {
+    setDeletingTransaction(transaction)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!deletingTransaction) return
 
     try {
-      const response = await fetch(`/api/financeiro/${id}`, {
+      const response = await fetch(`/api/financeiro/${deletingTransaction.id}`, {
         method: "DELETE",
       })
 
       if (response.ok) {
+        setIsDeleteDialogOpen(false)
+        setDeletingTransaction(null)
         fetchTransactions()
       } else {
         alert("Erro ao excluir transação")
@@ -647,7 +656,7 @@ export default function FinanceiroPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDelete(transaction.id)}
+                          onClick={() => handleDeleteClick(transaction)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -661,6 +670,109 @@ export default function FinanceiroPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <DialogTitle>Excluir Transação</DialogTitle>
+                <DialogDescription>
+                  Esta ação não pode ser desfeita.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {deletingTransaction && (
+            <div className="space-y-4 py-4">
+              <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Tipo</span>
+                  <Badge
+                    variant={deletingTransaction.type === "INCOME" ? "default" : "destructive"}
+                  >
+                    {typeLabels[deletingTransaction.type]}
+                  </Badge>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Valor</span>
+                  <span className={`text-lg font-bold ${
+                    deletingTransaction.type === "INCOME"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}>
+                    {deletingTransaction.type === "INCOME" ? "+" : "-"}
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(deletingTransaction.amount)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-muted-foreground">Descrição</span>
+                  <span className="text-sm text-right max-w-[250px]">
+                    {deletingTransaction.description}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Data</span>
+                  <span className="text-sm">
+                    {format(new Date(deletingTransaction.date), "dd/MM/yyyy", {
+                      locale: ptBR,
+                    })}
+                  </span>
+                </div>
+
+                {deletingTransaction.client && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-muted-foreground">Cliente</span>
+                    <span className="text-sm">{deletingTransaction.client.name}</span>
+                  </div>
+                )}
+
+                {deletingTransaction.project && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-muted-foreground">Projeto</span>
+                    <span className="text-sm">{deletingTransaction.project.name}</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Tem certeza que deseja excluir esta transação? Esta ação é permanente e não pode ser revertida.
+              </p>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false)
+                setDeletingTransaction(null)
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Excluir Transação
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   )
 }
