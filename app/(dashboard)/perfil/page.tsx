@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -132,31 +131,31 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
             <p className="mt-4 text-gray-600">Carregando perfil...</p>
           </div>
         </div>
-      </DashboardLayout>
+      </>
     )
   }
 
   if (!user) {
     return (
-      <DashboardLayout>
+      <>
         <Card>
           <CardContent className="p-8">
             <p className="text-center text-gray-500">Erro ao carregar perfil</p>
           </CardContent>
         </Card>
-      </DashboardLayout>
+      </>
     )
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6 max-w-4xl">
         <div>
           <h1 className="text-3xl font-bold">Meu Perfil</h1>
@@ -392,7 +391,7 @@ export default function PerfilPage() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   )
 }
 

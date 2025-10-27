@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -201,7 +200,7 @@ export default function TeamsPage() {
   const activeMembers = members.filter(m => m)
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -487,7 +486,7 @@ export default function TeamsPage() {
           </Card>
         )}
       </div>
-    </DashboardLayout>
+    </>
   )
 }
 
