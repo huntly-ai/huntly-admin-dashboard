@@ -465,7 +465,7 @@ export default function ContractsPage() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(statusLabels).map(([key, label]) => (
@@ -533,6 +533,8 @@ export default function ContractsPage() {
                             <Label className="text-xs">Parcela</Label>
                             <Input
                               type="number"
+                              placeholder="1"
+                              min="1"
                               value={payment.installmentNumber}
                               onChange={(e) =>
                                 updatePayment(index, "installmentNumber", parseInt(e.target.value))
