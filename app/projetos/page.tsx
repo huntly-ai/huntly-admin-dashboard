@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -85,6 +86,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const searchParams = useSearchParams()
   const [projects, setProjects] = useState<Project[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
@@ -109,6 +111,23 @@ export default function ProjectsPage() {
     fetchProjects()
     fetchClients()
   }, [])
+
+  // Handle URL parameters (clientId and clientName from client page)
+  useEffect(() => {
+    const clientId = searchParams.get("clientId")
+    const clientName = searchParams.get("clientName")
+    
+    if (clientId && clientName) {
+      setFormData(prev => ({
+        ...prev,
+        clientId: clientId,
+      }))
+      setIsDialogOpen(true)
+      
+      // Clean URL after capturing params
+      window.history.replaceState({}, "", "/projetos")
+    }
+  }, [searchParams])
 
   const fetchProjects = async () => {
     try {

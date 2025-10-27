@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, FolderKanban, DollarSign } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { formatPhone, formatCNPJ } from "@/lib/utils/formatters"
+import { useRouter } from "next/navigation"
 
 const statusLabels: Record<string, string> = {
   ACTIVE: "Ativo",
@@ -59,6 +61,7 @@ interface Client {
 }
 
 export default function ClientsPage() {
+  const router = useRouter()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -101,10 +104,17 @@ export default function ClientsPage() {
         : "/api/clientes"
       const method = editingClient ? "PUT" : "POST"
 
+      // Remove máscaras antes de enviar
+      const dataToSend = {
+        ...formData,
+        phone: formData.phone.replace(/\D/g, ""),
+        cnpj: formData.cnpj.replace(/\D/g, ""),
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -146,11 +156,11 @@ export default function ClientsPage() {
     setFormData({
       name: client.name,
       email: client.email,
-      phone: client.phone || "",
+      phone: formatPhone(client.phone || ""),
       company: client.company || "",
       position: client.position || "",
       status: client.status,
-      cnpj: client.cnpj || "",
+      cnpj: formatCNPJ(client.cnpj || ""),
       address: client.address || "",
       website: client.website || "",
       notes: client.notes || "",
@@ -224,6 +234,7 @@ export default function ClientsPage() {
                     <Label htmlFor="name">Nome *</Label>
                     <Input
                       id="name"
+                      placeholder="Nome do cliente"
                       required
                       value={formData.name}
                       onChange={(e) =>
@@ -236,6 +247,7 @@ export default function ClientsPage() {
                     <Input
                       id="email"
                       type="email"
+                      placeholder="email@exemplo.com"
                       required
                       value={formData.email}
                       onChange={(e) =>
@@ -250,20 +262,26 @@ export default function ClientsPage() {
                     <Label htmlFor="phone">Telefone</Label>
                     <Input
                       id="phone"
+                      placeholder="+55 (11) 98765-4321"
                       value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const formatted = formatPhone(e.target.value)
+                        setFormData({ ...formData, phone: formatted })
+                      }}
+                      maxLength={19}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cnpj">CNPJ</Label>
                     <Input
                       id="cnpj"
+                      placeholder="12.345.678/0001-90"
                       value={formData.cnpj}
-                      onChange={(e) =>
-                        setFormData({ ...formData, cnpj: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const formatted = formatCNPJ(e.target.value)
+                        setFormData({ ...formData, cnpj: formatted })
+                      }}
+                      maxLength={18}
                     />
                   </div>
                 </div>
@@ -273,6 +291,7 @@ export default function ClientsPage() {
                     <Label htmlFor="company">Empresa</Label>
                     <Input
                       id="company"
+                      placeholder="Nome da empresa"
                       value={formData.company}
                       onChange={(e) =>
                         setFormData({ ...formData, company: e.target.value })
@@ -283,6 +302,7 @@ export default function ClientsPage() {
                     <Label htmlFor="position">Cargo</Label>
                     <Input
                       id="position"
+                      placeholder="Cargo do contato"
                       value={formData.position}
                       onChange={(e) =>
                         setFormData({ ...formData, position: e.target.value })
@@ -297,6 +317,7 @@ export default function ClientsPage() {
                     <Input
                       id="website"
                       type="url"
+                      placeholder="https://www.exemplo.com"
                       value={formData.website}
                       onChange={(e) =>
                         setFormData({ ...formData, website: e.target.value })
@@ -329,6 +350,7 @@ export default function ClientsPage() {
                   <Label htmlFor="address">Endereço</Label>
                   <Input
                     id="address"
+                    placeholder="Rua, número, bairro, cidade - UF"
                     value={formData.address}
                     onChange={(e) =>
                       setFormData({ ...formData, address: e.target.value })
@@ -393,7 +415,7 @@ export default function ClientsPage() {
                           </div>
                           {client.phone && (
                             <div>
-                              <span className="font-medium">Telefone:</span> {client.phone}
+                              <span className="font-medium">Telefone:</span> {formatPhone(client.phone)}
                             </div>
                           )}
                           {client.company && (
@@ -403,7 +425,7 @@ export default function ClientsPage() {
                           )}
                           {client.cnpj && (
                             <div>
-                              <span className="font-medium">CNPJ:</span> {client.cnpj}
+                              <span className="font-medium">CNPJ:</span> {formatCNPJ(client.cnpj)}
                             </div>
                           )}
                           {client.website && (
@@ -453,7 +475,18 @@ export default function ClientsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => router.push(`/projetos?clientId=${client.id}&clientName=${encodeURIComponent(client.name)}`)}
+                          className="text-blue-600 hover:text-blue-700"
+                          title="Criar Projeto"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Projeto
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleEdit(client)}
+                          title="Editar Cliente"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -462,6 +495,7 @@ export default function ClientsPage() {
                           variant="outline"
                           onClick={() => handleDelete(client.id)}
                           className="text-red-600 hover:text-red-700"
+                          title="Excluir Cliente"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
