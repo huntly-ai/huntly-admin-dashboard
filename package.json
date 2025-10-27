@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
-    "create-users": "tsx scripts/create-users-for-members.ts"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
