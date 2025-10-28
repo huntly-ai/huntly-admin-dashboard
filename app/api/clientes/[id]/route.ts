@@ -6,8 +6,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     const client = await prisma.client.findUnique({
       where: { id },
@@ -45,8 +43,6 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     const body = await request.json()
 
@@ -97,8 +93,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     
     // Check if client has projects

@@ -6,8 +6,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     const lead = await prisma.lead.findUnique({
       where: { id },
@@ -38,8 +36,6 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     const body = await request.json()
 
@@ -89,8 +85,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     await prisma.lead.delete({
       where: { id },

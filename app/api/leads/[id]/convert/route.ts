@@ -6,8 +6,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await props.params
-    const { id } = params
     const { id } = await params
     
     // Get the lead
@@ -33,7 +31,7 @@ export async function POST(
     const client = await prisma.client.create({
       data: {
         name: lead.name,
-        email: lead.email,
+        email: lead.email || "N/A",
         phone: lead.phone,
         company: lead.company,
         position: lead.position,
