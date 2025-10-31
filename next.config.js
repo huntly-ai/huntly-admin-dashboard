@@ -15,7 +15,13 @@ const nextConfig = {
     return config
   },
 
+  // Usar output standalone para otimização no Vercel
   output: 'standalone',
+  
+  // Garantir que os arquivos .node sejam incluídos
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./node_modules/.prisma/client/*.node', './node_modules/@prisma/client/*.node'],
+  },
 }
 
 module.exports = nextConfig
