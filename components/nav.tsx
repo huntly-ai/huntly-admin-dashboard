@@ -12,7 +12,8 @@ import {
   FileText,
   UserCog,
   UsersRound,
-  Menu
+  Menu,
+  Calendar
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -42,6 +43,11 @@ const navItems = [
     title: "Contratos",
     href: "/contratos",
     icon: FileText,
+  },
+  {
+    title: "Reuniões",
+    href: "/reunioes",
+    icon: Calendar,
   },
   {
     title: "Membros",
