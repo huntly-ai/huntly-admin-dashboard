@@ -24,6 +24,7 @@ import {
   Cell
 } from "recharts"
 import { Badge } from "@/components/ui/badge"
+import { UpcomingMeetings } from "./components/upcoming-meetings"
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
@@ -113,6 +114,9 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">Visão geral da Huntly</p>
         </div>
+
+        {/* Upcoming Meetings at the top */}
+        <UpcomingMeetings />
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -339,7 +343,7 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
-    </div>
+      </div>
     </>
   )
 }
