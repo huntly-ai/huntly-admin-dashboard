@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select } from "@/components/ui/select"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus } from "lucide-react"
 
@@ -216,23 +222,31 @@ function MeetingFormDialogComponent({
             <div className="space-y-2">
               <Label htmlFor="leadId">Lead</Label>
               <Select value={formData.leadId} onValueChange={(value) => onFormChange("leadId", value)}>
-                <option value="">Selecione um lead</option>
-                {leads.map((lead) => (
-                  <option key={lead.id} value={lead.id}>
-                    {lead.name}
-                  </option>
-                ))}
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leads.map((lead) => (
+                    <SelectItem key={lead.id} value={lead.id}>
+                      {lead.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="clientId">Cliente</Label>
               <Select value={formData.clientId} onValueChange={(value) => onFormChange("clientId", value)}>
-                <option value="">Selecione um cliente</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -241,10 +255,15 @@ function MeetingFormDialogComponent({
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select value={formData.status} onValueChange={(value) => onFormChange("status", value)}>
-              <option value="SCHEDULED">Agendada</option>
-              <option value="IN_PROGRESS">Em Progresso</option>
-              <option value="COMPLETED">Concluída</option>
-              <option value="CANCELLED">Cancelada</option>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SCHEDULED">Agendada</SelectItem>
+                <SelectItem value="IN_PROGRESS">Em Progresso</SelectItem>
+                <SelectItem value="COMPLETED">Concluída</SelectItem>
+                <SelectItem value="CANCELLED">Cancelada</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 
