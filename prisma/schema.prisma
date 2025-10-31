@@ -134,6 +134,7 @@ model Lead {
   @@index([status])
   @@index([source])
   @@index([createdAt])
+  meetings        Meeting[]
 }
 
 model Client {
@@ -165,6 +166,7 @@ model Client {
   
   @@index([status])
   @@index([createdAt])
+  meetings        Meeting[]
 }
 
 model Project {
@@ -362,6 +364,7 @@ model TeamMember {
   teamMemberships TeamMembership[]
   projectMembers  ProjectMember[]
   taskMembers     TaskMember[]
+  meetingMembers  MeetingMember[]
   
   notes           String?
   
@@ -384,6 +387,7 @@ model Team {
   teamMemberships TeamMembership[]
   projectTeams    ProjectTeam[]
   taskTeams       TaskTeam[]
+  meetingTeams    MeetingTeam[]
   
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -515,5 +519,81 @@ model TaskTeam {
   
   @@unique([taskId, teamId])
   @@index([taskId])
+  @@index([teamId])
+}
+
+model Meeting {
+  id              String        @id @default(cuid())
+  title           String
+  description     String?
+  
+  // Date and time
+  startDate       DateTime
+  endDate         DateTime?
+  
+  // Location/Link
+  location        String?       // Physical location or video call link
+  
+  // Relationships
+  leadId          String?
+  lead            Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  clientId        String?
+  client          Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  // Participants
+  meetingMembers  MeetingMember[]
+  meetingTeams    MeetingTeam[]
+  
+  // Tags/Subject
+  tags            String?       // JSON array of tags/subjects
+  
+  // Notes
+  notes           String?
+  recordingUrl    String?       // URL to meeting recording if available
+  
+  // Status
+  status          String        @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([leadId])
+  @@index([clientId])
+  @@index([startDate])
+  @@index([status])
+}
+
+model MeetingMember {
+  id              String        @id @default(cuid())
+  meetingId       String
+  memberId        String
+  
+  meeting         Meeting       @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  member          TeamMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  // RSVP status
+  rsvpStatus      String        @default("PENDING") // PENDING, ACCEPTED, DECLINED, TENTATIVE
+  rsvpAt          DateTime?
+  
+  createdAt       DateTime      @default(now())
+  
+  @@unique([meetingId, memberId])
+  @@index([meetingId])
+  @@index([memberId])
+}
+
+model MeetingTeam {
+  id              String        @id @default(cuid())
+  meetingId       String
+  teamId          String
+  
+  meeting         Meeting       @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  team            Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime      @default(now())
+  
+  @@unique([meetingId, teamId])
+  @@index([meetingId])
   @@index([teamId])
 }
