@@ -55,7 +55,6 @@ const statusLabels: Record<string, string> = {
 export default function PerfilPage() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [changingPassword, setChangingPassword] = useState(false)
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -383,8 +382,8 @@ export default function PerfilPage() {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={changingPassword}>
-                  {changingPassword ? "Alterando..." : "Alterar Senha"}
+                <Button type="submit">
+                  Alterar Senha
                 </Button>
               </div>
             </form>

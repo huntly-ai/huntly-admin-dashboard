@@ -53,7 +53,7 @@ export async function PUT(
     const { id } = params
     const body = await request.json()
 
-    const { projectIds, payments, ...contractData } = body
+    const { projectIds, ...contractData } = body
 
     // Handle project associations separately if needed
     const updateData: Record<string, unknown> = {

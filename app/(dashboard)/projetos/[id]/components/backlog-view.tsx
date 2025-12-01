@@ -1,17 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, ChevronRight, ChevronDown, MoreHorizontal, Calendar, User as UserIcon } from "lucide-react"
+import { Plus, ChevronRight, ChevronDown, MoreHorizontal, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Progress } from "@/components/ui/progress" // Assuming we have Progress, if not I'll use simple div
 import { EpicFormDialog } from "./epic-form-dialog"
 import { StoryFormDialog } from "./story-form-dialog"
 
@@ -43,7 +36,12 @@ interface Story {
   points?: number
   epicId?: string | null
   storyMembers?: { member: Member }[]
-  tasks?: any[]
+  tasks?: Task[]
+}
+
+interface Task {
+  id: string
+  title: string
 }
 
 interface BacklogViewProps {

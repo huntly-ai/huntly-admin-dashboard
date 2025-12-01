@@ -3,8 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Circle, Clock, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react"
+import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 interface Member {
   id: string

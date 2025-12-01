@@ -32,7 +32,7 @@ export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
     return payload as { userId: string; email: string; memberId?: string | null }
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -55,7 +55,7 @@ export async function verifyAuth(request: NextRequest): Promise<{
     }
 
     return { isValid: true, user }
-  } catch (error) {
+  } catch {
     return { isValid: false }
   }
 }

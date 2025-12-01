@@ -68,8 +68,21 @@ export default function MembersPage() {
   const [userConfirmPassword, setUserConfirmPassword] = useState("")
   const [userError, setUserError] = useState("")
 
-  useEffect(() => {
-    fetchMembers()
+  const resetForm = useCallback(() => {
+    setEditingMember(null)
+    setSelectedRoles(["DEVELOPER"])
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      role: "DEVELOPER",
+      status: "ACTIVE",
+      department: "",
+      hireDate: "",
+      bio: "",
+      skills: "",
+      notes: "",
+    })
   }, [])
 
   const fetchMembers = useCallback(async () => {
@@ -83,6 +96,10 @@ export default function MembersPage() {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    fetchMembers()
+  }, [fetchMembers])
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,7 +135,7 @@ export default function MembersPage() {
       console.error("Error saving member:", error)
       alert("Erro ao salvar membro")
     }
-  }, [editingMember, formData, selectedRoles, fetchMembers])
+  }, [editingMember, formData, selectedRoles, fetchMembers, resetForm])
 
   const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este membro?")) return
@@ -160,23 +177,6 @@ export default function MembersPage() {
       notes: member.notes || "",
     })
     setIsDialogOpen(true)
-  }, [])
-
-  const resetForm = useCallback(() => {
-    setEditingMember(null)
-    setSelectedRoles(["DEVELOPER"])
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      role: "DEVELOPER",
-      status: "ACTIVE",
-      department: "",
-      hireDate: "",
-      bio: "",
-      skills: "",
-      notes: "",
-    })
   }, [])
   
   const toggleRole = useCallback((role: string) => {

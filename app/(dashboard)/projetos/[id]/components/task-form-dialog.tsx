@@ -183,7 +183,7 @@ export function TaskFormDialog({
     } finally {
       setIsSubmitting(false)
     }
-  }, [formData, tags, selectedMemberIds, selectedTeamIds, editingTask, projectId, onSuccess])
+  }, [formData, tags, selectedMemberIds, selectedTeamIds, editingTask, projectId, onSuccess, storyId])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

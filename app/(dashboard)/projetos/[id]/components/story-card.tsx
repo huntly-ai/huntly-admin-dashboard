@@ -35,6 +35,7 @@ interface Story {
   epic?: Epic | null
   storyMembers?: { member: Member }[]
   tasks?: Task[]
+  order: number
 }
 
 interface StoryCardProps {
