@@ -4,7 +4,7 @@ import { verifyPassword, createToken } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, remember } = await request.json()
 
     // Validate input
     if (!email || !password) {
@@ -54,11 +54,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create JWT token
+    const expirationTime = remember ? "30d" : "7d"
+    const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7 // 30 days or 7 days
+
     const token = await createToken({
       userId: user.id,
       email: user.email,
       memberId: user.memberId,
-    })
+    }, expirationTime)
 
     // Return success with token
     const response = NextResponse.json({
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: maxAge,
       path: "/",
     })
 

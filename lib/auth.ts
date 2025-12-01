@@ -17,11 +17,14 @@ export async function verifyPassword(
   return bcrypt.compare(password, hashedPassword)
 }
 
-export async function createToken(payload: { userId: string; email: string; memberId?: string | null }) {
+export async function createToken(
+  payload: { userId: string; email: string; memberId?: string | null },
+  expirationTime: string = "7d"
+) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(expirationTime)
     .sign(JWT_SECRET)
 }
 

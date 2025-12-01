@@ -198,7 +198,9 @@ model Project {
   projectTeams ProjectTeam[]
   projectMembers ProjectMember[]
   
-  // Tasks
+  // Scrum / Tasks
+  epics       Epic[]
+  stories     Story[]
   tasks       Task[]
   
   // Notes
@@ -364,6 +366,7 @@ model TeamMember {
   teamMemberships TeamMembership[]
   projectMembers  ProjectMember[]
   taskMembers     TaskMember[]
+  storyMembers    StoryMember[]
   meetingMembers  MeetingMember[]
   
   notes           String?
@@ -387,6 +390,7 @@ model Team {
   teamMemberships TeamMembership[]
   projectTeams    ProjectTeam[]
   taskTeams       TaskTeam[]
+  storyTeams      StoryTeam[]
   meetingTeams    MeetingTeam[]
   
   createdAt       DateTime      @default(now())
@@ -441,6 +445,105 @@ model ProjectMember {
   @@index([memberId])
 }
 
+enum EpicStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model Epic {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  status      EpicStatus    @default(TODO)
+  priority    TaskPriority  @default(MEDIUM)
+  
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  stories     Story[]
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@index([projectId])
+  @@index([status])
+}
+
+enum StoryStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+model Story {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  status      StoryStatus   @default(TODO)
+  priority    TaskPriority  @default(MEDIUM)
+  points      Int?          @default(0) // Story points
+  
+  // Project link
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  // Epic link (optional)
+  epicId      String?
+  epic        Epic?         @relation(fields: [epicId], references: [id], onDelete: SetNull)
+  
+  // Tasks (Sub-tasks)
+  tasks       Task[]
+  
+  // Members/Teams
+  storyMembers StoryMember[]
+  storyTeams   StoryTeam[]
+  
+  // Order in backlog/board
+  order       Int           @default(0)
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@index([projectId])
+  @@index([epicId])
+  @@index([status])
+}
+
+model StoryMember {
+  id        String     @id @default(cuid())
+  storyId   String
+  memberId  String
+  
+  story     Story      @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  member    TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime  @default(now())
+  
+  @@unique([storyId, memberId])
+  @@index([storyId])
+  @@index([memberId])
+}
+
+model StoryTeam {
+  id        String   @id @default(cuid())
+  storyId   String
+  teamId    String
+  
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime @default(now())
+  
+  @@unique([storyId, teamId])
+  @@index([storyId])
+  @@index([teamId])
+}
+
 enum TaskStatus {
   TODO
   IN_PROGRESS
@@ -466,6 +569,10 @@ model Task {
   projectId       String
   project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
+  // Story relationship (optional - task can be part of a story)
+  storyId         String?
+  story           Story?        @relation(fields: [storyId], references: [id], onDelete: SetNull)
+  
   // Task assignments
   taskMembers     TaskMember[]
   taskTeams       TaskTeam[]
@@ -487,6 +594,7 @@ model Task {
   updatedAt       DateTime      @updatedAt
   
   @@index([projectId])
+  @@index([storyId])
   @@index([status])
   @@index([priority])
   @@index([dueDate])

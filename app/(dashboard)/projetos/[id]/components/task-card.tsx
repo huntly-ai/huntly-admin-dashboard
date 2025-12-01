@@ -2,11 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Calendar, Clock, AlertCircle } from "lucide-react"
-import { format, isPast, isToday } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { CheckCircle2, Circle, Clock, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 interface Member {
   id: string
@@ -16,35 +14,12 @@ interface Member {
   avatar?: string
 }
 
-interface Team {
-  id: string
-  name: string
-}
-
-interface TaskMember {
-  member: Member
-}
-
-interface TaskTeam {
-  team: Team
-}
-
 interface Task {
   id: string
   title: string
-  description?: string
   status: string
   priority: string
-  dueDate?: string
-  completedAt?: string
-  estimatedHours?: number
-  actualHours?: number
-  tags?: string
-  order: number
-  taskMembers?: TaskMember[]
-  taskTeams?: TaskTeam[]
-  createdAt: string
-  updatedAt: string
+  taskMembers?: { member: Member }[]
 }
 
 interface TaskCardProps {
@@ -52,29 +27,36 @@ interface TaskCardProps {
   onClick: () => void
 }
 
-const priorityColors: Record<string, string> = {
-  LOW: "bg-gray-100 text-gray-800",
-  MEDIUM: "bg-blue-100 text-blue-800",
-  HIGH: "bg-orange-100 text-orange-800",
-  URGENT: "bg-red-100 text-red-800",
-}
-
-const priorityLabels: Record<string, string> = {
-  LOW: "Baixa",
-  MEDIUM: "Média",
-  HIGH: "Alta",
-  URGENT: "Urgente",
+const PriorityIcon = ({ priority }: { priority: string }) => {
+  switch (priority) {
+    case "URGENT":
+      return <ArrowUp className="h-3.5 w-3.5 text-red-600" />
+    case "HIGH":
+      return <ArrowUp className="h-3.5 w-3.5 text-orange-500" />
+    case "MEDIUM":
+      return <Minus className="h-3.5 w-3.5 text-yellow-500" />
+    case "LOW":
+      return <ArrowDown className="h-3.5 w-3.5 text-blue-500" />
+    default:
+      return <Minus className="h-3.5 w-3.5 text-gray-400" />
+  }
 }
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   const {
+    setNodeRef,
     attributes,
     listeners,
-    setNodeRef,
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id })
+  } = useSortable({
+    id: task.id,
+    data: {
+      type: "Task",
+      task,
+    },
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -82,13 +64,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const tags = task.tags ? JSON.parse(task.tags) : []
-  
-  const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && task.status !== 'DONE'
-  const isDueToday = task.dueDate && isToday(new Date(task.dueDate))
-
   const handleClick = (e: React.MouseEvent) => {
-    // Only trigger onClick if not dragging
     e.stopPropagation()
     if (!isDragging) {
       onClick()
@@ -101,104 +77,41 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-move"
       onClick={handleClick}
+      className="bg-white p-2.5 rounded shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors cursor-grab active:cursor-grabbing group"
     >
-      {/* Priority Badge */}
-      <div className="flex items-start justify-between mb-2">
-        <Badge className={`${priorityColors[task.priority]} text-xs`}>
-          {priorityLabels[task.priority]}
-        </Badge>
-        {isOverdue && (
-          <AlertCircle className="h-4 w-4 text-red-500" />
-        )}
-      </div>
-
-      {/* Title */}
-      <h4 className="font-semibold text-sm mb-2 line-clamp-2">{task.title}</h4>
-
-      {/* Description */}
-      {task.description && (
-        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-          {task.description}
-        </p>
-      )}
-
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {tags.slice(0, 3).map((tag: string, index: number) => (
-            <span
-              key={index}
-              className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-            >
-              {tag}
-            </span>
-          ))}
-          {tags.length > 3 && (
-            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-              +{tags.length - 3}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Due Date and Estimated Hours */}
-      <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
-        {task.dueDate && (
-          <div className={`flex items-center gap-1 ${
-            isOverdue ? 'text-red-600 font-semibold' : 
-            isDueToday ? 'text-orange-600 font-semibold' : ''
-          }`}>
-            <Calendar className="h-3 w-3" />
-            <span>{format(new Date(task.dueDate), "dd/MM", { locale: ptBR })}</span>
-          </div>
-        )}
-        {task.estimatedHours && (
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span>{task.estimatedHours}h</span>
-          </div>
-        )}
-      </div>
-
-      {/* Assigned Members and Teams */}
       <div className="space-y-2">
-        {task.taskMembers && task.taskMembers.length > 0 && (
-          <div className="flex items-center gap-1">
-            <div className="flex -space-x-2">
-              {task.taskMembers.slice(0, 3).map((tm) => (
-                <Avatar key={tm.member.id} className="h-6 w-6 border-2 border-white">
-                  <AvatarFallback className="text-xs">
-                    {tm.member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
+        <div className="flex items-start gap-2">
+            <div className="mt-0.5 shrink-0">
+                 <PriorityIcon priority={task.priority} />
             </div>
-            {task.taskMembers.length > 3 && (
-              <span className="text-xs text-gray-600">
-                +{task.taskMembers.length - 3}
-              </span>
-            )}
-          </div>
-        )}
+            <span className="text-sm text-gray-900 font-medium leading-tight line-clamp-3 group-hover:text-blue-600 group-hover:underline">
+                {task.title}
+            </span>
+        </div>
 
-        {task.taskTeams && task.taskTeams.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {task.taskTeams.slice(0, 2).map((tt) => (
-              <Badge key={tt.team.id} variant="outline" className="text-xs">
-                {tt.team.name}
-              </Badge>
-            ))}
-            {task.taskTeams.length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{task.taskTeams.length - 2}
-              </Badge>
-            )}
-          </div>
-        )}
+        <div className="flex items-center justify-between mt-1">
+           <div className="flex items-center gap-2">
+             <span className="text-[10px] font-mono text-gray-500 font-medium">
+                {/* Mocking key based on ID for visual similarity */}
+                TSK-{task.id.slice(-4).toUpperCase()}
+             </span>
+           </div>
+
+           {task.taskMembers && task.taskMembers.length > 0 && (
+             <div className="flex -space-x-1.5">
+                {task.taskMembers.slice(0, 2).map(tm => (
+                  <Avatar key={tm.member.id} className="h-5 w-5 border border-white ring-1 ring-gray-100">
+                    <AvatarImage src={tm.member.avatar} />
+                    <AvatarFallback className="text-[8px] bg-gray-100 text-gray-600">
+                      {tm.member.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+             </div>
+           )}
+        </div>
       </div>
     </div>
   )
 }
-

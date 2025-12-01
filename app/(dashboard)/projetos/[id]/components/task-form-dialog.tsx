@@ -57,6 +57,7 @@ interface TaskFormDialogProps {
   editingTask: Task | null
   members: Member[]
   teams: Team[]
+  storyId?: string
 }
 
 export function TaskFormDialog({
@@ -67,6 +68,7 @@ export function TaskFormDialog({
   editingTask,
   members,
   teams,
+  storyId,
 }: TaskFormDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -165,6 +167,7 @@ export function TaskFormDialog({
           tags: tags.length > 0 ? tags : null,
           memberIds: selectedMemberIds,
           teamIds: selectedTeamIds,
+          storyId: storyId || null,
         }),
       })
 

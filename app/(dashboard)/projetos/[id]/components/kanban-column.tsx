@@ -2,7 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { TaskCard } from "./task-card"
+import { StoryCard } from "./story-card"
 
 interface Member {
   id: string
@@ -12,70 +12,61 @@ interface Member {
   avatar?: string
 }
 
-interface Team {
+interface Epic {
   id: string
-  name: string
-}
-
-interface TaskMember {
-  member: Member
-}
-
-interface TaskTeam {
-  team: Team
+  title: string
 }
 
 interface Task {
+  id: string
+  status: string
+}
+
+interface Story {
   id: string
   title: string
   description?: string
   status: string
   priority: string
-  dueDate?: string
-  completedAt?: string
-  estimatedHours?: number
-  actualHours?: number
-  tags?: string
+  points?: number
+  epic?: Epic | null
+  storyMembers?: { member: Member }[]
+  tasks?: Task[]
   order: number
-  taskMembers?: TaskMember[]
-  taskTeams?: TaskTeam[]
-  createdAt: string
-  updatedAt: string
 }
 
 interface KanbanColumnProps {
   id: string
   title: string
   color: string
-  tasks: Task[]
-  onTaskClick: (task: Task) => void
+  stories: Story[]
+  onStoryClick: (story: Story) => void
 }
 
-export function KanbanColumn({ id, title, color, tasks, onTaskClick }: KanbanColumnProps) {
+export function KanbanColumn({ id, title, color, stories, onStoryClick }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id })
 
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg p-4 min-h-[500px] transition-colors ${color} ${
-        isOver ? "ring-2 ring-blue-500" : ""
-      }`}
+      className={`rounded-lg p-3 min-h-[500px] transition-colors ${color} ${
+        isOver ? "bg-gray-200" : ""
+      } flex flex-col gap-2`}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg">{title}</h3>
-        <span className="text-sm text-gray-600 bg-white px-2 py-1 rounded">
-          {tasks.length}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide px-1">{title}</h3>
+        <span className="text-xs font-medium text-gray-500 bg-black/5 px-2 py-0.5 rounded-full">
+          {stories.length}
         </span>
       </div>
 
-      <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-3">
-          {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+      <SortableContext items={stories.map(s => s.id)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-3 flex-1">
+          {stories.map(story => (
+            <StoryCard key={story.id} story={story} onClick={onStoryClick} />
           ))}
         </div>
       </SortableContext>
     </div>
   )
 }
-
