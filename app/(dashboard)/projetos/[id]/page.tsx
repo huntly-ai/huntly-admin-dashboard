@@ -325,6 +325,7 @@ export default function ProjectKanbanPage({
               <CardContent className="p-0">
                 <KanbanBoard
                   stories={stories}
+                  members={members}
                   onTaskMove={handleTaskMove}
                   onStoryClick={handleStoryClick}
                   onTaskClick={handleTaskClick}

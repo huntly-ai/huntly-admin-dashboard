@@ -56,6 +56,7 @@ interface Story {
 
 interface KanbanBoardProps {
   stories: Story[]
+  members: Member[]
   onTaskMove: (taskId: string, newStatus: string, newOrder: number) => void
   onStoryClick: (story: Story) => void
   onTaskClick: (task: Task) => void
@@ -69,7 +70,7 @@ const COLUMNS = [
   { id: "DONE", title: "Concluído" },
 ]
 
-export function KanbanBoard({ stories, onTaskMove, onStoryClick, onTaskClick, onAddSubtask }: KanbanBoardProps) {
+export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTaskClick, onAddSubtask }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   
@@ -77,6 +78,36 @@ export function KanbanBoard({ stories, onTaskMove, onStoryClick, onTaskClick, on
 
   // Flatten all tasks to find active one during drag
   const allTasks = useMemo(() => storiesArray.flatMap(s => s.tasks || []), [storiesArray])
+
+  // Get unique members involved in the project
+  const projectMembers = useMemo(() => {
+    const memberIds = new Set<string>()
+    storiesArray.forEach(story => {
+      story.tasks?.forEach(task => {
+        task.taskMembers?.forEach(tm => {
+          memberIds.add(tm.member.id)
+        })
+      })
+    })
+    
+    return Array.from(memberIds)
+      .map(id => members.find(m => m.id === id))
+      .filter((m): m is Member => m !== undefined)
+      .slice(0, 3) // Show first 3 members
+  }, [storiesArray, members])
+
+  // Count remaining members not shown
+  const remainingMembersCount = useMemo(() => {
+    const memberIds = new Set<string>()
+    storiesArray.forEach(story => {
+      story.tasks?.forEach(task => {
+        task.taskMembers?.forEach(tm => {
+          memberIds.add(tm.member.id)
+        })
+      })
+    })
+    return Math.max(0, memberIds.size - 3)
+  }, [storiesArray])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -143,15 +174,41 @@ export function KanbanBoard({ stories, onTaskMove, onStoryClick, onTaskClick, on
              />
           </div>
           <div className="flex -space-x-2">
-             <Avatar className="h-8 w-8 border-2 border-white cursor-pointer hover:z-10">
-               <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">AB</AvatarFallback>
-             </Avatar>
-             <Avatar className="h-8 w-8 border-2 border-white cursor-pointer hover:z-10">
-               <AvatarFallback className="bg-green-100 text-green-700 text-xs">JD</AvatarFallback>
-             </Avatar>
-             <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-gray-200">
-                <span className="text-xs font-medium text-gray-600">+2</span>
-             </div>
+             {projectMembers.length === 0 ? (
+               <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                 <span className="text-xs font-medium text-gray-600">-</span>
+               </div>
+             ) : (
+               <>
+                 {projectMembers.map((member, index) => {
+                   const colors = [
+                     "bg-blue-100 text-blue-700",
+                     "bg-green-100 text-green-700",
+                     "bg-purple-100 text-purple-700",
+                   ]
+                   const bgColorClass = colors[index % colors.length]
+                   const initials = member.name
+                     .split(" ")
+                     .map(n => n.charAt(0))
+                     .join("")
+                     .substring(0, 2)
+                     .toUpperCase()
+                   
+                   return (
+                     <Avatar key={member.id} className="h-8 w-8 border-2 border-white cursor-pointer hover:z-10" title={member.name}>
+                       <AvatarFallback className={`text-xs font-medium ${bgColorClass}`}>
+                         {initials}
+                       </AvatarFallback>
+                     </Avatar>
+                   )
+                 })}
+                 {remainingMembersCount > 0 && (
+                   <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-gray-200" title={`${remainingMembersCount} more members`}>
+                     <span className="text-xs font-medium text-gray-600">+{remainingMembersCount}</span>
+                   </div>
+                 )}
+               </>
+             )}
           </div>
           <div className="ml-auto flex gap-2">
              <button className="text-sm text-gray-600 font-medium hover:bg-gray-100 px-3 py-1.5 rounded flex items-center gap-2">
