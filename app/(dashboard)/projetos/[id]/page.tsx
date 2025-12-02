@@ -51,6 +51,7 @@ interface Task {
   order: number
   taskMembers?: { member: Member }[]
   taskTeams?: { team: Team }[]
+  storyId?: string | null
   createdAt: string
   updatedAt: string
 }

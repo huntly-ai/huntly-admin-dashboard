@@ -45,6 +45,7 @@ interface Task {
   order: number
   taskMembers?: TaskMember[]
   taskTeams?: TaskTeam[]
+  storyId?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -167,7 +168,7 @@ export function TaskFormDialog({
           tags: tags.length > 0 ? tags : null,
           memberIds: selectedMemberIds,
           teamIds: selectedTeamIds,
-          storyId: storyId || null,
+          storyId: editingTask ? (editingTask.storyId || null) : (storyId || null),
         }),
       })
 
