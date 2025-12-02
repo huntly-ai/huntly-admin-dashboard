@@ -90,6 +90,7 @@ export async function PUT(
       teamIds,
       order,
       completedAt,
+      storyId,
     } = body
 
     // Check if task exists
@@ -117,6 +118,7 @@ export async function PUT(
         description,
         status,
         priority,
+        storyId: storyId !== undefined ? (storyId || null) : undefined,
         dueDate: dueDate ? new Date(dueDate) : null,
         estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
         actualHours: actualHours ? parseFloat(actualHours) : null,

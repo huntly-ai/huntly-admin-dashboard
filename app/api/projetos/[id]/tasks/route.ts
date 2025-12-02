@@ -84,6 +84,7 @@ export async function POST(
       tags,
       memberIds,
       teamIds,
+      storyId,
     } = body
 
     // Verify project exists
@@ -116,6 +117,7 @@ export async function POST(
         status: status || 'TODO',
         priority: priority || 'MEDIUM',
         projectId: id,
+        storyId: storyId || null,
         dueDate: dueDate ? new Date(dueDate) : null,
         estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
         actualHours: actualHours ? parseFloat(actualHours) : null,
