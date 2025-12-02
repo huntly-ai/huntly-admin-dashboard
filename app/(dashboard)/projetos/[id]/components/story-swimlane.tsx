@@ -23,6 +23,7 @@ interface Task {
   priority: string
   order: number
   taskMembers?: { member: Member }[]
+  tags?: string
   createdAt: string
   updatedAt: string
 }
@@ -41,7 +42,7 @@ interface Story {
 
 interface StorySwimlaneProps {
   story: Story
-  columns: { id: string; title: string }[]
+  columns: { id: string; title: string; headerClass?: string }[]
   onTaskClick: (task: Task) => void
   onStoryClick: (story: Story) => void
   onAddSubtask: (storyId: string) => void
@@ -97,7 +98,7 @@ export function StorySwimlane({ story, columns, onTaskClick, onStoryClick, onAdd
 
       {/* Body */}
       {isOpen && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-x divide-gray-100 bg-white min-h-[120px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 bg-gray-50/50 min-h-[120px] p-2">
            {columns.map(col => {
              const tasks = story.tasks?.filter(t => t.status === col.id).sort((a, b) => a.order - b.order) || []
              
@@ -122,7 +123,7 @@ function SwimlaneColumn({ id, tasks, onTaskClick }: { id: string, tasks: Task[],
   return (
     <div 
       ref={setNodeRef}
-      className={`p-2 transition-colors ${isOver ? 'bg-blue-50/50' : ''}`}
+      className={`p-2 rounded transition-colors ${isOver ? 'bg-blue-100/50' : 'bg-transparent'}`}
     >
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-2 min-h-[50px]">
@@ -134,4 +135,3 @@ function SwimlaneColumn({ id, tasks, onTaskClick }: { id: string, tasks: Task[],
     </div>
   )
 }
-

@@ -3,7 +3,8 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowUp, ArrowDown, Minus } from "lucide-react"
+import { ArrowUp, ArrowDown, Minus, CheckSquare } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface Member {
   id: string
@@ -19,6 +20,7 @@ interface Task {
   status: string
   priority: string
   taskMembers?: { member: Member }[]
+  tags?: string
 }
 
 interface TaskCardProps {
@@ -70,6 +72,16 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     }
   }
 
+  // Parse tags safely
+  let tags: string[] = []
+  try {
+    if (task.tags) {
+      tags = JSON.parse(task.tags)
+    }
+  } catch (e) {
+    console.error("Failed to parse tags", e)
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -77,37 +89,70 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="bg-white p-2.5 rounded shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors cursor-grab active:cursor-grabbing group"
+      className="bg-white p-3 rounded-md shadow-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md hover:border-gray-300 transition-all cursor-grab active:cursor-grabbing group"
     >
-      <div className="space-y-2">
+      <div className="space-y-2.5">
+        {/* Header: Title */}
         <div className="flex items-start gap-2">
-            <div className="mt-0.5 shrink-0">
-                 <PriorityIcon priority={task.priority} />
-            </div>
-            <span className="text-sm text-gray-900 font-medium leading-tight line-clamp-3 group-hover:text-blue-600 group-hover:underline">
+            <span className="text-sm text-gray-900 font-medium leading-tight line-clamp-3 group-hover:text-blue-600">
                 {task.title}
             </span>
         </div>
 
-        <div className="flex items-center justify-between mt-1">
-           <div className="flex items-center gap-2">
-             <span className="text-[10px] font-mono text-gray-500 font-medium">
-                {/* Mocking key based on ID for visual similarity */}
-                TSK-{task.id.slice(-4).toUpperCase()}
-             </span>
+        {/* Body: Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag, index) => (
+              <span 
+                key={index}
+                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 uppercase tracking-wide"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Footer: Metadata */}
+        <div className="flex items-center justify-between pt-1">
+           <div className="flex items-center gap-3">
+             {/* Task Type Icon + Key */}
+             <div className="flex items-center gap-1.5 text-gray-500">
+                <div className="bg-blue-50 p-0.5 rounded">
+                    <CheckSquare className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <span className="text-[10px] font-mono font-medium group-hover:underline">
+                  TSK-{task.id.slice(-4).toUpperCase()}
+                </span>
+             </div>
+
+             {/* Priority */}
+             <div className="flex items-center" title={`Priority: ${task.priority}`}>
+                <PriorityIcon priority={task.priority} />
+             </div>
            </div>
 
-           {task.taskMembers && task.taskMembers.length > 0 && (
-             <div className="flex -space-x-1.5">
-                {task.taskMembers.slice(0, 2).map(tm => (
-                  <Avatar key={tm.member.id} className="h-5 w-5 border border-white ring-1 ring-gray-100">
+           {/* Assignees */}
+           {task.taskMembers && task.taskMembers.length > 0 ? (
+             <div className="flex -space-x-2">
+                {task.taskMembers.slice(0, 3).map(tm => (
+                  <Avatar key={tm.member.id} className="h-6 w-6 border-2 border-white ring-1 ring-gray-100">
                     <AvatarImage src={tm.member.avatar} />
-                    <AvatarFallback className="text-[8px] bg-gray-100 text-gray-600">
+                    <AvatarFallback className="text-[9px] bg-blue-100 text-blue-700 font-bold">
                       {tm.member.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 ))}
+                {task.taskMembers.length > 3 && (
+                    <div className="h-6 w-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center ring-1 ring-gray-100">
+                        <span className="text-[9px] font-medium text-gray-600">+{task.taskMembers.length - 3}</span>
+                    </div>
+                )}
              </div>
+           ) : (
+               <div className="h-6 w-6 rounded-full border border-dashed border-gray-300 flex items-center justify-center">
+                   <span className="text-gray-300 text-[10px]">?</span>
+               </div>
            )}
         </div>
       </div>

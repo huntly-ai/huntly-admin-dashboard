@@ -64,10 +64,10 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS = [
-  { id: "TODO", title: "A Fazer" },
-  { id: "IN_PROGRESS", title: "Em Progresso" },
-  { id: "IN_REVIEW", title: "Em Revisão" },
-  { id: "DONE", title: "Concluído" },
+  { id: "TODO", title: "A Fazer", headerClass: "bg-gray-100 text-gray-700 border-t-4 border-gray-400" },
+  { id: "IN_PROGRESS", title: "Em Progresso", headerClass: "bg-blue-50 text-blue-700 border-t-4 border-blue-500" },
+  { id: "IN_REVIEW", title: "Em Revisão", headerClass: "bg-purple-50 text-purple-700 border-t-4 border-purple-500" },
+  { id: "DONE", title: "Concluído", headerClass: "bg-green-50 text-green-700 border-t-4 border-green-500" },
 ]
 
 export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTaskClick, onAddSubtask }: KanbanBoardProps) {
@@ -218,9 +218,9 @@ export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTask
        </div>
 
        {/* Header Columns (Sticky) */}
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 mb-2 px-0 bg-gray-50/80 backdrop-blur rounded-t-lg border-b border-gray-200 sticky top-0 z-10">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-2 px-2 sticky top-0 z-10 pb-2">
           {COLUMNS.map(col => (
-             <div key={col.id} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 first:rounded-tl-lg last:rounded-tr-lg">
+             <div key={col.id} className={`px-4 py-3 text-xs font-bold uppercase tracking-wider rounded-md shadow-sm ${col.headerClass}`}>
                 {col.title}
              </div>
           ))}
