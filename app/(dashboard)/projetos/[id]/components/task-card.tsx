@@ -4,7 +4,6 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowUp, ArrowDown, Minus, CheckSquare } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 
 interface Member {
   id: string
