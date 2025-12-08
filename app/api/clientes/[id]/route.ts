@@ -46,19 +46,22 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
 
+    // Convert empty strings to null for unique fields
+    const cnpj = body.cnpj?.trim() || null
+
     const client = await prisma.client.update({
       where: { id },
       data: {
         name: body.name,
         email: body.email,
-        phone: body.phone,
-        company: body.company,
-        position: body.position,
+        phone: body.phone || null,
+        company: body.company || null,
+        position: body.position || null,
         status: body.status,
-        cnpj: body.cnpj,
-        address: body.address,
-        website: body.website,
-        notes: body.notes,
+        cnpj,
+        address: body.address || null,
+        website: body.website || null,
+        notes: body.notes || null,
       },
     })
 

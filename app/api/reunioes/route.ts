@@ -67,13 +67,32 @@ export async function POST(request: NextRequest) {
         )
       : null
 
+    // Parse dates properly
+    const startDate = new Date(data.startDate)
+    const endDate = data.endDate ? new Date(data.endDate) : null
+
+    // Validate dates
+    if (isNaN(startDate.getTime())) {
+      return NextResponse.json(
+        { error: "Data de início inválida" },
+        { status: 400 }
+      )
+    }
+
+    if (endDate && isNaN(endDate.getTime())) {
+      return NextResponse.json(
+        { error: "Data de fim inválida" },
+        { status: 400 }
+      )
+    }
+
     // Create meeting
     const meeting = await prisma.meeting.create({
       data: {
         title: data.title,
         description: data.description || null,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : null,
+        startDate,
+        endDate,
         location: data.location || null,
         leadId: data.leadId || null,
         clientId: data.clientId || null,
