@@ -170,6 +170,17 @@ Se algo der errado:
 - Certifique-se que todas as migrations estão commitadas
 - Rode `npx prisma migrate resolve --applied <migration_name>` se necessário
 
+### Erro: "P1002 - The database server was reached but timed out" (Advisory Lock Timeout)
+Este erro ocorre quando o Prisma não consegue adquirir o advisory lock do PostgreSQL dentro do timeout padrão (10 segundos).
+
+**Soluções:**
+1. O script `vercel-build` já está configurado com timeout aumentado (30 segundos)
+2. Se o problema persistir, adicione a variável de ambiente na Vercel:
+   - Nome: `PRISMA_MIGRATE_LOCK_TIMEOUT`
+   - Valor: `30000` (30 segundos em milissegundos)
+3. Verifique se há conexões pendentes no banco de dados
+4. Certifique-se de que não há múltiplos builds rodando simultaneamente
+
 ### Erro: "Prisma Client not generated"
 - O `postinstall` hook deve resolver isso automaticamente
 - Se persistir, adicione `prisma generate` manualmente no build command
