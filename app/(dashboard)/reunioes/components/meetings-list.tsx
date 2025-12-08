@@ -21,6 +21,8 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-800",
 }
 
+const isUrl = (str: string) => /^https?:\/\//.test(str)
+
 interface Meeting {
   id: string
   title: string
@@ -114,7 +116,18 @@ function MeetingsListComponent({
                   {meeting.location && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-400" />
-                      <span>{meeting.location}</span>
+                      {isUrl(meeting.location) ? (
+                        <a
+                          href={meeting.location}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {meeting.location}
+                        </a>
+                      ) : (
+                        <span>{meeting.location}</span>
+                      )}
                     </div>
                   )}
 

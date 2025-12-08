@@ -128,8 +128,8 @@ export default function MeetingsPage() {
 
       const dataToSend = {
         ...formData,
-        startDate: `${formData.startDate}T${formData.startTime}`,
-        endDate: formData.endDate ? `${formData.endDate}T${formData.endTime}` : null,
+        startDate: `${formData.startDate}T${formData.startTime}:00`,
+        endDate: formData.endDate && formData.endTime ? `${formData.endDate}T${formData.endTime}:00` : null,
         leadId: formData.leadId || null,
         clientId: formData.clientId || null,
       }
