@@ -15,6 +15,13 @@ export async function GET(
         transactions: {
           orderBy: { date: "desc" },
         },
+        tasks: {
+          select: {
+            id: true,
+            actualHours: true,
+            estimatedHours: true,
+          },
+        },
         projectMembers: {
           include: {
             member: {
@@ -46,7 +53,38 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(project)
+    // Calculate hours metrics
+    const totalWorkedHours = project.tasks
+      .reduce((sum, t) => sum + (Number(t.actualHours) || 0), 0)
+    
+    const totalEstimatedHours = project.tasks
+      .reduce((sum, t) => sum + (Number(t.estimatedHours) || 0), 0)
+    
+    // Calculate project value based on billing type
+    let calculatedValue: number
+    if (project.billingType === 'HOURLY_RATE' && project.hourlyRate) {
+      calculatedValue = project.hourlyRate * totalWorkedHours
+    } else {
+      calculatedValue = project.projectValue
+    }
+    
+    // Calculate effective hourly rate
+    const effectiveHourlyRate = totalWorkedHours > 0 
+      ? calculatedValue / totalWorkedHours 
+      : 0
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tasks, ...projectData } = project
+
+    return NextResponse.json({
+      ...projectData,
+      hours: {
+        totalWorkedHours,
+        totalEstimatedHours,
+        calculatedValue,
+        effectiveHourlyRate,
+      },
+    })
   } catch (error) {
     console.error("Error fetching project:", error)
     return NextResponse.json(
@@ -75,7 +113,11 @@ export async function PUT(
           description: body.description,
           status: body.status,
           priority: body.priority,
-          projectValue: body.projectValue ? parseFloat(body.projectValue) : undefined,
+          billingType: body.billingType,
+          projectValue: body.projectValue !== undefined ? parseFloat(body.projectValue) : undefined,
+          hourlyRate: body.hourlyRate !== undefined 
+            ? (body.hourlyRate ? parseFloat(body.hourlyRate) : null) 
+            : undefined,
           startDate: body.startDate ? new Date(body.startDate) : null,
           endDate: body.endDate ? new Date(body.endDate) : null,
           deadline: body.deadline ? new Date(body.deadline) : null,

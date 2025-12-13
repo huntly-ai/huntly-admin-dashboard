@@ -39,6 +39,11 @@ const priorityLabels: Record<string, string> = {
   URGENT: "Urgente",
 }
 
+const billingTypeLabels: Record<string, string> = {
+  FIXED_PRICE: "Valor Fixo",
+  HOURLY_RATE: "Por Hora",
+}
+
 interface Client {
   id: string
   name: string
@@ -61,7 +66,9 @@ interface FormData {
   description: string
   status: string
   priority: string
+  billingType: string
   projectValue: string
+  hourlyRate: string
   startDate: string
   endDate: string
   deadline: string
@@ -201,21 +208,59 @@ function ProjectFormDialogComponent({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="projectValue">Valor do Projeto (R$) *</Label>
-            <Input
-              id="projectValue"
-              placeholder="R$ 0,00"
-              required
-              value={formatCurrencyInput(formData.projectValue)}
-              onChange={(e) => {
-                const onlyNumbers = e.target.value.replace(/\D/g, "")
-                onFormChange("projectValue", onlyNumbers)
-              }}
-            />
-            <p className="text-sm text-muted-foreground">
-              Valor total cobrado do cliente por este projeto
-            </p>
+            <Label htmlFor="billingType">Tipo de Cobrança *</Label>
+            <Select
+              value={formData.billingType}
+              onValueChange={(value) => onFormChange("billingType", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(billingTypeLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {formData.billingType === "FIXED_PRICE" ? (
+            <div className="space-y-2">
+              <Label htmlFor="projectValue">Valor do Projeto (R$) *</Label>
+              <Input
+                id="projectValue"
+                placeholder="R$ 0,00"
+                required
+                value={formatCurrencyInput(formData.projectValue)}
+                onChange={(e) => {
+                  const onlyNumbers = e.target.value.replace(/\D/g, "")
+                  onFormChange("projectValue", onlyNumbers)
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                Valor total cobrado do cliente por este projeto
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="hourlyRate">Valor por Hora (R$) *</Label>
+              <Input
+                id="hourlyRate"
+                placeholder="R$ 0,00"
+                required
+                value={formatCurrencyInput(formData.hourlyRate)}
+                onChange={(e) => {
+                  const onlyNumbers = e.target.value.replace(/\D/g, "")
+                  onFormChange("hourlyRate", onlyNumbers)
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                O valor total será calculado com base nas horas trabalhadas nas tasks
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">

@@ -4,7 +4,7 @@ import { memo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, Kanban } from "lucide-react"
+import { Edit, Trash2, Kanban, Clock, DollarSign } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -38,6 +38,16 @@ const priorityColors: Record<string, string> = {
   URGENT: "bg-red-100 text-red-800",
 }
 
+const billingTypeLabels: Record<string, string> = {
+  FIXED_PRICE: "Valor Fixo",
+  HOURLY_RATE: "Por Hora",
+}
+
+const billingTypeColors: Record<string, string> = {
+  FIXED_PRICE: "bg-indigo-100 text-indigo-800",
+  HOURLY_RATE: "bg-amber-100 text-amber-800",
+}
+
 interface Client {
   id: string
   name: string
@@ -50,7 +60,9 @@ interface Project {
   description?: string
   status: string
   priority: string
+  billingType: string
   projectValue: number
+  hourlyRate?: number
   startDate?: string
   endDate?: string
   deadline?: string
@@ -61,6 +73,7 @@ interface Project {
   createdAt: string
   _count?: {
     transactions: number
+    tasks: number
   }
   financials?: {
     totalReceived: number
@@ -68,6 +81,12 @@ interface Project {
     profit: number
     remaining: number
     paymentProgress: number
+  }
+  hours?: {
+    totalWorkedHours: number
+    totalEstimatedHours: number
+    calculatedValue: number
+    effectiveHourlyRate: number
   }
   projectMembers?: Array<{
     member: {
@@ -157,13 +176,16 @@ function ProjectsListComponent({
             </div>
           </div>
 
-          {/* Status and Priority badges */}
+          {/* Status, Priority and Billing Type badges */}
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge className={statusColors[project.status]}>
               {statusLabels[project.status]}
             </Badge>
             <Badge className={priorityColors[project.priority]}>
               {priorityLabels[project.priority]}
+            </Badge>
+            <Badge className={billingTypeColors[project.billingType] || billingTypeColors.FIXED_PRICE}>
+              {billingTypeLabels[project.billingType] || billingTypeLabels.FIXED_PRICE}
             </Badge>
           </div>
 
@@ -174,13 +196,59 @@ function ProjectsListComponent({
             </p>
           )}
 
+          {/* Hours and Rate Summary */}
+          {project.hours && (
+            <div className="bg-amber-50 rounded-lg p-4 mb-4 space-y-2 border border-amber-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-amber-600" />
+                <span className="font-medium text-amber-800 text-sm">Horas & Rentabilidade</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Horas Trabalhadas:</span>
+                <span className="font-semibold text-amber-700">
+                  {project.hours.totalWorkedHours.toFixed(1)}h
+                </span>
+              </div>
+              {project.hours.totalEstimatedHours > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Horas Estimadas:</span>
+                  <span className="font-semibold text-gray-600">
+                    {project.hours.totalEstimatedHours.toFixed(1)}h
+                  </span>
+                </div>
+              )}
+              {project.billingType === "HOURLY_RATE" && project.hourlyRate && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Taxa por Hora:</span>
+                  <span className="font-semibold text-amber-700">
+                    {formatCurrency(project.hourlyRate)}/h
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm pt-1 border-t border-amber-200">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <DollarSign className="h-3 w-3" />
+                  Rentabilidade Efetiva:
+                </span>
+                <span className="font-semibold text-green-600">
+                  {project.hours.effectiveHourlyRate > 0 
+                    ? `${formatCurrency(project.hours.effectiveHourlyRate)}/h`
+                    : "—"
+                  }
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Financial Summary */}
           {project.financials && (
             <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Valor do Projeto:</span>
+                <span className="text-gray-600">
+                  {project.billingType === "HOURLY_RATE" ? "Valor Calculado:" : "Valor do Projeto:"}
+                </span>
                 <span className="font-semibold text-blue-600">
-                  {formatCurrency(project.projectValue)}
+                  {formatCurrency(project.hours?.calculatedValue || project.projectValue)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">

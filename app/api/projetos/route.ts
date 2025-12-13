@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { ProjectStatus } from "@prisma/client"
+import { ProjectStatus, BillingType } from "@prisma/client"
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const status = searchParams.get("status")
     const clientId = searchParams.get("clientId")
+    const billingType = searchParams.get("billingType")
+    const minHourlyRate = searchParams.get("minHourlyRate")
+    const maxHourlyRate = searchParams.get("maxHourlyRate")
     
     const projects = await prisma.project.findMany({
       where: {
         ...(status && { status: status as ProjectStatus }),
         ...(clientId && { clientId }),
+        ...(billingType && { billingType: billingType as BillingType }),
       },
       orderBy: {
         createdAt: "desc",
@@ -31,15 +35,23 @@ export async function GET(request: NextRequest) {
             amount: true,
           },
         },
+        tasks: {
+          select: {
+            id: true,
+            actualHours: true,
+            estimatedHours: true,
+          },
+        },
         _count: {
           select: {
             transactions: true,
+            tasks: true,
           },
         },
       },
     })
 
-    // Calculate financial data for each project
+    // Calculate financial data and hours for each project
     const projectsWithFinancials = projects.map(project => {
       const totalReceived = project.transactions
         .filter(t => t.type === 'INCOME')
@@ -49,14 +61,34 @@ export async function GET(request: NextRequest) {
         .filter(t => t.type === 'EXPENSE')
         .reduce((sum, t) => sum + Number(t.amount), 0)
       
+      // Calculate hours from tasks
+      const totalWorkedHours = project.tasks
+        .reduce((sum, t) => sum + (Number(t.actualHours) || 0), 0)
+      
+      const totalEstimatedHours = project.tasks
+        .reduce((sum, t) => sum + (Number(t.estimatedHours) || 0), 0)
+      
+      // Calculate project value based on billing type
+      let calculatedValue: number
+      if (project.billingType === 'HOURLY_RATE' && project.hourlyRate) {
+        calculatedValue = project.hourlyRate * totalWorkedHours
+      } else {
+        calculatedValue = project.projectValue
+      }
+      
+      // Calculate effective hourly rate (value per hour worked)
+      const effectiveHourlyRate = totalWorkedHours > 0 
+        ? calculatedValue / totalWorkedHours 
+        : 0
+      
       const profit = totalReceived - totalCost
-      const remaining = project.projectValue - totalReceived
-      const paymentProgress = project.projectValue > 0 
-        ? (totalReceived / project.projectValue) * 100 
+      const remaining = calculatedValue - totalReceived
+      const paymentProgress = calculatedValue > 0 
+        ? (totalReceived / calculatedValue) * 100 
         : 0
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { transactions, ...projectData } = project
+      const { transactions, tasks, ...projectData } = project
 
       return {
         ...projectData,
@@ -67,10 +99,33 @@ export async function GET(request: NextRequest) {
           remaining,
           paymentProgress,
         },
+        hours: {
+          totalWorkedHours,
+          totalEstimatedHours,
+          calculatedValue,
+          effectiveHourlyRate,
+        },
       }
     })
 
-    return NextResponse.json(projectsWithFinancials)
+    // Apply hourly rate filters (post-query since it's calculated)
+    let filteredProjects = projectsWithFinancials
+    
+    if (minHourlyRate) {
+      const min = parseFloat(minHourlyRate)
+      filteredProjects = filteredProjects.filter(
+        p => p.hours.effectiveHourlyRate >= min
+      )
+    }
+    
+    if (maxHourlyRate) {
+      const max = parseFloat(maxHourlyRate)
+      filteredProjects = filteredProjects.filter(
+        p => p.hours.effectiveHourlyRate <= max || p.hours.effectiveHourlyRate === 0
+      )
+    }
+
+    return NextResponse.json(filteredProjects)
   } catch (error) {
     console.error("Error fetching projects:", error)
     return NextResponse.json(
@@ -93,7 +148,9 @@ export async function POST(request: NextRequest) {
           description: body.description,
           status: body.status || "PLANNING",
           priority: body.priority || "MEDIUM",
-          projectValue: parseFloat(body.projectValue),
+          billingType: body.billingType || "FIXED_PRICE",
+          projectValue: body.projectValue ? parseFloat(body.projectValue) : 0,
+          hourlyRate: body.hourlyRate ? parseFloat(body.hourlyRate) : null,
           startDate: body.startDate ? new Date(body.startDate) : null,
           endDate: body.endDate ? new Date(body.endDate) : null,
           deadline: body.deadline ? new Date(body.deadline) : null,

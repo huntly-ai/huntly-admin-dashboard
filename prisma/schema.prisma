@@ -51,6 +51,11 @@ enum ProjectPriority {
   URGENT
 }
 
+enum BillingType {
+  FIXED_PRICE
+  HOURLY_RATE
+}
+
 enum TransactionType {
   INCOME
   EXPENSE
@@ -177,7 +182,9 @@ model Project {
   priority    ProjectPriority @default(MEDIUM)
   
   // Financial
-  projectValue Float          // Valor total cobrado do cliente
+  billingType  BillingType     @default(FIXED_PRICE)
+  projectValue Float           @default(0) // Valor total cobrado do cliente (usado em FIXED_PRICE)
+  hourlyRate   Float?          // Valor por hora (usado em HOURLY_RATE)
   
   // Dates
   startDate   DateTime?
@@ -214,6 +221,7 @@ model Project {
   @@index([clientId])
   @@index([startDate])
   @@index([deadline])
+  @@index([billingType])
 }
 
 model Transaction {
