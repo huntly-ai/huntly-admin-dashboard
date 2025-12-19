@@ -7,6 +7,7 @@ interface TransactionsStatsProps {
   totalIncome: number
   totalExpense: number
   balance: number
+  periodLabel?: string
 }
 
 function formatCurrency(value: number): string {
@@ -20,7 +21,10 @@ function TransactionsStatsComponent({
   totalIncome,
   totalExpense,
   balance,
+  periodLabel,
 }: TransactionsStatsProps) {
+  const periodSuffix = periodLabel ? ` (${periodLabel})` : ""
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {/* Total Receitas */}
@@ -33,7 +37,7 @@ function TransactionsStatsComponent({
 
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-            Total de Receitas
+            Receitas{periodSuffix}
           </span>
           <TrendingUp className="h-4 w-4 text-emerald-500" />
         </div>
@@ -52,7 +56,7 @@ function TransactionsStatsComponent({
 
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-            Total de Despesas
+            Despesas{periodSuffix}
           </span>
           <TrendingDown className="h-4 w-4 text-red-500" />
         </div>
@@ -71,7 +75,7 @@ function TransactionsStatsComponent({
 
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-            Saldo
+            Saldo{periodSuffix}
           </span>
           <DollarSign className="h-4 w-4 text-blue-500" />
         </div>

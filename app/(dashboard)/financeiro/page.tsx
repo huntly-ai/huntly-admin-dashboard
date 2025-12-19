@@ -6,6 +6,7 @@ import { TransactionsList } from "./components/transactions-list"
 import { TransactionFormDialog } from "./components/transaction-form-dialog"
 import { DeleteTransactionDialog } from "./components/delete-transaction-dialog"
 import { TransactionsStats } from "./components/transactions-stats"
+import { PeriodSelector, type PeriodMode } from "./components/period-selector"
 import {
   SectionHeader,
   HuntlyCard,
@@ -13,6 +14,9 @@ import {
   HuntlyCardContent,
   HuntlyLoading,
 } from "@/components/huntly-ui"
+import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface Client {
   id: string
@@ -48,6 +52,11 @@ export default function FinanceiroPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
+
+  // Period filter state - defaults to current month
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfMonth(new Date()))
+  const [periodMode, setPeriodMode] = useState<PeriodMode>("month")
+
   const [formData, setFormData] = useState({
     type: "INCOME",
     category: "",
@@ -204,27 +213,51 @@ export default function FinanceiroPage() {
     }
   }, [resetForm])
 
-  // Memoized calculations
+  // Filter transactions by selected period
+  const filteredTransactions = useMemo(() => {
+    if (periodMode === "all") {
+      return transactions
+    }
+
+    const monthStart = startOfMonth(selectedDate)
+    const monthEnd = endOfMonth(selectedDate)
+
+    return transactions.filter((t) => {
+      const transactionDate = parseISO(t.date)
+      return isWithinInterval(transactionDate, { start: monthStart, end: monthEnd })
+    })
+  }, [transactions, selectedDate, periodMode])
+
+  // Memoized calculations using filtered transactions
   const totalIncome = useMemo(
     () =>
-      transactions
+      filteredTransactions
         .filter(t => t.type === "INCOME")
         .reduce((sum, t) => sum + Number(t.amount), 0),
-    [transactions]
+    [filteredTransactions]
   )
 
   const totalExpense = useMemo(
     () =>
-      transactions
+      filteredTransactions
         .filter(t => t.type === "EXPENSE")
         .reduce((sum, t) => sum + Number(t.amount), 0),
-    [transactions]
+    [filteredTransactions]
   )
 
   const balance = useMemo(
     () => totalIncome - totalExpense,
     [totalIncome, totalExpense]
   )
+
+  // Period label for display
+  const periodLabel = useMemo(() => {
+    if (periodMode === "all") {
+      return "todas as transações"
+    }
+    const formatted = format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+  }, [selectedDate, periodMode])
 
   if (loading) {
     return <HuntlyLoading text="Carregando transações..." />
@@ -237,16 +270,24 @@ export default function FinanceiroPage() {
         title="Controle"
         titleBold="Financeiro"
         action={
-          <TransactionFormDialog
-            isOpen={isDialogOpen}
-            onOpenChange={handleDialogChange}
-            editingTransaction={editingTransaction}
-            formData={formData}
-            clients={clients}
-            projects={projects}
-            onFormChange={handleFormChange}
-            onSubmit={handleSubmit}
-          />
+          <div className="flex items-center gap-4">
+            <PeriodSelector
+              selectedDate={selectedDate}
+              mode={periodMode}
+              onDateChange={setSelectedDate}
+              onModeChange={setPeriodMode}
+            />
+            <TransactionFormDialog
+              isOpen={isDialogOpen}
+              onOpenChange={handleDialogChange}
+              editingTransaction={editingTransaction}
+              formData={formData}
+              clients={clients}
+              projects={projects}
+              onFormChange={handleFormChange}
+              onSubmit={handleSubmit}
+            />
+          </div>
         }
       />
 
@@ -254,16 +295,17 @@ export default function FinanceiroPage() {
         totalIncome={totalIncome}
         totalExpense={totalExpense}
         balance={balance}
+        periodLabel={periodLabel}
       />
 
       <HuntlyCard>
         <HuntlyCardHeader
           title="Transações"
-          description={`${transactions.length} transações registradas`}
+          description={`${filteredTransactions.length} transações em ${periodLabel}`}
         />
         <HuntlyCardContent className="p-0">
           <TransactionsList
-            transactions={transactions}
+            transactions={filteredTransactions}
             onEdit={handleEdit}
             onDelete={handleOpenDeleteDialog}
           />
