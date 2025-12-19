@@ -46,7 +46,7 @@
 }
 
 /* =============================================================================
-   DARK MODE (DEFAULT) - Identidade Huntly
+   DARK MODE - Identidade Huntly
    Baseado em huntlyai.xyz
    ============================================================================= */
 
@@ -108,54 +108,6 @@
 }
 
 /* =============================================================================
-   LIGHT MODE (Opcional)
-   ============================================================================= */
-
-.light {
-  --background: #fafafa;
-  --foreground: #09090b;
-
-  --card: #ffffff;
-  --card-foreground: #09090b;
-
-  --popover: #ffffff;
-  --popover-foreground: #09090b;
-
-  --primary: #09090b;
-  --primary-foreground: #fafafa;
-
-  --secondary: #f4f4f5;
-  --secondary-foreground: #09090b;
-
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-
-  --accent: #f4f4f5;
-  --accent-foreground: #09090b;
-
-  --destructive: #dc2626;
-
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #a1a1aa;
-
-  --chart-1: #3b82f6;
-  --chart-2: #10b981;
-  --chart-3: #8b5cf6;
-  --chart-4: #f59e0b;
-  --chart-5: #ec4899;
-
-  --sidebar: #fafafa;
-  --sidebar-foreground: #09090b;
-  --sidebar-primary: #09090b;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #09090b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #a1a1aa;
-}
-
-/* =============================================================================
    BASE STYLES
    ============================================================================= */
 
@@ -198,19 +150,6 @@
   background: #3f3f46;
 }
 
-/* Light mode scrollbar */
-.light ::-webkit-scrollbar-track {
-  background: #f4f4f5;
-}
-
-.light ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-}
-
-.light ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
-}
-
 /* =============================================================================
    SELECTION
    ============================================================================= */
@@ -218,11 +157,6 @@
 ::selection {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-}
-
-.light ::selection {
-  background: rgba(0, 0, 0, 0.2);
-  color: #000000;
 }
 
 /* =============================================================================
@@ -255,15 +189,6 @@
     ),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
-}
-
-.light .grid-bg {
-  background-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.03) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 }
 
 /* =============================================================================
@@ -299,13 +224,8 @@
   position: absolute;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   pointer-events: none;
-}
-
-.dark .corner-accent::before,
-.dark .corner-accent::after {
-  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .corner-accent::before {
@@ -360,13 +280,6 @@
 .glitch-corners:hover::before,
 .glitch-corners:hover::after {
   opacity: 1;
-  border-color: rgba(0, 0, 0, 0.3);
-}
-
-.dark .group:hover .glitch-corners::before,
-.dark .group:hover .glitch-corners::after,
-.dark .glitch-corners:hover::before,
-.dark .glitch-corners:hover::after {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -386,12 +299,8 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: rgba(0, 0, 0, 0.3);
-  transition: width 0.5s ease;
-}
-
-.dark .hover-line::after {
   background: rgba(255, 255, 255, 0.3);
+  transition: width 0.5s ease;
 }
 
 .group:hover .hover-line::after,
@@ -458,20 +367,12 @@
   background: linear-gradient(
     to bottom,
     transparent 50%,
-    rgba(0, 0, 0, 0.03) 50%
+    rgba(255, 255, 255, 0.03) 50%
   );
   background-size: 100% 4px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-}
-
-.dark .scanline::before {
-  background: linear-gradient(
-    to bottom,
-    transparent 50%,
-    rgba(255, 255, 255, 0.03) 50%
-  );
 }
 
 .group:hover .scanline::before,
@@ -515,12 +416,5 @@
 .group:hover .huntly-card-corners::after,
 .huntly-card:hover .huntly-card-corners::before,
 .huntly-card:hover .huntly-card-corners::after {
-  border-color: rgba(0, 0, 0, 0.3);
-}
-
-.dark .group:hover .huntly-card-corners::before,
-.dark .group:hover .huntly-card-corners::after,
-.dark .huntly-card:hover .huntly-card-corners::before,
-.dark .huntly-card:hover .huntly-card-corners::after {
   border-color: rgba(255, 255, 255, 0.3);
 }

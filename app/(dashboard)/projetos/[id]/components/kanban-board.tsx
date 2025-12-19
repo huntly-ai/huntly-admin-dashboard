@@ -16,7 +16,7 @@ import { TaskCard } from "./task-card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Search, Filter } from "lucide-react"
-import { kanbanColumnStyles, taskStatusLabels, avatarColors, getAvatarColor } from "@/lib/design-tokens"
+import { kanbanColumnStyles, taskStatusLabels, getAvatarColor } from "@/lib/design-tokens"
 
 interface Member {
   id: string

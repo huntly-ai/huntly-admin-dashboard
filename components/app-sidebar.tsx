@@ -28,7 +28,6 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { NavUser } from "@/components/nav-user"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 const navigation = {
   main: [
@@ -274,9 +273,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-zinc-800/50">
-        <div className="flex items-center justify-between px-3 py-2">
-          <ThemeToggle />
-        </div>
         <NavUser />
       </SidebarFooter>
       <SidebarRail />

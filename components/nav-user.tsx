@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
   User,
 } from "lucide-react"
 
