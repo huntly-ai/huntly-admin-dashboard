@@ -80,9 +80,15 @@ export default function SugestoesPage() {
 
       const response = await fetch(`/api/sugestoes?${params.toString()}`)
       const data = await response.json()
-      setSuggestions(data)
+
+      if (Array.isArray(data)) {
+        setSuggestions(data)
+      } else {
+        setSuggestions([])
+      }
     } catch (error) {
       console.error("Error fetching suggestions:", error)
+      setSuggestions([])
     } finally {
       setLoading(false)
     }

@@ -97,7 +97,7 @@ function SuggestionsListComponent({
   onVote,
   onViewDetails,
 }: SuggestionsListProps) {
-  if (suggestions.length === 0) {
+  if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) {
     return (
       <HuntlyEmpty
         title="Nenhuma sugestão"
