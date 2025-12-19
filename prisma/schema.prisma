@@ -107,6 +107,7 @@ enum MemberRole {
   CEO
   CTO
   CFO
+  ADVISOR
   OTHER
 }
 
