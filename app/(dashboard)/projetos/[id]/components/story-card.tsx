@@ -89,7 +89,7 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-secondary border-2 border-dashed border-zinc-700 rounded-lg h-[150px] opacity-50"
+        className="bg-secondary border-2 border-dashed border-border rounded-lg h-[150px] opacity-50"
       />
     )
   }
@@ -158,7 +158,7 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
 
           {totalTasks > 0 && (
              <div className="flex items-center gap-1.5 flex-1 max-w-[80px] ml-auto">
-               <CheckCircle2 className={`h-3 w-3 ${progress === 100 ? 'text-emerald-400' : 'text-zinc-500'}`} />
+               <CheckCircle2 className={`h-3 w-3 ${progress === 100 ? 'text-emerald-400' : 'text-muted-foreground'}`} />
                <Progress value={progress} className="h-1.5" />
              </div>
           )}

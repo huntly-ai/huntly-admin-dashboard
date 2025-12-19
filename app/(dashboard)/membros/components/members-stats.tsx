@@ -32,7 +32,7 @@ function MembersStatsComponent({
         label="Inativos / Férias"
         value={inactiveMembers}
         icon={UserX}
-        className="[&_.font-display]:text-zinc-500"
+        className="[&_.font-display]:text-muted-foreground"
       />
     </div>
   )

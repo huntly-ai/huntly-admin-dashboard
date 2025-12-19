@@ -323,15 +323,15 @@ export default function MembersPage() {
         />
         <HuntlyCardContent className="p-0">
           <Tabs defaultValue="all" className="w-full">
-            <div className="px-5 pt-4 border-b border-zinc-800/50">
-              <TabsList className="bg-zinc-900/50 border border-zinc-800/50">
-                <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+            <div className="px-5 pt-4 border-b border-border/50">
+              <TabsList className="bg-muted/50 border border-border/50">
+                <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground">
                   Todos ({members.length})
                 </TabsTrigger>
-                <TabsTrigger value="active" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                <TabsTrigger value="active" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground">
                   Ativos ({activeMembers.length})
                 </TabsTrigger>
-                <TabsTrigger value="inactive" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                <TabsTrigger value="inactive" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground">
                   Inativos ({inactiveMembers.length})
                 </TabsTrigger>
               </TabsList>

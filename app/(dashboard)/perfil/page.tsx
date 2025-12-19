@@ -119,7 +119,7 @@ export default function PerfilPage() {
     return (
       <HuntlyCard>
         <HuntlyCardContent className="p-8">
-          <p className="text-center text-zinc-500">Erro ao carregar perfil</p>
+          <p className="text-center text-muted-foreground">Erro ao carregar perfil</p>
         </HuntlyCardContent>
       </HuntlyCard>
     )
@@ -142,14 +142,14 @@ export default function PerfilPage() {
         <HuntlyCardContent className="p-6">
           {/* Profile Header */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="h-20 w-20 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-display text-2xl">
+            <div className="h-20 w-20 bg-muted border border-border flex items-center justify-center text-foreground font-display text-2xl">
               {user.member?.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="font-display text-2xl font-bold text-white mb-1">
+              <h2 className="font-display text-2xl font-bold text-foreground mb-1">
                 {user.member?.name || "Usuário"}
               </h2>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 {user.member ? memberRoleLabels[user.member.role] || user.member.role : "Membro da equipe"}
               </p>
             </div>
@@ -158,24 +158,24 @@ export default function PerfilPage() {
           {user.member && (
             <div className="space-y-6">
               {/* Status */}
-              <div className="pb-6 border-b border-zinc-800/50">
-                <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-3">Status</p>
+              <div className="pb-6 border-b border-border/50">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-3">Status</p>
                 <span className={`inline-flex items-center px-2.5 py-1 text-xs ${memberStatusColors[user.member.status]}`}>
                   {memberStatusLabels[user.member.status]}
                 </span>
               </div>
 
               {/* Contact Information */}
-              <div className="pb-6 border-b border-zinc-800/50">
-                <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Informações de Contato</p>
+              <div className="pb-6 border-b border-border/50">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-4">Informações de Contato</p>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-zinc-400">
-                    <Mail className="h-4 w-4 text-zinc-600" />
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-zinc-400">
+                    <Mail className="h-4 w-4 text-muted-foreground/70" />
                     <span>{user.email}</span>
                   </div>
                   {user.member.phone && (
-                    <div className="flex items-center gap-3 text-sm text-zinc-400">
-                      <Phone className="h-4 w-4 text-zinc-600" />
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-zinc-400">
+                      <Phone className="h-4 w-4 text-muted-foreground/70" />
                       <span>{formatPhone(user.member.phone)}</span>
                     </div>
                   )}
@@ -184,18 +184,18 @@ export default function PerfilPage() {
 
               {/* Work Information */}
               {(user.member.department || user.member.hireDate) && (
-                <div className="pb-6 border-b border-zinc-800/50">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Informações Profissionais</p>
+                <div className="pb-6 border-b border-border/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-4">Informações Profissionais</p>
                   <div className="space-y-3">
                     {user.member.department && (
-                      <div className="flex items-center gap-3 text-sm text-zinc-400">
-                        <Briefcase className="h-4 w-4 text-zinc-600" />
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-zinc-400">
+                        <Briefcase className="h-4 w-4 text-muted-foreground/70" />
                         <span>{user.member.department}</span>
                       </div>
                     )}
                     {user.member.hireDate && (
-                      <div className="flex items-center gap-3 text-sm text-zinc-400">
-                        <Calendar className="h-4 w-4 text-zinc-600" />
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-zinc-400">
+                        <Calendar className="h-4 w-4 text-muted-foreground/70" />
                         <span>
                           Na empresa desde {format(new Date(user.member.hireDate), "MMMM 'de' yyyy", { locale: ptBR })}
                         </span>
@@ -207,13 +207,13 @@ export default function PerfilPage() {
 
               {/* All Roles */}
               {user.member.roles && JSON.parse(user.member.roles).length > 1 && (
-                <div className="pb-6 border-b border-zinc-800/50">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Todos os Cargos</p>
+                <div className="pb-6 border-b border-border/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-4">Todos os Cargos</p>
                   <div className="flex flex-wrap gap-2">
                     {JSON.parse(user.member.roles).map((role: string, index: number) => (
                       <span
                         key={index}
-                        className="px-2.5 py-1 text-xs border border-zinc-700 text-zinc-400"
+                        className="px-2.5 py-1 text-xs border border-border text-muted-foreground dark:text-zinc-400"
                       >
                         {memberRoleLabels[role] || role}
                       </span>
@@ -224,13 +224,13 @@ export default function PerfilPage() {
 
               {/* Skills */}
               {user.member.skills && (
-                <div className="pb-6 border-b border-zinc-800/50">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Habilidades</p>
+                <div className="pb-6 border-b border-border/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-4">Habilidades</p>
                   <div className="flex flex-wrap gap-2">
                     {user.member.skills.split(",").map((skill, index) => (
                       <span
                         key={index}
-                        className="px-2.5 py-1 text-xs bg-zinc-900/50 border border-zinc-800/50 text-zinc-400"
+                        className="px-2.5 py-1 text-xs bg-muted/50 border border-border/50 text-muted-foreground dark:text-zinc-400"
                       >
                         {skill.trim()}
                       </span>
@@ -242,8 +242,8 @@ export default function PerfilPage() {
               {/* Bio */}
               {user.member.bio && (
                 <div>
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Bio</p>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{user.member.bio}</p>
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground/70 mb-4">Bio</p>
+                  <p className="text-sm text-muted-foreground dark:text-zinc-400 leading-relaxed">{user.member.bio}</p>
                 </div>
               )}
             </div>
@@ -277,7 +277,7 @@ export default function PerfilPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="currentPassword" className="text-xs text-zinc-400">Senha Atual</Label>
+              <Label htmlFor="currentPassword" className="text-xs text-muted-foreground dark:text-zinc-400">Senha Atual</Label>
               <Input
                 id="currentPassword"
                 type="password"
@@ -287,12 +287,12 @@ export default function PerfilPage() {
                   setPasswordData({ ...passwordData, currentPassword: e.target.value })
                 }
                 required
-                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:ring-zinc-700"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-xs text-zinc-400">Nova Senha</Label>
+              <Label htmlFor="newPassword" className="text-xs text-muted-foreground dark:text-zinc-400">Nova Senha</Label>
               <Input
                 id="newPassword"
                 type="password"
@@ -302,13 +302,13 @@ export default function PerfilPage() {
                   setPasswordData({ ...passwordData, newPassword: e.target.value })
                 }
                 required
-                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:ring-zinc-700"
               />
-              <p className="text-[10px] text-zinc-600">Mínimo de 6 caracteres</p>
+              <p className="text-[10px] text-muted-foreground/70">Mínimo de 6 caracteres</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-xs text-zinc-400">Confirmar Nova Senha</Label>
+              <Label htmlFor="confirmPassword" className="text-xs text-muted-foreground dark:text-zinc-400">Confirmar Nova Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -318,11 +318,11 @@ export default function PerfilPage() {
                   setPasswordData({ ...passwordData, confirmPassword: e.target.value })
                 }
                 required
-                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:ring-zinc-700"
               />
             </div>
 
-            <div className="flex gap-3 pt-4 border-t border-zinc-800/50">
+            <div className="flex gap-3 pt-4 border-t border-border/50">
               <Button
                 type="button"
                 variant="ghost"
@@ -335,7 +335,7 @@ export default function PerfilPage() {
                   setPasswordError("")
                   setPasswordSuccess(false)
                 }}
-                className="text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 Cancelar
               </Button>

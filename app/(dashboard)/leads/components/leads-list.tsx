@@ -60,21 +60,21 @@ function LeadsListComponent({
     }).format(value)
 
   return (
-    <div className="divide-y divide-zinc-800/50">
+    <div className="divide-y divide-border">
       {leads.map((lead, index) => (
         <div
           key={lead.id}
-          className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
+          className="group/item p-5 hover:bg-muted/30 transition-colors"
         >
           <div className="flex items-start justify-between gap-4">
             {/* Lead Info */}
             <div className="flex-1 min-w-0">
               {/* Header */}
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                <h3 className="font-display text-base font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                   {lead.name}
                 </h3>
                 <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${leadStatusColors[lead.status]}`}>
@@ -88,24 +88,24 @@ function LeadsListComponent({
               {/* Details Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
                 {lead.email && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Mail className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span className="truncate">{lead.email}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-zinc-500">
-                  <Phone className="h-3.5 w-3.5 text-zinc-600" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground/70" />
                   <span>{formatPhone(lead.phone)}</span>
                 </div>
                 {lead.company && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Building2 className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Building2 className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span className="truncate">{lead.company}</span>
                   </div>
                 )}
                 {lead.position && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Briefcase className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span className="truncate">{lead.position}</span>
                   </div>
                 )}
@@ -117,7 +117,7 @@ function LeadsListComponent({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-zinc-600">
+                <div className="flex items-center gap-2 text-muted-foreground/70">
                   <Calendar className="h-3.5 w-3.5" />
                   <span className="text-[11px]">
                     {format(new Date(lead.createdAt), "dd/MM/yyyy", { locale: ptBR })}
@@ -127,7 +127,7 @@ function LeadsListComponent({
 
               {/* Notes */}
               {lead.notes && (
-                <p className="mt-3 text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-3 leading-relaxed">
+                <p className="mt-3 text-xs text-muted-foreground bg-muted/50 border border-border/50 p-3 leading-relaxed">
                   {lead.notes}
                 </p>
               )}
@@ -149,7 +149,7 @@ function LeadsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onConvert(lead)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-950/30"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-400 hover:bg-emerald-950/30"
                   title="Converter em Cliente"
                 >
                   <UserCheck className="h-4 w-4" />
@@ -159,7 +159,7 @@ function LeadsListComponent({
                 size="sm"
                 variant="ghost"
                 onClick={() => onEdit(lead)}
-                className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                 title="Editar Lead"
               >
                 <Edit className="h-4 w-4" />
@@ -168,7 +168,7 @@ function LeadsListComponent({
                 size="sm"
                 variant="ghost"
                 onClick={() => onDelete(lead.id)}
-                className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
                 title="Excluir Lead"
               >
                 <Trash2 className="h-4 w-4" />

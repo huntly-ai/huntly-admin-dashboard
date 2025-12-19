@@ -67,7 +67,7 @@ function MeetingsListComponent({
   }
 
   return (
-    <div className="divide-y divide-zinc-800/50">
+    <div className="divide-y divide-border">
       {meetings.map((meeting, index) => {
         const startDate = new Date(meeting.startDate)
         const endDate = meeting.endDate ? new Date(meeting.endDate) : null
@@ -76,17 +76,17 @@ function MeetingsListComponent({
         return (
           <div
             key={meeting.id}
-            className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
+            className="group/item p-5 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-4">
               {/* Meeting Info */}
               <div className="flex-1 min-w-0">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  <h3 className="font-display text-base font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                     {meeting.title}
                   </h3>
                   <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${meetingStatusColors[meeting.status]}`}>
@@ -96,7 +96,7 @@ function MeetingsListComponent({
 
                 {/* Description */}
                 {meeting.description && (
-                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
+                  <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
                     {meeting.description}
                   </p>
                 )}
@@ -104,12 +104,12 @@ function MeetingsListComponent({
                 {/* Details Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm mb-3">
                   {/* Date/Time */}
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Calendar className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{format(startDate, "dd/MM/yyyy", { locale: ptBR })}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Clock className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>
                       {format(startDate, "HH:mm", { locale: ptBR })}
                       {endDate && ` - ${format(endDate, "HH:mm", { locale: ptBR })}`}
@@ -119,7 +119,7 @@ function MeetingsListComponent({
                   {/* Location */}
                   {meeting.location && (
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-3.5 w-3.5 text-zinc-600" />
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
                       {isUrl(meeting.location) ? (
                         <a
                           href={meeting.location}
@@ -131,23 +131,23 @@ function MeetingsListComponent({
                           <ExternalLink className="h-3 w-3 flex-shrink-0" />
                         </a>
                       ) : (
-                        <span className="text-zinc-500 truncate">{meeting.location}</span>
+                        <span className="text-muted-foreground truncate">{meeting.location}</span>
                       )}
                     </div>
                   )}
 
                   {/* Client */}
                   {meeting.client && (
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <Building2 className="h-3.5 w-3.5 text-zinc-600" />
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span className="truncate">{meeting.client.name}</span>
                     </div>
                   )}
 
                   {/* Lead */}
                   {meeting.lead && (
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <User className="h-3.5 w-3.5 text-zinc-600" />
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <User className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span className="truncate">{meeting.lead.name}</span>
                     </div>
                   )}
@@ -159,7 +159,7 @@ function MeetingsListComponent({
                     {tags.map((tag: string) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-border text-muted-foreground dark:text-zinc-400"
                       >
                         <Tag className="h-2.5 w-2.5" />
                         {tag}
@@ -170,8 +170,8 @@ function MeetingsListComponent({
 
                 {/* Members */}
                 {(meeting.meetingMembers || []).length > 0 && (
-                  <div className="flex items-center gap-2 text-xs text-zinc-500 mb-3">
-                    <Users className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>
                       {meeting.meetingMembers?.map(m => m.member.name).join(", ")}
                     </span>
@@ -180,7 +180,7 @@ function MeetingsListComponent({
 
                 {/* Notes */}
                 {meeting.notes && (
-                  <p className="text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-3 leading-relaxed">
+                  <p className="text-xs text-muted-foreground bg-muted/50 border border-border/50 p-3 leading-relaxed">
                     {meeting.notes}
                   </p>
                 )}
@@ -192,7 +192,7 @@ function MeetingsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onEdit(meeting)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                   title="Editar Reunião"
                 >
                   <Edit className="h-4 w-4" />
@@ -201,7 +201,7 @@ function MeetingsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onDelete(meeting.id)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
                   title="Excluir Reunião"
                 >
                   <Trash2 className="h-4 w-4" />

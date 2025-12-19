@@ -151,8 +151,8 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
                 )}
              </div>
            ) : (
-               <div className="h-6 w-6 rounded-full border border-dashed border-zinc-700 flex items-center justify-center">
-                   <span className="text-zinc-600 text-[10px]">?</span>
+               <div className="h-6 w-6 rounded-full border border-dashed border-border flex items-center justify-center">
+                   <span className="text-muted-foreground/70 text-[10px]">?</span>
                </div>
            )}
         </div>

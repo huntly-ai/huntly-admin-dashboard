@@ -99,7 +99,7 @@ function MembersListComponent({
       {members.map((member, index) => (
         <div
           key={member.id}
-          className="group/item relative bg-black/50 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all duration-300"
+          className="group/item relative bg-card backdrop-blur-sm border border-border hover:border-border transition-all duration-300"
         >
           {/* Corner accents */}
           <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/0 group-hover/item:border-white/30 transition-colors duration-300" />
@@ -113,19 +113,19 @@ function MembersListComponent({
           {/* Header */}
           <div className="p-4">
             <div className="flex items-start gap-3 mb-3">
-              <div className="h-10 w-10 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-display text-sm flex-shrink-0">
+              <div className="h-10 w-10 bg-muted border border-border flex items-center justify-center text-foreground font-display text-sm flex-shrink-0">
                 {member.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="font-display text-sm font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  <h3 className="font-display text-sm font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                     {member.name}
                   </h3>
                 </div>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-muted-foreground">
                   {memberRoleLabels[member.role] || member.role}
                 </p>
               </div>
@@ -135,13 +135,13 @@ function MembersListComponent({
             </div>
 
             {/* Quick Stats */}
-            <div className="flex gap-4 text-xs text-zinc-500">
+            <div className="flex gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
-                <FolderKanban className="h-3 w-3 text-zinc-600" />
+                <FolderKanban className="h-3 w-3 text-muted-foreground/70" />
                 <span>{member._count?.projects || 0} projetos</span>
               </div>
               <div className="flex items-center gap-1">
-                <Users className="h-3 w-3 text-zinc-600" />
+                <Users className="h-3 w-3 text-muted-foreground/70" />
                 <span>{member._count?.teamMemberships || 0} times</span>
               </div>
             </div>
@@ -149,37 +149,37 @@ function MembersListComponent({
 
           {/* Expanded Content */}
           {isExpanded(member.id) && (
-            <div className="px-4 pb-4 space-y-3 border-t border-zinc-800/50 pt-3">
+            <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
               {/* Contact Info */}
               <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-zinc-500">
-                  <Mail className="h-3.5 w-3.5 text-zinc-600" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground/70" />
                   <span className="truncate">{member.email}</span>
                   {member.user ? (
                     <span className="text-[10px] px-1.5 py-0.5 bg-emerald-950/30 text-emerald-400 border border-emerald-900/50">
                       Acesso
                     </span>
                   ) : (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-zinc-900/50 text-zinc-500 border border-zinc-800/50">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-muted/50 text-muted-foreground border border-border/50">
                       Sem acesso
                     </span>
                   )}
                 </div>
                 {member.phone && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Phone className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{formatPhone(member.phone)}</span>
                   </div>
                 )}
                 {member.department && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Briefcase className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{member.department}</span>
                   </div>
                 )}
                 {member.hireDate && (
-                  <div className="flex items-center gap-2 text-zinc-500">
-                    <Calendar className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>
                       Desde {format(new Date(member.hireDate), "MMM yyyy", { locale: ptBR })}
                     </span>
@@ -189,11 +189,11 @@ function MembersListComponent({
 
               {/* All Roles */}
               {member.roles && JSON.parse(member.roles).length > 1 && (
-                <div className="pt-2 border-t border-zinc-800/50">
-                  <p className="text-[10px] text-zinc-600 uppercase tracking-wide mb-2">Cargos:</p>
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wide mb-2">Cargos:</p>
                   <div className="flex flex-wrap gap-1">
                     {JSON.parse(member.roles).map((role: string, idx: number) => (
-                      <span key={idx} className="text-[10px] px-2 py-0.5 border border-zinc-700 text-zinc-400">
+                      <span key={idx} className="text-[10px] px-2 py-0.5 border border-border text-muted-foreground dark:text-zinc-400">
                         {memberRoleLabels[role] || role}
                       </span>
                     ))}
@@ -203,11 +203,11 @@ function MembersListComponent({
 
               {/* Skills */}
               {member.skills && (
-                <div className="pt-2 border-t border-zinc-800/50">
-                  <p className="text-[10px] text-zinc-600 uppercase tracking-wide mb-2">Habilidades:</p>
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wide mb-2">Habilidades:</p>
                   <div className="flex flex-wrap gap-1">
                     {member.skills.split(",").map((skill, idx) => (
-                      <span key={idx} className="text-[10px] px-2 py-0.5 bg-zinc-900/50 border border-zinc-800/50 text-zinc-400">
+                      <span key={idx} className="text-[10px] px-2 py-0.5 bg-muted/50 border border-border/50 text-muted-foreground dark:text-zinc-400">
                         {skill.trim()}
                       </span>
                     ))}
@@ -217,15 +217,15 @@ function MembersListComponent({
 
               {/* Bio */}
               {member.bio && (
-                <div className="pt-2 border-t border-zinc-800/50">
-                  <p className="text-[10px] text-zinc-600 uppercase tracking-wide mb-1">Bio:</p>
-                  <p className="text-xs text-zinc-500">{member.bio}</p>
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wide mb-1">Bio:</p>
+                  <p className="text-xs text-muted-foreground">{member.bio}</p>
                 </div>
               )}
 
               {/* Notes */}
               {member.notes && (
-                <p className="text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-2 leading-relaxed">
+                <p className="text-xs text-muted-foreground bg-muted/50 border border-border/50 p-2 leading-relaxed">
                   {member.notes}
                 </p>
               )}
@@ -233,12 +233,12 @@ function MembersListComponent({
           )}
 
           {/* Actions */}
-          <div className="flex gap-1 p-3 border-t border-zinc-800/50">
+          <div className="flex gap-1 p-3 border-t border-border/50">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => toggleCardExpansion(member.id)}
-              className="flex-1 h-8 text-xs text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+              className="flex-1 h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <ChevronDown
                 className={`h-3.5 w-3.5 mr-1 transition-transform ${
@@ -252,7 +252,7 @@ function MembersListComponent({
                 size="sm"
                 variant="ghost"
                 onClick={() => onCreateUser(member)}
-                className="h-8 w-8 p-0 text-zinc-500 hover:text-blue-400 hover:bg-blue-950/30"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-blue-400 hover:bg-blue-950/30"
                 title="Criar Acesso"
               >
                 <UserCheck className="h-3.5 w-3.5" />
@@ -262,7 +262,7 @@ function MembersListComponent({
               size="sm"
               variant="ghost"
               onClick={() => onEdit(member)}
-              className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
               title="Editar"
             >
               <Edit className="h-3.5 w-3.5" />
@@ -271,7 +271,7 @@ function MembersListComponent({
               size="sm"
               variant="ghost"
               onClick={() => onDelete(member.id)}
-              className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
               title="Excluir"
             >
               <Trash2 className="h-3.5 w-3.5" />

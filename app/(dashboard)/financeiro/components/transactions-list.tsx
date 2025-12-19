@@ -88,18 +88,18 @@ function TransactionsListComponent({
   }
 
   return (
-    <div className="divide-y divide-zinc-800/50">
+    <div className="divide-y divide-border">
       {transactions.map((transaction, index) => (
         <div
           key={transaction.id}
-          className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
+          className="group/item p-5 hover:bg-muted/30 transition-colors"
         >
           <div className="flex items-start justify-between gap-4">
             {/* Transaction Info */}
             <div className="flex-1 min-w-0">
               {/* Header */}
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                   {String(index + 1).padStart(2, '0')}
                 </span>
                 {transaction.type === "INCOME" ? (
@@ -107,13 +107,13 @@ function TransactionsListComponent({
                 ) : (
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 )}
-                <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                <h3 className="font-display text-base font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                   {transaction.description}
                 </h3>
                 <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase ${transactionTypeColors[transaction.type]}`}>
                   {transactionTypeLabels[transaction.type]}
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400">
+                <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-border text-muted-foreground dark:text-zinc-400">
                   {categoryLabels[transaction.category] || transaction.category}
                 </span>
               </div>
@@ -129,35 +129,35 @@ function TransactionsListComponent({
 
               {/* Details Grid */}
               <div className="flex flex-wrap gap-4 text-xs">
-                <div className="flex items-center gap-1.5 text-zinc-500">
-                  <Calendar className="h-3.5 w-3.5 text-zinc-600" />
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
                   <span>{format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}</span>
                 </div>
 
                 {transaction.client && (
-                  <div className="flex items-center gap-1.5 text-zinc-500">
-                    <User className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <User className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{transaction.client.name}</span>
                   </div>
                 )}
 
                 {transaction.project && (
-                  <div className="flex items-center gap-1.5 text-zinc-500">
-                    <FolderKanban className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <FolderKanban className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{transaction.project.name}</span>
                   </div>
                 )}
 
                 {transaction.invoiceNumber && (
-                  <div className="flex items-center gap-1.5 text-zinc-500">
-                    <Receipt className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Receipt className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>NF: {transaction.invoiceNumber}</span>
                   </div>
                 )}
 
                 {transaction.paymentMethod && (
-                  <div className="flex items-center gap-1.5 text-zinc-500">
-                    <CreditCard className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <CreditCard className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>{transaction.paymentMethod}</span>
                   </div>
                 )}
@@ -165,7 +165,7 @@ function TransactionsListComponent({
 
               {/* Notes */}
               {transaction.notes && (
-                <p className="mt-3 text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-2 leading-relaxed">
+                <p className="mt-3 text-xs text-muted-foreground bg-muted/50 border border-border/50 p-2 leading-relaxed">
                   {transaction.notes}
                 </p>
               )}
@@ -177,7 +177,7 @@ function TransactionsListComponent({
                 size="sm"
                 variant="ghost"
                 onClick={() => onEdit(transaction)}
-                className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                 title="Editar Transação"
               >
                 <Edit className="h-4 w-4" />
@@ -186,7 +186,7 @@ function TransactionsListComponent({
                 size="sm"
                 variant="ghost"
                 onClick={() => onDelete(transaction)}
-                className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
                 title="Excluir Transação"
               >
                 <Trash2 className="h-4 w-4" />

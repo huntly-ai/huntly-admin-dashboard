@@ -60,11 +60,11 @@ function SectionHeader({ label, title, titleBold }: { label: string; title: stri
     <div className="mb-6">
       <div className="flex items-center gap-4 mb-3">
         <div className="w-8 h-px bg-white/20" />
-        <span className="text-[10px] tracking-[0.3em] text-zinc-500 uppercase">
+        <span className="text-[10px] tracking-[0.3em] text-muted-foreground uppercase">
           {label}
         </span>
       </div>
-      <h2 className="font-display text-2xl font-light text-white">
+      <h2 className="font-display text-2xl font-light text-foreground">
         <span className="font-medium animate-blink">_</span> {title} {titleBold && <span className="font-medium">{titleBold}</span>}
       </h2>
     </div>
@@ -86,24 +86,24 @@ function StatCard({
   trend?: { positive: boolean; label: string }
 }) {
   return (
-    <div className="group relative bg-black/50 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all duration-300 p-5">
+    <div className="group relative bg-card backdrop-blur-sm border border-border hover:border-border transition-all duration-300 p-5">
       {/* Corner accents */}
       <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
       <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/0 group-hover:border-white/30 transition-colors duration-300" />
 
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs tracking-[0.2em] uppercase text-zinc-500">
+        <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">
           {label}
         </span>
-        <Icon className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+        <Icon className="h-4 w-4 text-muted-foreground/70 group-hover:text-muted-foreground dark:text-zinc-400 transition-colors" />
       </div>
 
-      <div className="font-display text-2xl font-medium text-white mb-1">
+      <div className="font-display text-2xl font-medium text-foreground mb-1">
         {value}
       </div>
 
       {description && (
-        <p className="text-xs text-zinc-500">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       )}
 
       {trend && (
@@ -131,7 +131,7 @@ function StatCard({
 // Huntly-style card wrapper
 function HuntlyCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`group relative bg-black/50 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all duration-300 ${className}`}>
+    <div className={`group relative bg-card backdrop-blur-sm border border-border hover:border-border transition-all duration-300 ${className}`}>
       {/* Corner accents */}
       <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
       <div className="absolute top-0 right-0 w-3 h-3 border-r border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
@@ -169,11 +169,11 @@ export default function Home() {
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <div className="text-center">
           <div className="relative w-12 h-12 mx-auto mb-4">
-            <div className="absolute inset-0 border border-zinc-700 animate-pulse" />
+            <div className="absolute inset-0 border border-border animate-pulse" />
             <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/30" />
             <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/30" />
           </div>
-          <p className="text-zinc-500 text-sm tracking-wide">Carregando dashboard...</p>
+          <p className="text-muted-foreground text-sm tracking-wide">Carregando dashboard...</p>
         </div>
       </div>
     )
@@ -237,11 +237,11 @@ export default function Home() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Revenue Chart */}
         <HuntlyCard>
-          <div className="p-5 border-b border-zinc-800/50">
-            <h3 className="font-display text-base font-medium text-white">
+          <div className="p-5 border-b border-border/50">
+            <h3 className="font-display text-base font-medium text-foreground">
               Receitas e Despesas
             </h3>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Últimos 6 meses
             </p>
           </div>
@@ -270,11 +270,11 @@ export default function Home() {
 
         {/* Leads Distribution */}
         <HuntlyCard>
-          <div className="p-5 border-b border-zinc-800/50">
-            <h3 className="font-display text-base font-medium text-white">
+          <div className="p-5 border-b border-border/50">
+            <h3 className="font-display text-base font-medium text-foreground">
               Distribuição de Leads
             </h3>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Status atual no pipeline
             </p>
           </div>
@@ -313,40 +313,40 @@ export default function Home() {
 
       {/* Recent Projects */}
       <HuntlyCard>
-        <div className="p-5 border-b border-zinc-800/50">
-          <h3 className="font-display text-base font-medium text-white">
+        <div className="p-5 border-b border-border/50">
+          <h3 className="font-display text-base font-medium text-foreground">
             Projetos Recentes
           </h3>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Últimos 5 projetos cadastrados
           </p>
         </div>
         <div className="p-5">
           <div className="space-y-4">
             {metrics?.recentProjects?.length === 0 ? (
-              <p className="text-sm text-zinc-500 text-center py-8">
+              <p className="text-sm text-muted-foreground text-center py-8">
                 Nenhum projeto cadastrado ainda
               </p>
             ) : (
               metrics?.recentProjects?.map((project, index) => (
                 <div
                   key={project.id}
-                  className="flex items-center justify-between py-3 border-b border-zinc-800/50 last:border-0 group/item"
+                  className="flex items-center justify-between py-3 border-b border-border/50 last:border-0 group/item"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                    <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <div>
-                      <p className="text-sm font-medium text-zinc-200 group-hover/item:text-white transition-colors">
+                      <p className="text-sm font-medium text-foreground/80 group-hover/item:text-foreground transition-colors">
                         {project.name}
                       </p>
-                      <p className="text-xs text-zinc-500">{project.client.name}</p>
+                      <p className="text-xs text-muted-foreground">{project.client.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-zinc-300">
+                      <p className="text-sm font-medium text-muted-foreground/70 dark:text-zinc-300">
                         {formatCurrency(project.projectValue)}
                       </p>
                     </div>
@@ -364,35 +364,35 @@ export default function Home() {
       {/* Financial Summary */}
       <div className="grid gap-4 md:grid-cols-3">
         <HuntlyCard className="p-5">
-          <span className="text-xs tracking-[0.2em] uppercase text-zinc-500 block mb-3">
+          <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground block mb-3">
             Receita Total
           </span>
           <div className="font-display text-2xl font-medium text-emerald-400">
             {formatCurrency(metrics?.financial?.totalIncome || 0)}
           </div>
-          <p className="text-xs text-zinc-600 mt-1">Este ano</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Este ano</p>
         </HuntlyCard>
 
         <HuntlyCard className="p-5">
-          <span className="text-xs tracking-[0.2em] uppercase text-zinc-500 block mb-3">
+          <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground block mb-3">
             Despesas Totais
           </span>
           <div className="font-display text-2xl font-medium text-red-400">
             {formatCurrency(metrics?.financial?.totalExpense || 0)}
           </div>
-          <p className="text-xs text-zinc-600 mt-1">Este ano</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Este ano</p>
         </HuntlyCard>
 
         <HuntlyCard className="p-5">
-          <span className="text-xs tracking-[0.2em] uppercase text-zinc-500 block mb-3">
+          <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground block mb-3">
             Margem de Lucro
           </span>
-          <div className="font-display text-2xl font-medium text-white">
+          <div className="font-display text-2xl font-medium text-foreground">
             {metrics?.financial?.totalIncome
               ? ((metrics.financial.profit / metrics.financial.totalIncome) * 100).toFixed(1)
               : "0"}%
           </div>
-          <p className="text-xs text-zinc-600 mt-1">Este ano</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Este ano</p>
         </HuntlyCard>
       </div>
     </div>

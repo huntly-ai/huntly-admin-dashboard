@@ -113,7 +113,7 @@ function ConvertLeadDialogComponent({
               onConfirm()
               onOpenChange(false)
             }}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-foreground"
           >
             <UserCheck className="h-4 w-4 mr-2" />
             Converter em Cliente

@@ -73,7 +73,7 @@ const TaskStatusIcon = ({ status }: { status: string }) => {
     case "IN_REVIEW":
       return <AlertCircle className="h-4 w-4 text-violet-400" />
     default:
-      return <Circle className="h-4 w-4 text-zinc-500" />
+      return <Circle className="h-4 w-4 text-muted-foreground" />
   }
 }
 
@@ -133,7 +133,7 @@ export function StoryDetailDialog({
               {priorityLabels[story.priority]}
             </Badge>
             {story.points !== undefined && story.points > 0 && (
-               <Badge variant="secondary" className="px-3 py-1 bg-zinc-800 text-zinc-300 border-zinc-700">
+               <Badge variant="secondary" className="px-3 py-1 bg-zinc-800 text-muted-foreground/70 dark:text-zinc-300 border-border">
                  {story.points} Story Points
                </Badge>
             )}

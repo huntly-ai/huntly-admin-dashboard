@@ -55,7 +55,7 @@ const paymentStatusConfig: Record<string, { label: string; color: string; icon: 
   PENDING: { label: "Pendente", color: "text-amber-400 border-amber-900/50 bg-amber-950/20", icon: Clock },
   PAID: { label: "Pago", color: "text-emerald-400 border-emerald-900/50 bg-emerald-950/20", icon: CheckCircle2 },
   LATE: { label: "Atrasado", color: "text-red-400 border-red-900/50 bg-red-950/20", icon: AlertCircle },
-  CANCELLED: { label: "Cancelado", color: "text-zinc-400 border-zinc-700 bg-zinc-900/50", icon: XCircle },
+  CANCELLED: { label: "Cancelado", color: "text-muted-foreground dark:text-zinc-400 border-border bg-muted/50", icon: XCircle },
 }
 
 interface ContractsListProps {
@@ -87,7 +87,7 @@ function ContractsListComponent({
     }).format(value)
 
   return (
-    <div className="divide-y divide-zinc-800/50">
+    <div className="divide-y divide-border">
       {contracts.map((contract, index) => {
         const totalPaid = contract.payments
           .filter(p => p.status === "PAID")
@@ -102,18 +102,18 @@ function ContractsListComponent({
         return (
           <div
             key={contract.id}
-            className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
+            className="group/item p-5 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-4">
               {/* Contract Info */}
               <div className="flex-1 min-w-0">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <FileText className="h-4 w-4 text-zinc-600" />
-                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  <FileText className="h-4 w-4 text-muted-foreground/70" />
+                  <h3 className="font-display text-base font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                     {contract.title}
                   </h3>
                   <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${contractStatusColors[contract.status]}`}>
@@ -122,20 +122,20 @@ function ContractsListComponent({
                 </div>
 
                 {/* Contract Number and Client */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500 mb-3">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-zinc-600 font-mono">#</span>
+                    <span className="text-[10px] text-muted-foreground/70 font-mono">#</span>
                     <span className="font-mono text-xs">{contract.contractNumber}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-zinc-600">Cliente:</span>
-                    <span className="text-zinc-400">{contract.client.company || contract.client.name}</span>
+                    <span className="text-muted-foreground/70">Cliente:</span>
+                    <span className="text-muted-foreground dark:text-zinc-400">{contract.client.company || contract.client.name}</span>
                   </div>
                 </div>
 
                 {/* Description */}
                 {contract.description && (
-                  <p className="text-xs text-zinc-500 mb-4 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                     {contract.description}
                   </p>
                 )}
@@ -143,21 +143,21 @@ function ContractsListComponent({
                 {/* Financial Summary */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wide text-zinc-600 block mb-1">Valor Total</span>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70 block mb-1">Valor Total</span>
                     <span className="text-blue-400 font-medium">{formatCurrency(Number(contract.totalValue))}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wide text-zinc-600 block mb-1">Recebido</span>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70 block mb-1">Recebido</span>
                     <span className="text-emerald-400 font-medium">{formatCurrency(totalPaid)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wide text-zinc-600 block mb-1">Pendente</span>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70 block mb-1">Pendente</span>
                     <span className="text-amber-400 font-medium">{formatCurrency(totalPending)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wide text-zinc-600 block mb-1">Projetos</span>
-                    <span className="text-zinc-300 font-medium flex items-center gap-1">
-                      <FolderKanban className="h-3 w-3 text-zinc-600" />
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70 block mb-1">Projetos</span>
+                    <span className="text-muted-foreground/70 dark:text-zinc-300 font-medium flex items-center gap-1">
+                      <FolderKanban className="h-3 w-3 text-muted-foreground/70" />
                       {contract.contractProjects.length}
                     </span>
                   </div>
@@ -165,7 +165,7 @@ function ContractsListComponent({
 
                 {/* Payment Progress Bar */}
                 <div className="mb-4">
-                  <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                     <span>Progresso de Pagamento</span>
                     <span>{paymentProgress.toFixed(0)}%</span>
                   </div>
@@ -179,7 +179,7 @@ function ContractsListComponent({
 
                 {/* Dates */}
                 {(contract.startDate || contract.endDate) && (
-                  <div className="flex items-center gap-4 text-xs text-zinc-600 mb-4">
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground/70 mb-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       <span>
@@ -193,10 +193,10 @@ function ContractsListComponent({
 
                 {/* Payments */}
                 {contract.payments.length > 0 && (
-                  <div className="bg-zinc-900/50 border border-zinc-800/50 p-3">
+                  <div className="bg-muted/50 border border-border/50 p-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <DollarSign className="h-3.5 w-3.5 text-zinc-600" />
-                      <span className="text-[10px] tracking-wide uppercase text-zinc-500">
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground/70" />
+                      <span className="text-[10px] tracking-wide uppercase text-muted-foreground">
                         Parcelas ({contract.payments.length})
                       </span>
                     </div>
@@ -211,12 +211,12 @@ function ContractsListComponent({
                           >
                             <Icon className="h-3 w-3" />
                             <span>{payment.installmentNumber}ª</span>
-                            <span className="text-zinc-400">{formatCurrency(Number(payment.amount))}</span>
+                            <span className="text-muted-foreground dark:text-zinc-400">{formatCurrency(Number(payment.amount))}</span>
                           </div>
                         )
                       })}
                       {contract.payments.length > 5 && (
-                        <span className="text-[10px] text-zinc-500 self-center">
+                        <span className="text-[10px] text-muted-foreground self-center">
                           +{contract.payments.length - 5} parcelas
                         </span>
                       )}
@@ -231,7 +231,7 @@ function ContractsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onEdit(contract)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                   title="Editar Contrato"
                 >
                   <Edit className="h-4 w-4" />
@@ -240,7 +240,7 @@ function ContractsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onDelete(contract.id)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
                   title="Excluir Contrato"
                 >
                   <Trash2 className="h-4 w-4" />

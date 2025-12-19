@@ -436,7 +436,7 @@ export default function ProjectsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="h-8 text-zinc-500 hover:text-white"
+                  className="h-8 text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5 mr-1" />
                   Limpar
@@ -446,7 +446,7 @@ export default function ProjectsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`h-8 ${showFilters ? "text-white bg-zinc-800" : "text-zinc-500 hover:text-white"}`}
+                className={`h-8 ${showFilters ? "text-foreground bg-zinc-800" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Filter className="h-3.5 w-3.5 mr-1" />
                 Filtros
@@ -457,12 +457,12 @@ export default function ProjectsPage() {
 
         {showFilters && (
           <div className="px-5 pb-5">
-            <div className="p-4 bg-zinc-900/50 border border-zinc-800/50 space-y-4">
+            <div className="p-4 bg-muted/50 border border-border/50 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <HuntlyLabel>Tipo de Cobrança</HuntlyLabel>
                   <Select value={filterBillingType} onValueChange={setFilterBillingType}>
-                    <SelectTrigger className="bg-black/50 border-zinc-800 h-10">
+                    <SelectTrigger className="bg-card border-border h-10">
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -476,7 +476,7 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <HuntlyLabel>Status</HuntlyLabel>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="bg-black/50 border-zinc-800 h-10">
+                    <SelectTrigger className="bg-card border-border h-10">
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -499,7 +499,7 @@ export default function ProjectsPage() {
                       const onlyNumbers = e.target.value.replace(/\D/g, "")
                       setFilterMinRate(onlyNumbers)
                     }}
-                    className="bg-black/50 border-zinc-800 h-10"
+                    className="bg-card border-border h-10"
                   />
                 </div>
 
@@ -512,7 +512,7 @@ export default function ProjectsPage() {
                       const onlyNumbers = e.target.value.replace(/\D/g, "")
                       setFilterMaxRate(onlyNumbers)
                     }}
-                    className="bg-black/50 border-zinc-800 h-10"
+                    className="bg-card border-border h-10"
                   />
                 </div>
               </div>

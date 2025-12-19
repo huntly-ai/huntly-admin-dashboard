@@ -54,7 +54,7 @@ function TeamsListComponent({
   }
 
   return (
-    <div className="divide-y divide-zinc-800/50">
+    <div className="divide-y divide-border">
       {teams.map((team, index) => {
         const leader = team.leadId
           ? team.teamMemberships.find(tm => tm.member.id === team.leadId)?.member
@@ -63,28 +63,28 @@ function TeamsListComponent({
         return (
           <div
             key={team.id}
-            className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
+            className="group/item p-5 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-4">
               {/* Team Info */}
               <div className="flex-1 min-w-0">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  <span className="text-[10px] tracking-wider text-muted-foreground/70 font-mono">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <UsersIcon className="h-4 w-4 text-blue-500" />
-                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  <h3 className="font-display text-base font-medium text-foreground/80 group-hover/item:text-foreground transition-colors truncate">
                     {team.name}
                   </h3>
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400">
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-border text-muted-foreground dark:text-zinc-400">
                     {team._count?.teamMemberships || 0} membros
                   </span>
                 </div>
 
                 {/* Description */}
                 {team.description && (
-                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
+                  <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
                     {team.description}
                   </p>
                 )}
@@ -93,9 +93,9 @@ function TeamsListComponent({
                 {leader && (
                   <div className="flex items-center gap-2 mb-3 text-xs">
                     <Crown className="h-3.5 w-3.5 text-amber-500" />
-                    <span className="text-zinc-500">Líder:</span>
-                    <span className="text-zinc-300">{leader.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 border border-zinc-700 text-zinc-500">
+                    <span className="text-muted-foreground">Líder:</span>
+                    <span className="text-muted-foreground/70 dark:text-zinc-300">{leader.name}</span>
+                    <span className="text-[10px] px-2 py-0.5 border border-border text-muted-foreground">
                       {memberRoleLabels[leader.role] || leader.role}
                     </span>
                   </div>
@@ -104,7 +104,7 @@ function TeamsListComponent({
                 {/* Members */}
                 {team.teamMemberships.length > 0 && (
                   <div className="mb-3">
-                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mb-2">
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-2">
                       <UsersIcon className="h-3 w-3" />
                       <span className="tracking-wide uppercase">Membros</span>
                     </div>
@@ -112,14 +112,14 @@ function TeamsListComponent({
                       {team.teamMemberships.map((tm) => (
                         <div
                           key={tm.id}
-                          className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800/50 px-2.5 py-1.5"
+                          className="flex items-center gap-2 bg-muted/50 border border-border/50 px-2.5 py-1.5"
                         >
-                          <div className="h-5 w-5 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white text-[10px] font-medium">
+                          <div className="h-5 w-5 bg-muted border border-border flex items-center justify-center text-foreground text-[10px] font-medium">
                             {tm.member.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-xs text-zinc-300">{tm.member.name}</p>
-                            <p className="text-[10px] text-zinc-600">
+                            <p className="text-xs text-muted-foreground/70 dark:text-zinc-300">{tm.member.name}</p>
+                            <p className="text-[10px] text-muted-foreground/70">
                               {memberRoleLabels[tm.member.role] || tm.member.role}
                             </p>
                           </div>
@@ -131,10 +131,10 @@ function TeamsListComponent({
 
                 {/* Projects Count */}
                 {team._count && team._count.projectTeams > 0 && (
-                  <div className="flex items-center gap-2 text-xs text-zinc-500 pt-3 border-t border-zinc-800/50">
-                    <FolderKanban className="h-3.5 w-3.5 text-zinc-600" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-3 border-t border-border/50">
+                    <FolderKanban className="h-3.5 w-3.5 text-muted-foreground/70" />
                     <span>
-                      <span className="text-zinc-300 font-medium">{team._count.projectTeams}</span>
+                      <span className="text-muted-foreground/70 dark:text-zinc-300 font-medium">{team._count.projectTeams}</span>
                       {" "}
                       {team._count.projectTeams === 1 ? "projeto" : "projetos"} alocado(s)
                     </span>
@@ -148,7 +148,7 @@ function TeamsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onEdit(team)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                   title="Editar Time"
                 >
                   <Edit className="h-4 w-4" />
@@ -157,7 +157,7 @@ function TeamsListComponent({
                   size="sm"
                   variant="ghost"
                   onClick={() => onDelete(team.id)}
-                  className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-950/30"
                   title="Excluir Time"
                 >
                   <Trash2 className="h-4 w-4" />

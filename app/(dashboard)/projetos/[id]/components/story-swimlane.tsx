@@ -74,11 +74,11 @@ export function StorySwimlane({ story, columns, onTaskClick, onStoryClick, onAdd
            </div>
 
            <div className="flex items-center gap-2 ml-2">
-             <Badge variant="outline" className="text-[10px] h-5 font-normal text-muted-foreground border-zinc-700">
+             <Badge variant="outline" className="text-[10px] h-5 font-normal text-muted-foreground border-border">
                {taskStatusLabels[story.status] || story.status}
              </Badge>
              {story.points !== undefined && story.points > 0 && (
-               <Badge variant="secondary" className="text-[10px] h-5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
+               <Badge variant="secondary" className="text-[10px] h-5 bg-zinc-800 text-muted-foreground/70 dark:text-zinc-300 hover:bg-zinc-700">
                  {story.points}
                </Badge>
              )}
