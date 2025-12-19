@@ -17,20 +17,20 @@ export function HuntlyCard({ children, className, hover = true, ...props }: Hunt
   return (
     <div
       className={cn(
-        "group relative bg-black/50 backdrop-blur-sm border border-zinc-800 transition-all duration-300",
-        hover && "hover:border-zinc-700",
+        "group relative bg-card backdrop-blur-sm border border-border transition-all duration-300",
+        hover && "hover:border-muted-foreground/30",
         className
       )}
       {...props}
     >
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-r border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-l border-b border-white/0 group-hover:border-white/30 transition-colors duration-300" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/0 group-hover:border-white/30 transition-colors duration-300" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-transparent group-hover:border-foreground/30 transition-colors duration-300" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-r border-t border-transparent group-hover:border-foreground/30 transition-colors duration-300" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-l border-b border-transparent group-hover:border-foreground/30 transition-colors duration-300" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-transparent group-hover:border-foreground/30 transition-colors duration-300" />
       {children}
       {/* Hover line */}
-      <div className="absolute bottom-0 left-0 w-0 h-px bg-white/30 group-hover:w-full transition-all duration-500" />
+      <div className="absolute bottom-0 left-0 w-0 h-px bg-foreground/30 group-hover:w-full transition-all duration-500" />
     </div>
   )
 }
@@ -48,13 +48,13 @@ interface HuntlyCardHeaderProps {
 
 export function HuntlyCardHeader({ title, description, action }: HuntlyCardHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-5 border-b border-zinc-800/50">
+    <div className="flex items-center justify-between p-5 border-b border-border/50">
       <div>
-        <h3 className="font-display text-base font-medium text-white">
+        <h3 className="font-display text-base font-medium text-foreground">
           {title}
         </h3>
         {description && (
-          <p className="text-xs text-zinc-500 mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
       </div>
       {action}
@@ -96,12 +96,12 @@ export function SectionHeader({ label, title, titleBold, action }: SectionHeader
     <div className="flex items-start justify-between mb-6">
       <div>
         <div className="flex items-center gap-4 mb-3">
-          <div className="w-8 h-px bg-white/20" />
-          <span className="text-[10px] tracking-[0.3em] text-zinc-500 uppercase">
+          <div className="w-8 h-px bg-foreground/20" />
+          <span className="text-[10px] tracking-[0.3em] text-muted-foreground uppercase">
             {label}
           </span>
         </div>
-        <h2 className="font-display text-2xl font-light text-white">
+        <h2 className="font-display text-2xl font-light text-foreground">
           <span className="font-medium animate-blink">_</span> {title}{" "}
           {titleBold && <span className="font-medium">{titleBold}</span>}
         </h2>
@@ -132,25 +132,25 @@ export function StatCard({ label, value, description, icon: Icon, trend, classNa
   return (
     <HuntlyCard className={cn("p-5", className)}>
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs tracking-[0.2em] uppercase text-zinc-500">
+        <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">
           {label}
         </span>
         {Icon && (
-          <Icon className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+          <Icon className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors" />
         )}
       </div>
 
-      <div className="font-display text-2xl font-medium text-white mb-1">
+      <div className="font-display text-2xl font-medium text-foreground mb-1">
         {value}
       </div>
 
       {description && (
-        <p className="text-xs text-zinc-500">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       )}
 
       {trend && (
         <div className="flex items-center text-xs mt-2">
-          <span className={trend.positive ? "text-emerald-400" : "text-red-400"}>
+          <span className={trend.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
             {trend.label}
           </span>
         </div>
@@ -178,9 +178,9 @@ export function HuntlyButton({
   ...props
 }: HuntlyButtonProps) {
   const variants = {
-    primary: "bg-white text-black hover:bg-zinc-200",
-    secondary: "bg-transparent border border-zinc-700 text-white hover:border-zinc-500 hover:bg-zinc-900/50",
-    ghost: "bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50",
+    primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+    secondary: "bg-transparent border border-border text-foreground hover:border-muted-foreground hover:bg-muted/50",
+    ghost: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
   }
 
   const sizes = {
@@ -218,14 +218,14 @@ export const HuntlyInput = React.forwardRef<HTMLInputElement, HuntlyInputProps>(
     return (
       <div className="space-y-2">
         {label && (
-          <label className="text-xs tracking-[0.2em] uppercase text-zinc-500 block">
+          <label className="text-xs tracking-[0.2em] uppercase text-muted-foreground block">
             {label}
           </label>
         )}
         <input
           ref={ref}
           className={cn(
-            "w-full h-11 px-4 bg-black/50 border border-zinc-800 focus:border-zinc-600 text-white placeholder:text-zinc-600 outline-none transition-colors",
+            "w-full h-11 px-4 bg-background border border-input focus:border-ring text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors",
             className
           )}
           {...props}
@@ -248,7 +248,7 @@ interface HuntlyLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 export function HuntlyLabel({ children, className, ...props }: HuntlyLabelProps) {
   return (
     <label
-      className={cn("text-xs tracking-[0.2em] uppercase text-zinc-500 block", className)}
+      className={cn("text-xs tracking-[0.2em] uppercase text-muted-foreground block", className)}
       {...props}
     >
       {children}
@@ -269,11 +269,11 @@ interface HuntlyBadgeProps {
 
 export function HuntlyBadge({ children, variant = "default", className }: HuntlyBadgeProps) {
   const variants = {
-    default: "bg-zinc-800/80 text-zinc-300 border-zinc-700",
-    success: "bg-emerald-950/50 text-emerald-400 border-emerald-900/50",
-    warning: "bg-amber-950/50 text-amber-400 border-amber-900/50",
-    danger: "bg-red-950/50 text-red-400 border-red-900/50",
-    info: "bg-blue-950/50 text-blue-400 border-blue-900/50",
+    default: "bg-muted text-muted-foreground border-border",
+    success: "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50",
+    warning: "bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50",
+    danger: "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50",
+    info: "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/50",
   }
 
   return (
@@ -301,9 +301,9 @@ interface HuntlyDividerProps {
 export function HuntlyDivider({ className }: HuntlyDividerProps) {
   return (
     <div className={cn("flex items-center gap-4 my-6", className)}>
-      <div className="flex-1 h-px bg-zinc-800" />
-      <span className="text-zinc-600 text-xs">{"///"}</span>
-      <div className="flex-1 h-px bg-zinc-800" />
+      <div className="flex-1 h-px bg-border" />
+      <span className="text-muted-foreground/50 text-xs">{"///"}</span>
+      <div className="flex-1 h-px bg-border" />
     </div>
   )
 }
@@ -322,11 +322,11 @@ export function HuntlyLoading({ text = "Carregando..." }: HuntlyLoadingProps) {
     <div className="flex items-center justify-center h-[calc(100vh-200px)]">
       <div className="text-center">
         <div className="relative w-12 h-12 mx-auto mb-4">
-          <div className="absolute inset-0 border border-zinc-700 animate-pulse" />
-          <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/30" />
-          <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/30" />
+          <div className="absolute inset-0 border border-border animate-pulse" />
+          <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-foreground/30" />
+          <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-foreground/30" />
         </div>
-        <p className="text-zinc-500 text-sm tracking-wide">{text}</p>
+        <p className="text-muted-foreground text-sm tracking-wide">{text}</p>
       </div>
     </div>
   )
@@ -348,13 +348,13 @@ export function HuntlyEmpty({ icon: Icon, title, description, action }: HuntlyEm
   return (
     <div className="text-center py-12">
       {Icon && (
-        <Icon className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+        <Icon className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
       )}
-      <h3 className="font-display text-lg font-medium text-zinc-400 mb-2">
+      <h3 className="font-display text-lg font-medium text-muted-foreground mb-2">
         {title}
       </h3>
       {description && (
-        <p className="text-sm text-zinc-500 mb-4">{description}</p>
+        <p className="text-sm text-muted-foreground/70 mb-4">{description}</p>
       )}
       {action}
     </div>

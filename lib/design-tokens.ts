@@ -2,7 +2,7 @@
  * Design Tokens - Huntly Admin Dashboard
  * Baseado na identidade visual do huntlyai.xyz
  *
- * Paleta: Dark-first, minimalista, alto contraste
+ * Paleta: Suporte a dark e light mode
  */
 
 // =============================================================================
@@ -14,13 +14,13 @@
  * Classes Tailwind para badges de status de leads
  */
 export const leadStatusColors: Record<string, string> = {
-  NEW: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  CONTACTED: "bg-blue-950 text-blue-300 border border-blue-800",
-  QUALIFIED: "bg-emerald-950 text-emerald-300 border border-emerald-800",
-  PROPOSAL_SENT: "bg-violet-950 text-violet-300 border border-violet-800",
-  NEGOTIATION: "bg-amber-950 text-amber-300 border border-amber-800",
-  WON: "bg-green-950 text-green-300 border border-green-800",
-  LOST: "bg-red-950 text-red-300 border border-red-800",
+  NEW: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  CONTACTED: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  QUALIFIED: "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+  PROPOSAL_SENT: "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800",
+  NEGOTIATION: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  WON: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  LOST: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
 }
 
 export const leadStatusLabels: Record<string, string> = {
@@ -37,11 +37,11 @@ export const leadStatusLabels: Record<string, string> = {
  * Project Status Colors
  */
 export const projectStatusColors: Record<string, string> = {
-  PLANNING: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  IN_PROGRESS: "bg-blue-950 text-blue-300 border border-blue-800",
-  ON_HOLD: "bg-amber-950 text-amber-300 border border-amber-800",
-  COMPLETED: "bg-green-950 text-green-300 border border-green-800",
-  CANCELLED: "bg-red-950 text-red-300 border border-red-800",
+  PLANNING: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  IN_PROGRESS: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  ON_HOLD: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  COMPLETED: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  CANCELLED: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
 }
 
 export const projectStatusLabels: Record<string, string> = {
@@ -56,10 +56,10 @@ export const projectStatusLabels: Record<string, string> = {
  * Meeting Status Colors
  */
 export const meetingStatusColors: Record<string, string> = {
-  SCHEDULED: "bg-blue-950 text-blue-300 border border-blue-800",
-  IN_PROGRESS: "bg-amber-950 text-amber-300 border border-amber-800",
-  COMPLETED: "bg-green-950 text-green-300 border border-green-800",
-  CANCELLED: "bg-red-950 text-red-300 border border-red-800",
+  SCHEDULED: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  IN_PROGRESS: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  COMPLETED: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  CANCELLED: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
 }
 
 export const meetingStatusLabels: Record<string, string> = {
@@ -73,11 +73,11 @@ export const meetingStatusLabels: Record<string, string> = {
  * Contract Status Colors
  */
 export const contractStatusColors: Record<string, string> = {
-  DRAFT: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  ACTIVE: "bg-green-950 text-green-300 border border-green-800",
-  COMPLETED: "bg-blue-950 text-blue-300 border border-blue-800",
-  CANCELLED: "bg-red-950 text-red-300 border border-red-800",
-  SUSPENDED: "bg-amber-950 text-amber-300 border border-amber-800",
+  DRAFT: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  ACTIVE: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  COMPLETED: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  CANCELLED: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
+  SUSPENDED: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
 }
 
 export const contractStatusLabels: Record<string, string> = {
@@ -92,10 +92,10 @@ export const contractStatusLabels: Record<string, string> = {
  * Payment Status Colors
  */
 export const paymentStatusColors: Record<string, string> = {
-  PENDING: "bg-amber-950 text-amber-300 border border-amber-800",
-  PAID: "bg-green-950 text-green-300 border border-green-800",
-  LATE: "bg-red-950 text-red-300 border border-red-800",
-  CANCELLED: "bg-zinc-800 text-zinc-300 border border-zinc-700",
+  PENDING: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  PAID: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  LATE: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
+  CANCELLED: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
 }
 
 export const paymentStatusLabels: Record<string, string> = {
@@ -109,9 +109,9 @@ export const paymentStatusLabels: Record<string, string> = {
  * Client Status Colors
  */
 export const clientStatusColors: Record<string, string> = {
-  ACTIVE: "bg-green-950 text-green-300 border border-green-800",
-  INACTIVE: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  CHURNED: "bg-red-950 text-red-300 border border-red-800",
+  ACTIVE: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  INACTIVE: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  CHURNED: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
 }
 
 export const clientStatusLabels: Record<string, string> = {
@@ -124,9 +124,9 @@ export const clientStatusLabels: Record<string, string> = {
  * Member Status Colors
  */
 export const memberStatusColors: Record<string, string> = {
-  ACTIVE: "bg-green-950 text-green-300 border border-green-800",
-  INACTIVE: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  ON_LEAVE: "bg-amber-950 text-amber-300 border border-amber-800",
+  ACTIVE: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  INACTIVE: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  ON_LEAVE: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
 }
 
 export const memberStatusLabels: Record<string, string> = {
@@ -171,10 +171,10 @@ export const memberRoleLabels: Record<string, string> = {
  * Task Status Colors
  */
 export const taskStatusColors: Record<string, string> = {
-  TODO: "bg-zinc-800 text-zinc-300 border border-zinc-700",
-  IN_PROGRESS: "bg-blue-950 text-blue-300 border border-blue-800",
-  IN_REVIEW: "bg-violet-950 text-violet-300 border border-violet-800",
-  DONE: "bg-green-950 text-green-300 border border-green-800",
+  TODO: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
+  IN_PROGRESS: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  IN_REVIEW: "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800",
+  DONE: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
 }
 
 export const taskStatusLabels: Record<string, string> = {
@@ -189,20 +189,20 @@ export const taskStatusLabels: Record<string, string> = {
  */
 export const kanbanColumnStyles: Record<string, { header: string; bg: string }> = {
   TODO: {
-    header: "bg-zinc-900 text-zinc-300 border-t-2 border-zinc-600",
-    bg: "bg-zinc-900/30",
+    header: "bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-t-2 border-zinc-400 dark:border-zinc-600",
+    bg: "bg-zinc-50 dark:bg-zinc-900/30",
   },
   IN_PROGRESS: {
-    header: "bg-blue-950/50 text-blue-300 border-t-2 border-blue-500",
-    bg: "bg-blue-950/20",
+    header: "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-t-2 border-blue-500",
+    bg: "bg-blue-50/50 dark:bg-blue-950/20",
   },
   IN_REVIEW: {
-    header: "bg-violet-950/50 text-violet-300 border-t-2 border-violet-500",
-    bg: "bg-violet-950/20",
+    header: "bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border-t-2 border-violet-500",
+    bg: "bg-violet-50/50 dark:bg-violet-950/20",
   },
   DONE: {
-    header: "bg-green-950/50 text-green-300 border-t-2 border-green-500",
-    bg: "bg-green-950/20",
+    header: "bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-300 border-t-2 border-green-500",
+    bg: "bg-green-50/50 dark:bg-green-950/20",
   },
 }
 
@@ -215,24 +215,24 @@ export const kanbanColumnStyles: Record<string, { header: string; bg: string }> 
  */
 export const priorityColors: Record<string, { text: string; bg: string; border: string }> = {
   URGENT: {
-    text: "text-red-400",
-    bg: "bg-red-950",
-    border: "border-red-800",
+    text: "text-red-600 dark:text-red-400",
+    bg: "bg-red-100 dark:bg-red-950",
+    border: "border-red-200 dark:border-red-800",
   },
   HIGH: {
-    text: "text-orange-400",
-    bg: "bg-orange-950",
-    border: "border-orange-800",
+    text: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-100 dark:bg-orange-950",
+    border: "border-orange-200 dark:border-orange-800",
   },
   MEDIUM: {
-    text: "text-amber-400",
-    bg: "bg-amber-950",
-    border: "border-amber-800",
+    text: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-100 dark:bg-amber-950",
+    border: "border-amber-200 dark:border-amber-800",
   },
   LOW: {
-    text: "text-blue-400",
-    bg: "bg-blue-950",
-    border: "border-blue-800",
+    text: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-100 dark:bg-blue-950",
+    border: "border-blue-200 dark:border-blue-800",
   },
 }
 
@@ -248,8 +248,8 @@ export const priorityLabels: Record<string, string> = {
 // =============================================================================
 
 export const transactionTypeColors: Record<string, string> = {
-  INCOME: "bg-green-950 text-green-300 border border-green-800",
-  EXPENSE: "bg-red-950 text-red-300 border border-red-800",
+  INCOME: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  EXPENSE: "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800",
 }
 
 export const transactionTypeLabels: Record<string, string> = {
@@ -262,7 +262,7 @@ export const transactionTypeLabels: Record<string, string> = {
 // =============================================================================
 
 /**
- * Chart Colors - Paleta otimizada para dark mode
+ * Chart Colors - Paleta otimizada para ambos os modos
  */
 export const chartColors = {
   // Primary colors for most charts
@@ -285,13 +285,13 @@ export const chartColors = {
     "#06b6d4", // cyan-500
   ],
 
-  // Grid and axis colors
-  grid: "rgba(255, 255, 255, 0.1)",
-  axis: "rgba(255, 255, 255, 0.5)",
+  // Grid and axis colors - use CSS variables for theme support
+  grid: "var(--chart-grid, rgba(0, 0, 0, 0.1))",
+  axis: "var(--chart-axis, rgba(0, 0, 0, 0.5))",
   tooltip: {
-    bg: "#18181b",       // zinc-900
-    border: "#3f3f46",   // zinc-700
-    text: "#fafafa",     // zinc-50
+    bg: "var(--card)",
+    border: "var(--border)",
+    text: "var(--foreground)",
   },
 }
 
@@ -303,12 +303,12 @@ export const chartColors = {
  * Avatar Background Colors - Para fallback quando não há imagem
  */
 export const avatarColors = [
-  "bg-zinc-700 text-zinc-200",
-  "bg-blue-900 text-blue-200",
-  "bg-emerald-900 text-emerald-200",
-  "bg-violet-900 text-violet-200",
-  "bg-amber-900 text-amber-200",
-  "bg-rose-900 text-rose-200",
+  "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200",
+  "bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-200",
+  "bg-emerald-200 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-200",
+  "bg-violet-200 dark:bg-violet-900 text-violet-700 dark:text-violet-200",
+  "bg-amber-200 dark:bg-amber-900 text-amber-700 dark:text-amber-200",
+  "bg-rose-200 dark:bg-rose-900 text-rose-700 dark:text-rose-200",
 ]
 
 /**
@@ -331,12 +331,12 @@ export function getAvatarColor(identifier: string | number): string {
 // =============================================================================
 
 export const leadSourceColors: Record<string, string> = {
-  WEBSITE: "bg-blue-950 text-blue-300 border border-blue-800",
-  REFERRAL: "bg-green-950 text-green-300 border border-green-800",
-  SOCIAL_MEDIA: "bg-violet-950 text-violet-300 border border-violet-800",
-  ZEROS_A_DIREITA: "bg-amber-950 text-amber-300 border border-amber-800",
-  EVENT: "bg-rose-950 text-rose-300 border border-rose-800",
-  OTHER: "bg-zinc-800 text-zinc-300 border border-zinc-700",
+  WEBSITE: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+  REFERRAL: "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800",
+  SOCIAL_MEDIA: "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800",
+  ZEROS_A_DIREITA: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  EVENT: "bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800",
+  OTHER: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700",
 }
 
 export const leadSourceLabels: Record<string, string> = {
@@ -356,12 +356,12 @@ export const leadSourceLabels: Record<string, string> = {
  * Icon Colors para stats cards e indicadores
  */
 export const iconColors = {
-  default: "text-zinc-400",
-  primary: "text-blue-400",
-  success: "text-emerald-400",
-  warning: "text-amber-400",
-  danger: "text-red-400",
-  info: "text-violet-400",
+  default: "text-zinc-500 dark:text-zinc-400",
+  primary: "text-blue-600 dark:text-blue-400",
+  success: "text-emerald-600 dark:text-emerald-400",
+  warning: "text-amber-600 dark:text-amber-400",
+  danger: "text-red-600 dark:text-red-400",
+  info: "text-violet-600 dark:text-violet-400",
 }
 
 // =============================================================================
@@ -369,8 +369,8 @@ export const iconColors = {
 // =============================================================================
 
 export const billingTypeColors: Record<string, string> = {
-  FIXED_PRICE: "bg-indigo-950 text-indigo-300 border border-indigo-800",
-  HOURLY_RATE: "bg-amber-950 text-amber-300 border border-amber-800",
+  FIXED_PRICE: "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800",
+  HOURLY_RATE: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
 }
 
 export const billingTypeLabels: Record<string, string> = {
@@ -383,8 +383,8 @@ export const billingTypeLabels: Record<string, string> = {
 // =============================================================================
 
 export const alertStyles = {
-  success: "bg-green-950/50 border border-green-800 text-green-300",
-  error: "bg-red-950/50 border border-red-800 text-red-300",
-  warning: "bg-amber-950/50 border border-amber-800 text-amber-300",
-  info: "bg-blue-950/50 border border-blue-800 text-blue-300",
+  success: "bg-green-100 dark:bg-green-950/50 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300",
+  error: "bg-red-100 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300",
+  warning: "bg-amber-100 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
+  info: "bg-blue-100 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300",
 }

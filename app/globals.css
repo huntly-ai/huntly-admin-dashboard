@@ -299,8 +299,13 @@
   position: absolute;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   pointer-events: none;
+}
+
+.dark .corner-accent::before,
+.dark .corner-accent::after {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .corner-accent::before {
@@ -331,7 +336,7 @@
   position: absolute;
   width: 16px;
   height: 16px;
-  border: 1px solid rgba(255, 255, 255, 0);
+  border: 1px solid transparent;
   opacity: 0;
   transition: all 0.3s ease;
 }
@@ -355,6 +360,13 @@
 .glitch-corners:hover::before,
 .glitch-corners:hover::after {
   opacity: 1;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark .group:hover .glitch-corners::before,
+.dark .group:hover .glitch-corners::after,
+.dark .glitch-corners:hover::before,
+.dark .glitch-corners:hover::after {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -374,8 +386,12 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
   transition: width 0.5s ease;
+}
+
+.dark .hover-line::after {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .group:hover .hover-line::after,
@@ -442,12 +458,20 @@
   background: linear-gradient(
     to bottom,
     transparent 50%,
-    rgba(255, 255, 255, 0.03) 50%
+    rgba(0, 0, 0, 0.03) 50%
   );
   background-size: 100% 4px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+.dark .scanline::before {
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(255, 255, 255, 0.03) 50%
+  );
 }
 
 .group:hover .scanline::before,
@@ -460,8 +484,8 @@
    ============================================================================= */
 
 .huntly-card {
-  @apply relative bg-black/50 backdrop-blur-sm border border-zinc-800;
-  @apply hover:border-zinc-700 transition-all duration-300;
+  @apply relative bg-card backdrop-blur-sm border border-border;
+  @apply hover:border-muted-foreground/30 transition-all duration-300;
 }
 
 .huntly-card-corners::before,
@@ -491,5 +515,12 @@
 .group:hover .huntly-card-corners::after,
 .huntly-card:hover .huntly-card-corners::before,
 .huntly-card:hover .huntly-card-corners::after {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark .group:hover .huntly-card-corners::before,
+.dark .group:hover .huntly-card-corners::after,
+.dark .huntly-card:hover .huntly-card-corners::before,
+.dark .huntly-card:hover .huntly-card-corners::after {
   border-color: rgba(255, 255, 255, 0.3);
 }
