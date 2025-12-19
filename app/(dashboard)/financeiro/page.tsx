@@ -26,6 +26,10 @@ interface Client {
 interface Project {
   id: string
   name: string
+  client?: {
+    id: string
+    name: string
+  } | null
 }
 
 interface Transaction {

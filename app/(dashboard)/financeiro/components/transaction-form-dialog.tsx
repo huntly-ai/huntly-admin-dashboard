@@ -1,6 +1,6 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useMemo, useCallback } from "react"
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { formatCurrencyInput } from "@/lib/utils/formatters"
 
 const typeLabels: Record<string, string> = {
@@ -61,6 +61,17 @@ const expenseCategories = [
   "OTHER_EXPENSE",
 ]
 
+const paymentMethods = [
+  { value: "PIX", label: "PIX" },
+  { value: "BOLETO", label: "Boleto" },
+  { value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
+  { value: "CARTAO_DEBITO", label: "Cartão de Débito" },
+  { value: "TRANSFERENCIA", label: "Transferência Bancária" },
+  { value: "CRIPTO", label: "Cripto" },
+  { value: "DINHEIRO", label: "Dinheiro" },
+  { value: "OUTRO", label: "Outro" },
+]
+
 interface Client {
   id: string
   name: string
@@ -69,6 +80,10 @@ interface Client {
 interface Project {
   id: string
   name: string
+  client?: {
+    id: string
+    name: string
+  } | null
 }
 
 interface FormData {
@@ -107,6 +122,54 @@ function TransactionFormDialogComponent({
 }: TransactionFormDialogProps) {
   const availableCategories =
     formData.type === "INCOME" ? incomeCategories : expenseCategories
+
+  // Filter projects based on selected client
+  const filteredProjects = useMemo(() => {
+    if (!formData.clientId) {
+      return projects
+    }
+    return projects.filter((p) => p.client?.id === formData.clientId)
+  }, [projects, formData.clientId])
+
+  // Handle client change - reset project if not from same client
+  const handleClientChange = useCallback(
+    (value: string | null) => {
+      onFormChange("clientId", value)
+      // If a project is selected and doesn't belong to the new client, clear it
+      if (formData.projectId && value) {
+        const currentProject = projects.find((p) => p.id === formData.projectId)
+        if (currentProject?.client?.id !== value) {
+          onFormChange("projectId", null)
+        }
+      }
+    },
+    [onFormChange, formData.projectId, projects]
+  )
+
+  // Handle project change - auto-select client
+  const handleProjectChange = useCallback(
+    (value: string | null) => {
+      onFormChange("projectId", value)
+      if (value) {
+        const selectedProject = projects.find((p) => p.id === value)
+        if (selectedProject?.client?.id) {
+          onFormChange("clientId", selectedProject.client.id)
+        }
+      }
+    },
+    [onFormChange, projects]
+  )
+
+  // Get selected names for display
+  const selectedClientName = useMemo(() => {
+    if (!formData.clientId) return null
+    return clients.find((c) => c.id === formData.clientId)?.name
+  }, [clients, formData.clientId])
+
+  const selectedProjectName = useMemo(() => {
+    if (!formData.projectId) return null
+    return projects.find((p) => p.id === formData.projectId)?.name
+  }, [projects, formData.projectId])
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -211,39 +274,80 @@ function TransactionFormDialogComponent({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="clientId">Cliente</Label>
-              <Select
-                value={formData.clientId || ""}
-                onValueChange={(value) => onFormChange("clientId", value || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.clientId || "none"}
+                  onValueChange={(value) =>
+                    handleClientChange(value === "none" ? null : value)
+                  }
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue>
+                      {selectedClientName || "Selecione um cliente"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum cliente</SelectItem>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.clientId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => handleClientChange(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="projectId">Projeto</Label>
-              <Select
-                value={formData.projectId || ""}
-                onValueChange={(value) => onFormChange("projectId", value || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um projeto (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.projectId || "none"}
+                  onValueChange={(value) =>
+                    handleProjectChange(value === "none" ? null : value)
+                  }
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue>
+                      {selectedProjectName || "Selecione um projeto"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum projeto</SelectItem>
+                    {filteredProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                        {project.client && !formData.clientId && (
+                          <span className="text-muted-foreground ml-2">
+                            ({project.client.name})
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.projectId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => handleProjectChange(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -259,12 +363,28 @@ function TransactionFormDialogComponent({
             </div>
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-              <Input
-                id="paymentMethod"
-                placeholder="PIX, Boleto, etc."
-                value={formData.paymentMethod}
-                onChange={(e) => onFormChange("paymentMethod", e.target.value)}
-              />
+              <Select
+                value={formData.paymentMethod || "none"}
+                onValueChange={(value) =>
+                  onFormChange("paymentMethod", value === "none" ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue>
+                    {formData.paymentMethod
+                      ? paymentMethods.find((m) => m.value === formData.paymentMethod)?.label || formData.paymentMethod
+                      : "Selecione o método"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {paymentMethods.map((method) => (
+                    <SelectItem key={method.value} value={method.value}>
+                      {method.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
