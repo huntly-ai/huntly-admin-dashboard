@@ -376,7 +376,12 @@ model TeamMember {
   taskMembers     TaskMember[]
   storyMembers    StoryMember[]
   meetingMembers  MeetingMember[]
-  
+
+  // Suggestions
+  suggestions         Suggestion[]
+  suggestionVotes     SuggestionVote[]
+  suggestionComments  SuggestionComment[]
+
   notes           String?
   
   createdAt       DateTime      @default(now())
@@ -703,13 +708,88 @@ model MeetingTeam {
   id              String        @id @default(cuid())
   meetingId       String
   teamId          String
-  
+
   meeting         Meeting       @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   team            Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  
+
   createdAt       DateTime      @default(now())
-  
+
   @@unique([meetingId, teamId])
   @@index([meetingId])
   @@index([teamId])
+}
+
+// ==================== SUGGESTIONS ====================
+
+enum SuggestionCategory {
+  FINANCEIRO
+  GESTAO
+  PROJETOS
+  EQUIPE
+  PROCESSOS
+  TECNOLOGIA
+  OUTRO
+}
+
+enum SuggestionStatus {
+  ABERTA
+  EM_ANALISE
+  APROVADA
+  IMPLEMENTADA
+  REJEITADA
+}
+
+model Suggestion {
+  id              String              @id @default(cuid())
+  title           String
+  description     String
+  category        SuggestionCategory
+  status          SuggestionStatus    @default(ABERTA)
+
+  // Author
+  authorId        String
+  author          TeamMember          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Interactions
+  votes           SuggestionVote[]
+  comments        SuggestionComment[]
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model SuggestionVote {
+  id              String        @id @default(cuid())
+  suggestionId    String
+  memberId        String
+
+  suggestion      Suggestion    @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  member          TeamMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime      @default(now())
+
+  @@unique([suggestionId, memberId])
+  @@index([suggestionId])
+  @@index([memberId])
+}
+
+model SuggestionComment {
+  id              String        @id @default(cuid())
+  suggestionId    String
+  authorId        String
+  content         String
+
+  suggestion      Suggestion    @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  author          TeamMember    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([suggestionId])
+  @@index([authorId])
 }

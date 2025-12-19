@@ -7,6 +7,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Lightbulb,
   UserCog,
   UserPlus,
   Users,
@@ -83,6 +84,13 @@ const navigation = {
       title: "Financeiro",
       url: "/financeiro",
       icon: DollarSign,
+    },
+  ],
+  collaboration: [
+    {
+      title: "Sugestões",
+      url: "/sugestoes",
+      icon: Lightbulb,
     },
   ],
 }
@@ -249,6 +257,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupLabel>
           <SidebarMenu>
             {navigation.finance.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={isActive(item.url)}
+                  className="group relative"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="text-zinc-500 group-hover:text-white transition-colors" />
+                    <span className="text-zinc-400 group-hover:text-white transition-colors">
+                      {item.title}
+                    </span>
+                    {isActive(item.url) && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white/80" />
+                    )}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Collaboration Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 font-normal px-3">
+            Colaboração
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {navigation.collaboration.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
