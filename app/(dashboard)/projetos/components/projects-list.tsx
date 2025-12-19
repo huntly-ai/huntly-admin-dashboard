@@ -3,50 +3,18 @@
 import { memo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, Kanban, Clock, DollarSign } from "lucide-react"
+import { Edit, Trash2, Kanban, Clock, DollarSign, Calendar, Users, Briefcase } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-
-const statusLabels: Record<string, string> = {
-  PLANNING: "Planejamento",
-  IN_PROGRESS: "Em Andamento",
-  ON_HOLD: "Pausado",
-  COMPLETED: "Concluído",
-  CANCELLED: "Cancelado",
-}
-
-const priorityLabels: Record<string, string> = {
-  LOW: "Baixa",
-  MEDIUM: "Média",
-  HIGH: "Alta",
-  URGENT: "Urgente",
-}
-
-const statusColors: Record<string, string> = {
-  PLANNING: "bg-blue-100 text-blue-800",
-  IN_PROGRESS: "bg-green-100 text-green-800",
-  ON_HOLD: "bg-yellow-100 text-yellow-800",
-  COMPLETED: "bg-purple-100 text-purple-800",
-  CANCELLED: "bg-red-100 text-red-800",
-}
-
-const priorityColors: Record<string, string> = {
-  LOW: "bg-gray-100 text-gray-800",
-  MEDIUM: "bg-blue-100 text-blue-800",
-  HIGH: "bg-orange-100 text-orange-800",
-  URGENT: "bg-red-100 text-red-800",
-}
-
-const billingTypeLabels: Record<string, string> = {
-  FIXED_PRICE: "Valor Fixo",
-  HOURLY_RATE: "Por Hora",
-}
-
-const billingTypeColors: Record<string, string> = {
-  FIXED_PRICE: "bg-indigo-100 text-indigo-800",
-  HOURLY_RATE: "bg-amber-100 text-amber-800",
-}
+import {
+  projectStatusColors,
+  projectStatusLabels,
+  priorityColors,
+  priorityLabels,
+  billingTypeColors,
+  billingTypeLabels,
+} from "@/lib/design-tokens"
+import { HuntlyEmpty } from "@/components/huntly-ui"
 
 interface Client {
   id: string
@@ -118,9 +86,12 @@ function ProjectsListComponent({
 
   if (projects.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        Nenhum projeto cadastrado ainda. Clique em &quot;Novo Projeto&quot; para começar.
-      </p>
+      <div className="p-8">
+        <HuntlyEmpty
+          title="Nenhum projeto cadastrado"
+          description="Clique em 'Novo Projeto' para começar."
+        />
+      </div>
     )
   }
 
@@ -131,213 +102,244 @@ function ProjectsListComponent({
     }).format(value)
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {projects.map((project) => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 p-5">
+      {projects.map((project, index) => (
         <div
           key={project.id}
-          className="border rounded-lg p-5 hover:shadow-lg transition-shadow bg-white"
+          className="group/item relative bg-black/50 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all duration-300"
         >
-          {/* Header with title and actions */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg mb-1 pr-2">{project.name}</h3>
-              <p className="text-sm text-gray-600">
-                {project.client.name}
-                {project.client.company && ` (${project.client.company})`}
-              </p>
-            </div>
-            <div className="flex gap-1 flex-shrink-0">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => router.push(`/projetos/${project.id}`)}
-                title="Ver Kanban"
-                className="hover:bg-blue-50"
-              >
-                <Kanban className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => onEdit(project)}
-                title="Editar Projeto"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => onDelete(project.id)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                title="Excluir Projeto"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {/* Corner accents */}
+          <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/0 group-hover/item:border-white/30 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-3 h-3 border-r border-t border-white/0 group-hover/item:border-white/30 transition-colors duration-300" />
+          <div className="absolute bottom-0 left-0 w-3 h-3 border-l border-b border-white/0 group-hover/item:border-white/30 transition-colors duration-300" />
+          <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/0 group-hover/item:border-white/30 transition-colors duration-300" />
 
-          {/* Status, Priority and Billing Type badges */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Badge className={statusColors[project.status]}>
-              {statusLabels[project.status]}
-            </Badge>
-            <Badge className={priorityColors[project.priority]}>
-              {priorityLabels[project.priority]}
-            </Badge>
-            <Badge className={billingTypeColors[project.billingType] || billingTypeColors.FIXED_PRICE}>
-              {billingTypeLabels[project.billingType] || billingTypeLabels.FIXED_PRICE}
-            </Badge>
-          </div>
+          {/* Hover line */}
+          <div className="absolute bottom-0 left-0 w-0 h-px bg-white/30 group-hover/item:w-full transition-all duration-500" />
 
-          {/* Description */}
-          {project.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-              {project.description}
-            </p>
-          )}
-
-          {/* Hours and Rate Summary */}
-          {project.hours && (
-            <div className="bg-amber-50 rounded-lg p-4 mb-4 space-y-2 border border-amber-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-amber-600" />
-                <span className="font-medium text-amber-800 text-sm">Horas & Rentabilidade</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Horas Trabalhadas:</span>
-                <span className="font-semibold text-amber-700">
-                  {project.hours.totalWorkedHours.toFixed(1)}h
-                </span>
-              </div>
-              {project.hours.totalEstimatedHours > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Horas Estimadas:</span>
-                  <span className="font-semibold text-gray-600">
-                    {project.hours.totalEstimatedHours.toFixed(1)}h
+          {/* Header */}
+          <div className="p-4 border-b border-zinc-800/50">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                    {String(index + 1).padStart(2, '0')}
                   </span>
+                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                    {project.name}
+                  </h3>
                 </div>
-              )}
-              {project.billingType === "HOURLY_RATE" && project.hourlyRate && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Taxa por Hora:</span>
-                  <span className="font-semibold text-amber-700">
-                    {formatCurrency(project.hourlyRate)}/h
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm pt-1 border-t border-amber-200">
-                <span className="text-gray-600 flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
-                  Rentabilidade Efetiva:
-                </span>
-                <span className="font-semibold text-green-600">
-                  {project.hours.effectiveHourlyRate > 0 
-                    ? `${formatCurrency(project.hours.effectiveHourlyRate)}/h`
-                    : "—"
-                  }
-                </span>
+                <p className="text-xs text-zinc-500">
+                  {project.client.name}
+                  {project.client.company && ` • ${project.client.company}`}
+                </p>
               </div>
-            </div>
-          )}
-
-          {/* Financial Summary */}
-          {project.financials && (
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">
-                  {project.billingType === "HOURLY_RATE" ? "Valor Calculado:" : "Valor do Projeto:"}
-                </span>
-                <span className="font-semibold text-blue-600">
-                  {formatCurrency(project.hours?.calculatedValue || project.projectValue)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Recebido:</span>
-                <span className="font-semibold text-green-600">
-                  {formatCurrency(project.financials.totalReceived)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Custos:</span>
-                <span className="font-semibold text-red-600">
-                  {formatCurrency(project.financials.totalCost)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Lucro:</span>
-                <span
-                  className={`font-semibold ${
-                    project.financials.profit >= 0 ? "text-green-600" : "text-red-600"
-                  }`}
+              <div className="flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => router.push(`/projetos/${project.id}`)}
+                  className="h-7 w-7 p-0 text-zinc-500 hover:text-blue-400 hover:bg-blue-950/30"
+                  title="Ver Kanban"
                 >
-                  {formatCurrency(project.financials.profit)}
-                </span>
-              </div>
-              
-              {/* Payment Progress Bar */}
-              <div className="pt-2">
-                <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Progresso de Pagamento</span>
-                  <span>{project.financials.paymentProgress.toFixed(1)}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min(project.financials.paymentProgress, 100)}%` }}
-                  />
-                </div>
+                  <Kanban className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onEdit(project)}
+                  className="h-7 w-7 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+                  title="Editar"
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDelete(project.id)}
+                  className="h-7 w-7 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
+                  title="Excluir"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
-          )}
 
-          {/* Team Members */}
-          {project.projectMembers && project.projectMembers.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-medium text-gray-500 mb-2">Membros:</p>
-              <div className="flex flex-wrap gap-1">
-                {project.projectMembers.slice(0, 3).map((pm) => (
-                  <Badge key={pm.member.id} variant="secondary" className="text-xs">
-                    {pm.member.name}
-                  </Badge>
-                ))}
-                {project.projectMembers.length > 3 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{project.projectMembers.length - 3}
-                  </Badge>
+            {/* Badges */}
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${projectStatusColors[project.status]}`}>
+                {projectStatusLabels[project.status]}
+              </span>
+              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${priorityColors[project.priority]?.bg} ${priorityColors[project.priority]?.text} ${priorityColors[project.priority]?.border}`}>
+                {priorityLabels[project.priority]}
+              </span>
+              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${billingTypeColors[project.billingType] || billingTypeColors.FIXED_PRICE}`}>
+                {billingTypeLabels[project.billingType] || billingTypeLabels.FIXED_PRICE}
+              </span>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-4 space-y-4">
+            {/* Description */}
+            {project.description && (
+              <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+                {project.description}
+              </p>
+            )}
+
+            {/* Hours & Rate Summary */}
+            {project.hours && project.hours.totalWorkedHours > 0 && (
+              <div className="bg-amber-950/20 border border-amber-900/30 p-3 space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-3.5 w-3.5 text-amber-500" />
+                  <span className="text-[10px] tracking-wide uppercase text-amber-400">Horas & Rentabilidade</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-zinc-500 block">Trabalhadas</span>
+                    <span className="text-amber-400 font-medium">{project.hours.totalWorkedHours.toFixed(1)}h</span>
+                  </div>
+                  {project.hours.totalEstimatedHours > 0 && (
+                    <div>
+                      <span className="text-zinc-500 block">Estimadas</span>
+                      <span className="text-zinc-400">{project.hours.totalEstimatedHours.toFixed(1)}h</span>
+                    </div>
+                  )}
+                </div>
+                {project.billingType === "HOURLY_RATE" && project.hourlyRate && (
+                  <div className="text-xs pt-1 border-t border-amber-900/30">
+                    <span className="text-zinc-500">Taxa: </span>
+                    <span className="text-amber-400">{formatCurrency(project.hourlyRate)}/h</span>
+                  </div>
                 )}
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-amber-900/30">
+                  <span className="text-zinc-500 flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    Rentabilidade
+                  </span>
+                  <span className="text-emerald-400 font-medium">
+                    {project.hours.effectiveHourlyRate > 0
+                      ? `${formatCurrency(project.hours.effectiveHourlyRate)}/h`
+                      : "—"
+                    }
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Teams */}
-          {project.projectTeams && project.projectTeams.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-medium text-gray-500 mb-2">Times:</p>
-              <div className="flex flex-wrap gap-1">
-                {project.projectTeams.map((pt) => (
-                  <Badge key={pt.team.id} variant="outline" className="text-xs">
-                    {pt.team.name}
-                  </Badge>
-                ))}
+            {/* Financial Summary */}
+            {project.financials && (
+              <div className="bg-zinc-900/50 border border-zinc-800/50 p-3 space-y-2">
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-zinc-500 block">
+                      {project.billingType === "HOURLY_RATE" ? "Valor Calculado" : "Valor"}
+                    </span>
+                    <span className="text-blue-400 font-medium">
+                      {formatCurrency(project.hours?.calculatedValue || project.projectValue)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Recebido</span>
+                    <span className="text-emerald-400 font-medium">
+                      {formatCurrency(project.financials.totalReceived)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Custos</span>
+                    <span className="text-red-400 font-medium">
+                      {formatCurrency(project.financials.totalCost)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Lucro</span>
+                    <span className={`font-medium ${project.financials.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {formatCurrency(project.financials.profit)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="pt-2 border-t border-zinc-800/50">
+                  <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
+                    <span>Progresso de Pagamento</span>
+                    <span>{project.financials.paymentProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-zinc-800 h-1">
+                    <div
+                      className="bg-emerald-500 h-1 transition-all"
+                      style={{ width: `${Math.min(project.financials.paymentProgress, 100)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Dates */}
-          <div className="text-xs text-gray-500 space-y-1 pt-3 border-t border-gray-100">
-            {project.startDate && (
+            {/* Team Members */}
+            {project.projectMembers && project.projectMembers.length > 0 && (
               <div>
-                Início: {format(new Date(project.startDate), "dd/MM/yyyy", { locale: ptBR })}
+                <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mb-2">
+                  <Users className="h-3 w-3" />
+                  <span className="tracking-wide uppercase">Membros</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {project.projectMembers.slice(0, 3).map((pm) => (
+                    <span
+                      key={pm.member.id}
+                      className="inline-flex items-center px-2 py-0.5 text-[10px] bg-zinc-900/50 border border-zinc-800/50 text-zinc-400"
+                    >
+                      {pm.member.name}
+                    </span>
+                  ))}
+                  {project.projectMembers.length > 3 && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-[10px] bg-zinc-900/50 border border-zinc-800/50 text-zinc-500">
+                      +{project.projectMembers.length - 3}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Teams */}
+            {project.projectTeams && project.projectTeams.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mb-2">
+                  <Briefcase className="h-3 w-3" />
+                  <span className="tracking-wide uppercase">Times</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {project.projectTeams.map((pt) => (
+                    <span
+                      key={pt.team.id}
+                      className="inline-flex items-center px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400"
+                    >
+                      {pt.team.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer - Dates */}
+          <div className="px-4 py-3 border-t border-zinc-800/50 flex flex-wrap gap-3 text-[10px] text-zinc-600">
+            {project.startDate && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>Início: {format(new Date(project.startDate), "dd/MM/yy", { locale: ptBR })}</span>
               </div>
             )}
             {project.deadline && (
-              <div>
-                Prazo: {format(new Date(project.deadline), "dd/MM/yyyy", { locale: ptBR })}
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>Prazo: {format(new Date(project.deadline), "dd/MM/yy", { locale: ptBR })}</span>
               </div>
             )}
             {project.endDate && (
-              <div>
-                Conclusão: {format(new Date(project.endDate), "dd/MM/yyyy", { locale: ptBR })}
+              <div className="flex items-center gap-1 text-emerald-600">
+                <Calendar className="h-3 w-3" />
+                <span>Conclusão: {format(new Date(project.endDate), "dd/MM/yy", { locale: ptBR })}</span>
               </div>
             )}
           </div>
@@ -348,4 +350,3 @@ function ProjectsListComponent({
 }
 
 export const ProjectsList = memo(ProjectsListComponent)
-

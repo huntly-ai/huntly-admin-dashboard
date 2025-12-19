@@ -16,6 +16,7 @@ import { TaskCard } from "./task-card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Search, Filter } from "lucide-react"
+import { kanbanColumnStyles, taskStatusLabels, avatarColors, getAvatarColor } from "@/lib/design-tokens"
 
 interface Member {
   id: string
@@ -64,10 +65,10 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS = [
-  { id: "TODO", title: "A Fazer", headerClass: "bg-gray-100 text-gray-700 border-t-4 border-gray-400" },
-  { id: "IN_PROGRESS", title: "Em Progresso", headerClass: "bg-blue-50 text-blue-700 border-t-4 border-blue-500" },
-  { id: "IN_REVIEW", title: "Em Revisão", headerClass: "bg-purple-50 text-purple-700 border-t-4 border-purple-500" },
-  { id: "DONE", title: "Concluído", headerClass: "bg-green-50 text-green-700 border-t-4 border-green-500" },
+  { id: "TODO", title: taskStatusLabels.TODO, headerClass: kanbanColumnStyles.TODO.header },
+  { id: "IN_PROGRESS", title: taskStatusLabels.IN_PROGRESS, headerClass: kanbanColumnStyles.IN_PROGRESS.header },
+  { id: "IN_REVIEW", title: taskStatusLabels.IN_REVIEW, headerClass: kanbanColumnStyles.IN_REVIEW.header },
+  { id: "DONE", title: taskStatusLabels.DONE, headerClass: kanbanColumnStyles.DONE.header },
 ]
 
 export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTaskClick, onAddSubtask }: KanbanBoardProps) {
@@ -165,37 +166,32 @@ export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTask
        {/* Jira-like Filter Bar */}
        <div className="flex items-center gap-4 mb-6">
           <div className="relative w-64">
-             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-             <Input 
-               placeholder="Search board" 
-               className="pl-8 h-9 bg-white" 
+             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+             <Input
+               placeholder="Buscar no board"
+               className="pl-8 h-9 bg-background border-border"
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
              />
           </div>
           <div className="flex -space-x-2">
              {projectMembers.length === 0 ? (
-               <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                 <span className="text-xs font-medium text-gray-600">-</span>
+               <div className="h-8 w-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center">
+                 <span className="text-xs font-medium text-muted-foreground">-</span>
                </div>
              ) : (
                <>
-                 {projectMembers.map((member, index) => {
-                   const colors = [
-                     "bg-blue-100 text-blue-700",
-                     "bg-green-100 text-green-700",
-                     "bg-purple-100 text-purple-700",
-                   ]
-                   const bgColorClass = colors[index % colors.length]
+                 {projectMembers.map((member) => {
+                   const bgColorClass = getAvatarColor(member.id)
                    const initials = member.name
                      .split(" ")
                      .map(n => n.charAt(0))
                      .join("")
                      .substring(0, 2)
                      .toUpperCase()
-                   
+
                    return (
-                     <Avatar key={member.id} className="h-8 w-8 border-2 border-white cursor-pointer hover:z-10" title={member.name}>
+                     <Avatar key={member.id} className="h-8 w-8 border-2 border-background cursor-pointer hover:z-10" title={member.name}>
                        <AvatarFallback className={`text-xs font-medium ${bgColorClass}`}>
                          {initials}
                        </AvatarFallback>
@@ -203,16 +199,16 @@ export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTask
                    )
                  })}
                  {remainingMembersCount > 0 && (
-                   <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-gray-200" title={`${remainingMembersCount} more members`}>
-                     <span className="text-xs font-medium text-gray-600">+{remainingMembersCount}</span>
+                   <div className="h-8 w-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center cursor-pointer hover:bg-zinc-700" title={`${remainingMembersCount} mais membros`}>
+                     <span className="text-xs font-medium text-muted-foreground">+{remainingMembersCount}</span>
                    </div>
                  )}
                </>
              )}
           </div>
           <div className="ml-auto flex gap-2">
-             <button className="text-sm text-gray-600 font-medium hover:bg-gray-100 px-3 py-1.5 rounded flex items-center gap-2">
-                <Filter className="h-4 w-4" /> Clear filters
+             <button className="text-sm text-muted-foreground font-medium hover:bg-secondary px-3 py-1.5 rounded flex items-center gap-2">
+                <Filter className="h-4 w-4" /> Limpar filtros
              </button>
           </div>
        </div>
@@ -248,8 +244,8 @@ export function KanbanBoard({ stories, members, onTaskMove, onStoryClick, onTask
             ))}
             
             {storiesArray.length === 0 && (
-               <div className="text-center py-12 text-gray-500">
-                  No stories found in this sprint.
+               <div className="text-center py-12 text-muted-foreground">
+                  Nenhuma story encontrada neste projeto.
                </div>
             )}
          </div>

@@ -1,8 +1,8 @@
 "use client"
 
 import { memo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, UserCheck, TrendingUp } from "lucide-react"
+import { Users, UserCheck, TrendingUp, Target } from "lucide-react"
+import { StatCard } from "@/components/huntly-ui"
 
 interface LeadsStatsProps {
   totalLeads: number
@@ -15,54 +15,37 @@ function LeadsStatsComponent({
   qualifiedLeads,
   convertedLeads,
 }: LeadsStatsProps) {
-  const conversionRate = totalLeads > 0 
-    ? ((convertedLeads / totalLeads) * 100).toFixed(1) 
+  const conversionRate = totalLeads > 0
+    ? ((convertedLeads / totalLeads) * 100).toFixed(1)
     : "0.0"
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Leads</CardTitle>
-          <Users className="h-4 w-4 text-gray-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalLeads}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Qualificados</CardTitle>
-          <UserCheck className="h-4 w-4 text-green-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">{qualifiedLeads}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Convertidos</CardTitle>
-          <TrendingUp className="h-4 w-4 text-blue-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-blue-600">{convertedLeads}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
-          <TrendingUp className="h-4 w-4 text-purple-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-purple-600">{conversionRate}%</div>
-        </CardContent>
-      </Card>
+      <StatCard
+        label="Total de Leads"
+        value={totalLeads}
+        icon={Users}
+      />
+      <StatCard
+        label="Qualificados"
+        value={qualifiedLeads}
+        icon={UserCheck}
+        className="[&_.font-display]:text-emerald-400"
+      />
+      <StatCard
+        label="Convertidos"
+        value={convertedLeads}
+        icon={TrendingUp}
+        className="[&_.font-display]:text-blue-400"
+      />
+      <StatCard
+        label="Taxa de Conversão"
+        value={`${conversionRate}%`}
+        icon={Target}
+        className="[&_.font-display]:text-violet-400"
+      />
     </div>
   )
 }
 
 export const LeadsStats = memo(LeadsStatsComponent)
-

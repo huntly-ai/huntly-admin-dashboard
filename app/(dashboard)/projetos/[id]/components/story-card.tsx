@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { AlertCircle, ArrowDown, ArrowUp, Clock, CheckCircle2 } from "lucide-react"
+import { priorityColors, getAvatarColor, iconColors } from "@/lib/design-tokens"
 
 interface Member {
   id: string
@@ -44,15 +45,16 @@ interface StoryCardProps {
 }
 
 const PriorityIcon = ({ priority }: { priority: string }) => {
+  const colorClass = priorityColors[priority]?.text || iconColors.default
   switch (priority) {
     case "URGENT":
-      return <AlertCircle className="h-4 w-4 text-red-600" />
+      return <AlertCircle className={`h-4 w-4 ${colorClass}`} />
     case "HIGH":
-      return <ArrowUp className="h-4 w-4 text-orange-500" />
+      return <ArrowUp className={`h-4 w-4 ${colorClass}`} />
     case "LOW":
-      return <ArrowDown className="h-4 w-4 text-blue-500" />
+      return <ArrowDown className={`h-4 w-4 ${colorClass}`} />
     default:
-      return <Clock className="h-4 w-4 text-gray-400" />
+      return <Clock className={`h-4 w-4 ${iconColors.default}`} />
   }
 }
 
@@ -87,7 +89,7 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg h-[150px] opacity-50"
+        className="bg-secondary border-2 border-dashed border-zinc-700 rounded-lg h-[150px] opacity-50"
       />
     )
   }
@@ -99,14 +101,14 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
       {...attributes}
       {...listeners}
       onClick={() => onClick(story)}
-      className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group relative"
+      className="bg-card p-3 rounded-lg shadow-sm border border-border hover:shadow-md hover:border-zinc-600 transition-all cursor-grab active:cursor-grabbing group relative"
     >
       <div className="space-y-3">
         {/* Header: Epic & Priority */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
              {story.epic && (
-               <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5 bg-blue-50 text-blue-700 hover:bg-blue-100 truncate max-w-[120px]">
+               <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5 bg-blue-950 text-blue-300 hover:bg-blue-900 truncate max-w-[120px]">
                  {story.epic.title}
                </Badge>
              )}
@@ -118,14 +120,14 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
 
         {/* Title */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 leading-tight group-hover:text-blue-600">
+          <h4 className="text-sm font-medium text-foreground leading-tight group-hover:text-blue-400">
             {story.title}
           </h4>
         </div>
 
         {/* Tags/Points & Key */}
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span className="font-mono bg-gray-100 px-1 rounded">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-mono bg-secondary px-1 rounded">
              {/* Simulating Issue Key */}
              ST-{story.id.slice(-4).toUpperCase()}
           </span>
@@ -137,18 +139,18 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
         </div>
 
         {/* Footer: Assignees & Progress */}
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
           <div className="flex -space-x-2">
             {story.storyMembers?.slice(0, 3).map((sm, i) => (
-              <Avatar key={i} className="h-6 w-6 border-2 border-white ring-1 ring-gray-100">
+              <Avatar key={i} className="h-6 w-6 border-2 border-card ring-1 ring-border">
                 <AvatarImage src={sm.member.avatar} />
-                <AvatarFallback className="text-[9px] bg-gray-100 text-gray-600">
+                <AvatarFallback className={`text-[9px] ${getAvatarColor(sm.member.id)}`}>
                   {sm.member.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             ))}
             {(story.storyMembers?.length || 0) > 3 && (
-              <div className="h-6 w-6 rounded-full bg-gray-100 border-2 border-white ring-1 ring-gray-100 flex items-center justify-center text-[9px] text-gray-500 font-medium">
+              <div className="h-6 w-6 rounded-full bg-secondary border-2 border-card ring-1 ring-border flex items-center justify-center text-[9px] text-muted-foreground font-medium">
                 +{(story.storyMembers?.length || 0) - 3}
               </div>
             )}
@@ -156,7 +158,7 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
 
           {totalTasks > 0 && (
              <div className="flex items-center gap-1.5 flex-1 max-w-[80px] ml-auto">
-               <CheckCircle2 className={`h-3 w-3 ${progress === 100 ? 'text-green-500' : 'text-gray-400'}`} />
+               <CheckCircle2 className={`h-3 w-3 ${progress === 100 ? 'text-emerald-400' : 'text-zinc-500'}`} />
                <Progress value={progress} className="h-1.5" />
              </div>
           )}

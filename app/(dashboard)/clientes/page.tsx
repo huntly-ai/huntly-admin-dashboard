@@ -2,10 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPhone, formatCNPJ } from "@/lib/utils/formatters"
 import { ClientsList } from "./components/clients-list"
 import { ClientFormDialog } from "./components/client-form-dialog"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+  StatCard,
+} from "@/components/huntly-ui"
+import { Users, UserCheck, FolderKanban } from "lucide-react"
 
 interface Client {
   id: string
@@ -86,7 +94,6 @@ export default function ClientsPage() {
         : "/api/clientes"
       const method = editingClient ? "PUT" : "POST"
 
-      // Remove máscaras antes de enviar
       const dataToSend = {
         ...formData,
         phone: formData.phone.replace(/\D/g, ""),
@@ -172,24 +179,19 @@ export default function ClientsPage() {
   }, [router])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando clientes...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando clientes..." />
   }
 
+  const activeClients = clients.filter(c => c.status === "ACTIVE").length
+  const totalProjects = clients.reduce((acc, c) => acc + (c._count?.projects || 0), 0)
+
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-            <p className="text-gray-600 mt-1">Gerencie seus clientes ativos</p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="CRM"
+        title="Clientes"
+        titleBold="Ativos"
+        action={
           <ClientFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -198,22 +200,44 @@ export default function ClientsPage() {
             onFormChange={handleFormChange}
             onSubmit={handleSubmit}
           />
-        </div>
+        }
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Clientes ({clients.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ClientsList
-              clients={clients}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onCreateProject={handleCreateProject}
-            />
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard
+          label="Total de Clientes"
+          value={clients.length}
+          icon={Users}
+        />
+        <StatCard
+          label="Clientes Ativos"
+          value={activeClients}
+          icon={UserCheck}
+          className="[&_.font-display]:text-emerald-400"
+        />
+        <StatCard
+          label="Projetos Vinculados"
+          value={totalProjects}
+          icon={FolderKanban}
+          className="[&_.font-display]:text-blue-400"
+        />
       </div>
-    </>
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Clientes"
+          description={`${clients.length} clientes cadastrados`}
+        />
+        <HuntlyCardContent className="p-0">
+          <ClientsList
+            clients={clients}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCreateProject={handleCreateProject}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }

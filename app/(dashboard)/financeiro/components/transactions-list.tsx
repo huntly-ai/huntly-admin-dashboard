@@ -2,15 +2,21 @@
 
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react"
+import {
+  Edit,
+  Trash2,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  User,
+  FolderKanban,
+  Receipt,
+  CreditCard,
+} from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-
-const typeLabels: Record<string, string> = {
-  INCOME: "Receita",
-  EXPENSE: "Despesa",
-}
+import { HuntlyEmpty } from "@/components/huntly-ui"
+import { transactionTypeColors, transactionTypeLabels } from "@/lib/design-tokens"
 
 const categoryLabels: Record<string, string> = {
   PROJECT_PAYMENT: "Pagamento de Projeto",
@@ -58,6 +64,13 @@ interface TransactionsListProps {
   onDelete: (transaction: Transaction) => void
 }
 
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value)
+}
+
 function TransactionsListComponent({
   transactions,
   onEdit,
@@ -65,108 +78,115 @@ function TransactionsListComponent({
 }: TransactionsListProps) {
   if (transactions.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        Nenhuma transação cadastrada ainda. Clique em &quot;Nova Transação&quot; para começar.
-      </p>
+      <div className="p-8">
+        <HuntlyEmpty
+          title="Nenhuma transação cadastrada"
+          description="Clique em 'Nova Transação' para começar."
+        />
+      </div>
     )
   }
 
   return (
-    <div className="space-y-3">
-      {transactions.map((transaction) => (
+    <div className="divide-y divide-zinc-800/50">
+      {transactions.map((transaction, index) => (
         <div
           key={transaction.id}
-          className={`border rounded-lg p-4 hover:bg-gray-50 transition-colors ${
-            transaction.type === "INCOME"
-              ? "border-l-4 border-l-green-500"
-              : "border-l-4 border-l-red-500"
-          }`}
+          className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-start justify-between gap-4">
+            {/* Transaction Info */}
+            <div className="flex-1 min-w-0">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
                 {transaction.type === "INCOME" ? (
-                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  <TrendingUp className="h-4 w-4 text-emerald-500" />
                 ) : (
-                  <TrendingDown className="h-5 w-5 text-red-600" />
+                  <TrendingDown className="h-4 w-4 text-red-500" />
                 )}
-                <h3 className="font-semibold text-lg">{transaction.description}</h3>
-                <Badge
-                  variant="outline"
-                  className={
-                    transaction.type === "INCOME"
-                      ? "bg-green-50 text-green-700 border-green-200"
-                      : "bg-red-50 text-red-700 border-red-200"
-                  }
-                >
-                  {typeLabels[transaction.type]}
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {categoryLabels[transaction.category]}
-                </Badge>
+                <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  {transaction.description}
+                </h3>
+                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase ${transactionTypeColors[transaction.type]}`}>
+                  {transactionTypeLabels[transaction.type]}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400">
+                  {categoryLabels[transaction.category] || transaction.category}
+                </span>
               </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2 text-sm text-gray-600">
-                <div>
-                  <span className="font-medium">Valor:</span>{" "}
-                  <span
-                    className={`font-bold ${
-                      transaction.type === "INCOME" ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(transaction.amount)}
-                  </span>
+
+              {/* Amount */}
+              <div className="mb-3">
+                <span className={`font-display text-xl font-bold tracking-tight ${
+                  transaction.type === "INCOME" ? "text-emerald-400" : "text-red-400"
+                }`}>
+                  {transaction.type === "INCOME" ? "+" : "-"} {formatCurrency(transaction.amount)}
+                </span>
+              </div>
+
+              {/* Details Grid */}
+              <div className="flex flex-wrap gap-4 text-xs">
+                <div className="flex items-center gap-1.5 text-zinc-500">
+                  <Calendar className="h-3.5 w-3.5 text-zinc-600" />
+                  <span>{format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}</span>
                 </div>
-                <div>
-                  <span className="font-medium">Data:</span>{" "}
-                  {format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}
-                </div>
+
                 {transaction.client && (
-                  <div>
-                    <span className="font-medium">Cliente:</span> {transaction.client.name}
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <User className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>{transaction.client.name}</span>
                   </div>
                 )}
+
                 {transaction.project && (
-                  <div>
-                    <span className="font-medium">Projeto:</span> {transaction.project.name}
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <FolderKanban className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>{transaction.project.name}</span>
                   </div>
                 )}
+
                 {transaction.invoiceNumber && (
-                  <div>
-                    <span className="font-medium">NF:</span> {transaction.invoiceNumber}
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <Receipt className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>NF: {transaction.invoiceNumber}</span>
                   </div>
                 )}
+
                 {transaction.paymentMethod && (
-                  <div>
-                    <span className="font-medium">Método:</span> {transaction.paymentMethod}
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <CreditCard className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>{transaction.paymentMethod}</span>
                   </div>
                 )}
               </div>
-              
+
+              {/* Notes */}
               {transaction.notes && (
-                <p className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                <p className="mt-3 text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-2 leading-relaxed">
                   {transaction.notes}
                 </p>
               )}
             </div>
-            
-            <div className="flex gap-2 ml-4">
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onEdit(transaction)}
+                className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                 title="Editar Transação"
               >
                 <Edit className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onDelete(transaction)}
-                className="text-red-600 hover:text-red-700"
+                className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
                 title="Excluir Transação"
               >
                 <Trash2 className="h-4 w-4" />
@@ -180,4 +200,3 @@ function TransactionsListComponent({
 }
 
 export const TransactionsList = memo(TransactionsListComponent)
-

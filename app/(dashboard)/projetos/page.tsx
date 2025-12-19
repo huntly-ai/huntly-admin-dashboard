@@ -2,10 +2,8 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -18,6 +16,14 @@ import { ProjectsList } from "./components/projects-list"
 import { ProjectFormDialog } from "./components/project-form-dialog"
 import { ProjectsStats } from "./components/projects-stats"
 import { Filter, X } from "lucide-react"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+  HuntlyLabel,
+} from "@/components/huntly-ui"
 
 interface Client {
   id: string
@@ -96,14 +102,14 @@ export default function ProjectsPage() {
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([])
-  
+
   // Filters
   const [filterBillingType, setFilterBillingType] = useState<string>("")
   const [filterStatus, setFilterStatus] = useState<string>("")
   const [filterMinRate, setFilterMinRate] = useState<string>("")
   const [filterMaxRate, setFilterMaxRate] = useState<string>("")
   const [showFilters, setShowFilters] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -169,7 +175,6 @@ export default function ProjectsPage() {
     fetchTeams()
   }, [fetchProjects, fetchClients, fetchMembers, fetchTeams])
 
-  // Check for clientId in URL params and pre-fill form
   useEffect(() => {
     const clientId = searchParams?.get("clientId")
     const clientName = searchParams?.get("clientName")
@@ -177,8 +182,6 @@ export default function ProjectsPage() {
     if (clientId && clientName) {
       setFormData((prev) => ({ ...prev, clientId }))
       setIsDialogOpen(true)
-
-      // Clean URL after opening dialog
       window.history.replaceState({}, "", "/projetos")
     }
   }, [searchParams])
@@ -213,11 +216,10 @@ export default function ProjectsPage() {
         : "/api/projetos"
       const method = editingProject ? "PUT" : "POST"
 
-      // Convert values to decimal based on billing type
       const projectValueDecimal = formData.billingType === "FIXED_PRICE" && formData.projectValue
         ? (parseFloat(formData.projectValue) / 100).toFixed(2)
         : "0"
-      
+
       const hourlyRateDecimal = formData.billingType === "HOURLY_RATE" && formData.hourlyRate
         ? (parseFloat(formData.hourlyRate) / 100).toFixed(2)
         : null
@@ -286,7 +288,6 @@ export default function ProjectsPage() {
       notes: project.notes || "",
     })
 
-    // Set selected members and teams
     if (project.projectMembers) {
       setSelectedMemberIds(project.projectMembers.map((pm) => pm.member.id))
     }
@@ -324,20 +325,14 @@ export default function ProjectsPage() {
     }
   }, [resetForm])
 
-  // Filter projects
   const filteredProjects = useMemo(() => {
     return projects.filter(p => {
-      // Filter by billing type
       if (filterBillingType && p.billingType !== filterBillingType) {
         return false
       }
-      
-      // Filter by status
       if (filterStatus && p.status !== filterStatus) {
         return false
       }
-      
-      // Filter by min effective hourly rate
       if (filterMinRate) {
         const minRate = parseFloat(filterMinRate) / 100
         const effectiveRate = p.hours?.effectiveHourlyRate || 0
@@ -345,8 +340,6 @@ export default function ProjectsPage() {
           return false
         }
       }
-      
-      // Filter by max effective hourly rate
       if (filterMaxRate) {
         const maxRate = parseFloat(filterMaxRate) / 100
         const effectiveRate = p.hours?.effectiveHourlyRate || 0
@@ -354,7 +347,6 @@ export default function ProjectsPage() {
           return false
         }
       }
-      
       return true
     })
   }, [projects, filterBillingType, filterStatus, filterMinRate, filterMaxRate])
@@ -368,7 +360,6 @@ export default function ProjectsPage() {
 
   const hasActiveFilters = filterBillingType || filterStatus || filterMinRate || filterMaxRate
 
-  // Memoized calculations
   const inProgressProjects = useMemo(
     () => projects.filter(p => p.status === "IN_PROGRESS").length,
     [projects]
@@ -397,26 +388,16 @@ export default function ProjectsPage() {
   }, [projects])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando projetos...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando projetos..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Projetos</h1>
-            <p className="text-gray-500 mt-1">
-              Gerencie seus projetos e acompanhe o andamento
-            </p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Gestão"
+        title="Projetos"
+        titleBold="& Entregas"
+        action={
           <ProjectFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -432,112 +413,121 @@ export default function ProjectsPage() {
             onTeamToggle={handleTeamToggle}
             onSubmit={handleSubmit}
           />
-        </div>
+        }
+      />
 
-        <ProjectsStats
-          totalProjects={projects.length}
-          inProgressProjects={inProgressProjects}
-          completedProjects={completedProjects}
-          plannedProjects={plannedProjects}
-          totalWorkedHours={totalWorkedHours}
-          averageHourlyRate={averageHourlyRate}
+      <ProjectsStats
+        totalProjects={projects.length}
+        inProgressProjects={inProgressProjects}
+        completedProjects={completedProjects}
+        plannedProjects={plannedProjects}
+        totalWorkedHours={totalWorkedHours}
+        averageHourlyRate={averageHourlyRate}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Projetos"
+          description={`${filteredProjects.length}${hasActiveFilters ? ` de ${projects.length}` : ""} projetos`}
+          action={
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-8 text-zinc-500 hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5 mr-1" />
+                  Limpar
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`h-8 ${showFilters ? "text-white bg-zinc-800" : "text-zinc-500 hover:text-white"}`}
+              >
+                <Filter className="h-3.5 w-3.5 mr-1" />
+                Filtros
+              </Button>
+            </div>
+          }
         />
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Lista de Projetos ({filteredProjects.length}{hasActiveFilters ? ` de ${projects.length}` : ""})</CardTitle>
-              <div className="flex items-center gap-2">
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="h-4 w-4 mr-1" />
-                    Limpar Filtros
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={showFilters ? "bg-gray-100" : ""}
-                >
-                  <Filter className="h-4 w-4 mr-1" />
-                  Filtros
-                </Button>
-              </div>
-            </div>
-            
-            {showFilters && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="filterBillingType">Tipo de Cobrança</Label>
-                    <Select value={filterBillingType} onValueChange={setFilterBillingType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="FIXED_PRICE">Valor Fixo</SelectItem>
-                        <SelectItem value="HOURLY_RATE">Por Hora</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="filterStatus">Status</Label>
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="PLANNING">Planejamento</SelectItem>
-                        <SelectItem value="IN_PROGRESS">Em Andamento</SelectItem>
-                        <SelectItem value="ON_HOLD">Pausado</SelectItem>
-                        <SelectItem value="COMPLETED">Concluído</SelectItem>
-                        <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="filterMinRate">Rentabilidade Mínima (R$/h)</Label>
-                    <Input
-                      id="filterMinRate"
-                      placeholder="R$ 0,00"
-                      value={formatCurrencyInput(filterMinRate)}
-                      onChange={(e) => {
-                        const onlyNumbers = e.target.value.replace(/\D/g, "")
-                        setFilterMinRate(onlyNumbers)
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="filterMaxRate">Rentabilidade Máxima (R$/h)</Label>
-                    <Input
-                      id="filterMaxRate"
-                      placeholder="R$ 0,00"
-                      value={formatCurrencyInput(filterMaxRate)}
-                      onChange={(e) => {
-                        const onlyNumbers = e.target.value.replace(/\D/g, "")
-                        setFilterMaxRate(onlyNumbers)
-                      }}
-                    />
-                  </div>
+        {showFilters && (
+          <div className="px-5 pb-5">
+            <div className="p-4 bg-zinc-900/50 border border-zinc-800/50 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <HuntlyLabel>Tipo de Cobrança</HuntlyLabel>
+                  <Select value={filterBillingType} onValueChange={setFilterBillingType}>
+                    <SelectTrigger className="bg-black/50 border-zinc-800 h-10">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="FIXED_PRICE">Valor Fixo</SelectItem>
+                      <SelectItem value="HOURLY_RATE">Por Hora</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <HuntlyLabel>Status</HuntlyLabel>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="bg-black/50 border-zinc-800 h-10">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="PLANNING">Planejamento</SelectItem>
+                      <SelectItem value="IN_PROGRESS">Em Andamento</SelectItem>
+                      <SelectItem value="ON_HOLD">Pausado</SelectItem>
+                      <SelectItem value="COMPLETED">Concluído</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <HuntlyLabel>Rentabilidade Mínima</HuntlyLabel>
+                  <Input
+                    placeholder="R$ 0,00"
+                    value={formatCurrencyInput(filterMinRate)}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, "")
+                      setFilterMinRate(onlyNumbers)
+                    }}
+                    className="bg-black/50 border-zinc-800 h-10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <HuntlyLabel>Rentabilidade Máxima</HuntlyLabel>
+                  <Input
+                    placeholder="R$ 0,00"
+                    value={formatCurrencyInput(filterMaxRate)}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, "")
+                      setFilterMaxRate(onlyNumbers)
+                    }}
+                    className="bg-black/50 border-zinc-800 h-10"
+                  />
                 </div>
               </div>
-            )}
-          </CardHeader>
-          <CardContent>
-            <ProjectsList
-              projects={filteredProjects}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
+            </div>
+          </div>
+        )}
+
+        <HuntlyCardContent className="p-0">
+          <ProjectsList
+            projects={filteredProjects}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }

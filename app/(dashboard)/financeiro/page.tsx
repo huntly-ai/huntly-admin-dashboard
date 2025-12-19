@@ -1,12 +1,18 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 import { TransactionsList } from "./components/transactions-list"
 import { TransactionFormDialog } from "./components/transaction-form-dialog"
 import { DeleteTransactionDialog } from "./components/delete-transaction-dialog"
 import { TransactionsStats } from "./components/transactions-stats"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
 
 interface Client {
   id: string
@@ -221,26 +227,16 @@ export default function FinanceiroPage() {
   )
 
   if (loading) {
-    return (
-        <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Carregando transações...</p>
-          </div>
-        </div>
-    )
+    return <HuntlyLoading text="Carregando transações..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Financeiro</h1>
-            <p className="text-gray-500 mt-1">
-              Gerencie receitas e despesas
-            </p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Finanças"
+        title="Controle"
+        titleBold="Financeiro"
+        action={
           <TransactionFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -250,35 +246,36 @@ export default function FinanceiroPage() {
             projects={projects}
             onFormChange={handleFormChange}
             onSubmit={handleSubmit}
-                  />
-                </div>
+          />
+        }
+      />
 
-        <TransactionsStats
-          totalIncome={totalIncome}
-          totalExpense={totalExpense}
-          balance={balance}
+      <TransactionsStats
+        totalIncome={totalIncome}
+        totalExpense={totalExpense}
+        balance={balance}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Transações"
+          description={`${transactions.length} transações registradas`}
         />
+        <HuntlyCardContent className="p-0">
+          <TransactionsList
+            transactions={transactions}
+            onEdit={handleEdit}
+            onDelete={handleOpenDeleteDialog}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Transações ({transactions.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TransactionsList
-              transactions={transactions}
-              onEdit={handleEdit}
-              onDelete={handleOpenDeleteDialog}
-            />
-          </CardContent>
-        </Card>
-
-        <DeleteTransactionDialog
-          isOpen={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          transaction={transactionToDelete}
-          onConfirm={handleDelete}
-        />
-      </div>
-    </>
+      <DeleteTransactionDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        transaction={transactionToDelete}
+        onConfirm={handleDelete}
+      />
+    </div>
   )
 }

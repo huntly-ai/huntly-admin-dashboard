@@ -23,26 +23,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus } from "lucide-react"
 import { formatCurrencyInput } from "@/lib/utils/formatters"
-
-const statusLabels: Record<string, string> = {
-  PLANNING: "Planejamento",
-  IN_PROGRESS: "Em Andamento",
-  ON_HOLD: "Pausado",
-  COMPLETED: "Concluído",
-  CANCELLED: "Cancelado",
-}
-
-const priorityLabels: Record<string, string> = {
-  LOW: "Baixa",
-  MEDIUM: "Média",
-  HIGH: "Alta",
-  URGENT: "Urgente",
-}
-
-const billingTypeLabels: Record<string, string> = {
-  FIXED_PRICE: "Valor Fixo",
-  HOURLY_RATE: "Por Hora",
-}
+import { projectStatusLabels, priorityLabels, billingTypeLabels } from "@/lib/design-tokens"
 
 interface Client {
   id: string
@@ -116,7 +97,7 @@ function ProjectFormDialogComponent({
           Novo Projeto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
           <DialogTitle>
             {editingProject ? "Editar Projeto" : "Novo Projeto"}
@@ -179,7 +160,7 @@ function ProjectFormDialogComponent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(statusLabels).map(([value, label]) => (
+                  {Object.entries(projectStatusLabels).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>
@@ -295,7 +276,7 @@ function ProjectFormDialogComponent({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-base font-semibold">Membros da Equipe</Label>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+              <div className="border border-border rounded-lg p-4 max-h-48 overflow-y-auto bg-secondary">
                 {members.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhum membro cadastrado</p>
                 ) : (
@@ -322,7 +303,7 @@ function ProjectFormDialogComponent({
 
             <div className="space-y-2">
               <Label className="text-base font-semibold">Times Alocados</Label>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+              <div className="border border-border rounded-lg p-4 max-h-48 overflow-y-auto bg-secondary">
                 {teams.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhum time cadastrado</p>
                 ) : (

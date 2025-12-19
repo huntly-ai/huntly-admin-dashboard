@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { UserCheck, Mail, Phone, Briefcase } from "lucide-react"
 import { formatPhone } from "@/lib/utils/formatters"
+import { getAvatarColor, alertStyles } from "@/lib/design-tokens"
 
 interface Lead {
   id: string
@@ -38,67 +39,67 @@ function ConvertLeadDialogComponent({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-card border-border">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <UserCheck className="h-6 w-6 text-green-600" />
+            <div className="h-12 w-12 rounded-md bg-green-950 border border-green-800 flex items-center justify-center">
+              <UserCheck className="h-6 w-6 text-green-400" />
             </div>
             <div>
-              <DialogTitle>Converter Lead em Cliente</DialogTitle>
-              <DialogDescription>
-                Confirme a conversão deste lead para cliente
+              <DialogTitle className="text-foreground">Converter Lead em Cliente</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Confirme a conversao deste lead para cliente
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-700">
-            Você está prestes a converter o seguinte lead em um cliente:
+          <p className="text-sm text-muted-foreground">
+            Voce esta prestes a converter o seguinte lead em um cliente:
           </p>
 
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg space-y-3 border border-blue-100">
+          <div className="bg-secondary p-4 rounded-lg space-y-3 border border-border">
             <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+              <div className={`h-10 w-10 rounded-md flex items-center justify-center font-bold ${getAvatarColor(lead.name)}`}>
                 {lead.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg text-gray-900">{lead.name}</h3>
+                <h3 className="font-semibold text-lg text-foreground">{lead.name}</h3>
                 {lead.company && (
-                  <p className="text-sm text-gray-600">{lead.company}</p>
+                  <p className="text-sm text-muted-foreground">{lead.company}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2 pl-13">
               {lead.email && (
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Mail className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
                   <span>{lead.email}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Phone className="h-4 w-4 text-gray-400" />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4" />
                 <span>{formatPhone(lead.phone)}</span>
               </div>
               {lead.position && (
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Briefcase className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
                   <span>{lead.position}</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-sm text-blue-800">
-              <strong>O que acontecerá:</strong>
+          <div className={`${alertStyles.info} rounded-lg p-3`}>
+            <p className="text-sm font-medium">
+              O que acontecera:
             </p>
-            <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4 list-disc">
-              <li>Um novo cliente será criado com estes dados</li>
-              <li>O status do lead será atualizado para &quot;Ganho&quot;</li>
-              <li>Você poderá criar projetos para este novo cliente</li>
+            <ul className="text-sm mt-2 space-y-1 ml-4 list-disc opacity-90">
+              <li>Um novo cliente sera criado com estes dados</li>
+              <li>O status do lead sera atualizado para &quot;Ganho&quot;</li>
+              <li>Voce podera criar projetos para este novo cliente</li>
             </ul>
           </div>
         </div>
@@ -112,7 +113,7 @@ function ConvertLeadDialogComponent({
               onConfirm()
               onOpenChange(false)
             }}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             <UserCheck className="h-4 w-4 mr-2" />
             Converter em Cliente
@@ -124,4 +125,3 @@ function ConvertLeadDialogComponent({
 }
 
 export const ConvertLeadDialog = memo(ConvertLeadDialogComponent)
-

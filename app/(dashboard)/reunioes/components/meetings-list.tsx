@@ -2,24 +2,11 @@
 
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, MapPin, Users, Tag } from "lucide-react"
+import { Edit, Trash2, MapPin, Users, Tag, Calendar, Clock, User, Building2, ExternalLink } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-
-const statusLabels: Record<string, string> = {
-  SCHEDULED: "Agendada",
-  IN_PROGRESS: "Em Progresso",
-  COMPLETED: "Concluída",
-  CANCELLED: "Cancelada",
-}
-
-const statusColors: Record<string, string> = {
-  SCHEDULED: "bg-blue-100 text-blue-800",
-  IN_PROGRESS: "bg-orange-100 text-orange-800",
-  COMPLETED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
-}
+import { HuntlyEmpty } from "@/components/huntly-ui"
+import { meetingStatusColors, meetingStatusLabels } from "@/lib/design-tokens"
 
 const isUrl = (str: string) => /^https?:\/\//.test(str)
 
@@ -70,15 +57,18 @@ function MeetingsListComponent({
 }: MeetingsListProps) {
   if (meetings.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        Nenhuma reunião cadastrada ainda. Clique em &quot;Nova Reunião&quot; para começar.
-      </p>
+      <div className="p-8">
+        <HuntlyEmpty
+          title="Nenhuma reunião cadastrada"
+          description="Clique em 'Nova Reunião' para começar."
+        />
+      </div>
     )
   }
 
   return (
-    <div className="space-y-3">
-      {meetings.map((meeting) => {
+    <div className="divide-y divide-zinc-800/50">
+      {meetings.map((meeting, index) => {
         const startDate = new Date(meeting.startDate)
         const endDate = meeting.endDate ? new Date(meeting.endDate) : null
         const tags = meeting.tags ? JSON.parse(meeting.tags) : []
@@ -86,105 +76,132 @@ function MeetingsListComponent({
         return (
           <div
             key={meeting.id}
-            className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">{meeting.title}</h3>
-                  <Badge className={statusColors[meeting.status]}>
-                    {statusLabels[meeting.status]}
-                  </Badge>
+            <div className="flex items-start justify-between gap-4">
+              {/* Meeting Info */}
+              <div className="flex-1 min-w-0">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                    {meeting.title}
+                  </h3>
+                  <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${meetingStatusColors[meeting.status]}`}>
+                    {meetingStatusLabels[meeting.status]}
+                  </span>
                 </div>
 
+                {/* Description */}
                 {meeting.description && (
-                  <p className="text-sm text-gray-600 mb-3">{meeting.description}</p>
+                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
+                    {meeting.description}
+                  </p>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600 mb-3">
-                  <div>
-                    <span className="font-medium">Data/Hora:</span>{" "}
-                    {format(startDate, "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                    {endDate && (
-                      <>
-                        {" - "}
-                        {format(endDate, "HH:mm", { locale: ptBR })}
-                      </>
-                    )}
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm mb-3">
+                  {/* Date/Time */}
+                  <div className="flex items-center gap-2 text-zinc-500">
+                    <Calendar className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>{format(startDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-zinc-500">
+                    <Clock className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>
+                      {format(startDate, "HH:mm", { locale: ptBR })}
+                      {endDate && ` - ${format(endDate, "HH:mm", { locale: ptBR })}`}
+                    </span>
                   </div>
 
+                  {/* Location */}
                   {meeting.location && (
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-gray-400" />
+                      <MapPin className="h-3.5 w-3.5 text-zinc-600" />
                       {isUrl(meeting.location) ? (
                         <a
                           href={meeting.location}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="text-blue-400 hover:text-blue-300 truncate flex items-center gap-1"
                         >
-                          {meeting.location}
+                          <span className="truncate">{meeting.location.replace(/^https?:\/\//, '').split('/')[0]}</span>
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
                         </a>
                       ) : (
-                        <span>{meeting.location}</span>
+                        <span className="text-zinc-500 truncate">{meeting.location}</span>
                       )}
                     </div>
                   )}
 
+                  {/* Client */}
                   {meeting.client && (
-                    <div>
-                      <span className="font-medium">Cliente:</span> {meeting.client.name}
+                    <div className="flex items-center gap-2 text-zinc-500">
+                      <Building2 className="h-3.5 w-3.5 text-zinc-600" />
+                      <span className="truncate">{meeting.client.name}</span>
                     </div>
                   )}
 
+                  {/* Lead */}
                   {meeting.lead && (
-                    <div>
-                      <span className="font-medium">Lead:</span> {meeting.lead.name}
+                    <div className="flex items-center gap-2 text-zinc-500">
+                      <User className="h-3.5 w-3.5 text-zinc-600" />
+                      <span className="truncate">{meeting.lead.name}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Tags */}
                 {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
                     {tags.map((tag: string) => (
-                      <Badge key={tag} variant="outline" className="flex items-center gap-1">
-                        <Tag className="h-3 w-3" />
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400"
+                      >
+                        <Tag className="h-2.5 w-2.5" />
                         {tag}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 )}
 
+                {/* Members */}
                 {(meeting.meetingMembers || []).length > 0 && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                    <Users className="h-4 w-4 text-gray-400" />
+                  <div className="flex items-center gap-2 text-xs text-zinc-500 mb-3">
+                    <Users className="h-3.5 w-3.5 text-zinc-600" />
                     <span>
                       {meeting.meetingMembers?.map(m => m.member.name).join(", ")}
                     </span>
                   </div>
                 )}
 
+                {/* Notes */}
                 {meeting.notes && (
-                  <p className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded italic">
-                    Notas: {meeting.notes}
+                  <p className="text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-3 leading-relaxed">
+                    {meeting.notes}
                   </p>
                 )}
               </div>
 
-              <div className="flex gap-2 ml-4">
+              {/* Actions */}
+              <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onEdit(meeting)}
+                  className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                   title="Editar Reunião"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onDelete(meeting.id)}
-                  className="text-red-600 hover:text-red-700"
+                  className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
                   title="Excluir Reunião"
                 >
                   <Trash2 className="h-4 w-4" />

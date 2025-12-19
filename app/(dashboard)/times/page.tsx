@@ -1,10 +1,16 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TeamsList } from "./components/teams-list"
 import { TeamFormDialog } from "./components/team-form-dialog"
 import { TeamsStats } from "./components/teams-stats"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
 
 interface Member {
   id: string
@@ -90,7 +96,6 @@ export default function TeamsPage() {
         : "/api/times"
       const method = editingTeam ? "PUT" : "POST"
 
-      // Prepare data, converting empty leadId to null
       const dataToSend = {
         ...formData,
         leadId: formData.leadId || null,
@@ -167,7 +172,6 @@ export default function TeamsPage() {
     }
   }, [resetForm])
 
-  // Memoized calculations
   const activeMembers = useMemo(
     () => members.filter(m => m),
     [members]
@@ -181,26 +185,16 @@ export default function TeamsPage() {
   )
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando times...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando times..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Times</h1>
-            <p className="text-gray-500 mt-1">
-              Organize equipes por projetos e especialidades
-            </p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Equipe"
+        title="Times"
+        titleBold="& Squads"
+        action={
           <TeamFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -211,27 +205,28 @@ export default function TeamsPage() {
             onMemberToggle={handleMemberToggle}
             onSubmit={handleSubmit}
           />
-        </div>
+        }
+      />
 
-        <TeamsStats
-          totalTeams={teams.length}
-          totalMembers={activeMembers.length}
-          averagePerTeam={averagePerTeam}
+      <TeamsStats
+        totalTeams={teams.length}
+        totalMembers={activeMembers.length}
+        averagePerTeam={averagePerTeam}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Times"
+          description={`${teams.length} times cadastrados`}
         />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Times ({teams.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TeamsList
-              teams={teams}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
+        <HuntlyCardContent className="p-0">
+          <TeamsList
+            teams={teams}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }

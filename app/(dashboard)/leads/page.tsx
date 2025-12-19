@@ -1,12 +1,18 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPhone, prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 import { LeadsList } from "./components/leads-list"
 import { LeadFormDialog } from "./components/lead-form-dialog"
 import { ConvertLeadDialog } from "./components/convert-lead-dialog"
 import { LeadsStats } from "./components/leads-stats"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
 
 interface Lead {
   id: string
@@ -82,7 +88,6 @@ export default function LeadsPage() {
         : "/api/leads"
       const method = editingLead ? "PUT" : "POST"
 
-      // Unformat phone
       const dataToSend = {
         ...formData,
         phone: formData.phone.replace(/\D/g, ""),
@@ -190,7 +195,6 @@ export default function LeadsPage() {
     }
   }, [resetForm])
 
-  // Memoized calculations
   const qualifiedLeads = useMemo(
     () => leads.filter(l => l.status === "QUALIFIED" || l.status === "PROPOSAL_SENT" || l.status === "NEGOTIATION").length,
     [leads]
@@ -202,26 +206,16 @@ export default function LeadsPage() {
   )
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando leads...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando leads..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Leads</h1>
-            <p className="text-gray-500 mt-1">
-              Gerencie seus leads e oportunidades
-            </p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="CRM"
+        title="Leads"
+        titleBold="& Oportunidades"
+        action={
           <LeadFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -230,35 +224,36 @@ export default function LeadsPage() {
             onFormChange={handleFormChange}
             onSubmit={handleSubmit}
           />
-        </div>
+        }
+      />
 
-        <LeadsStats
-          totalLeads={leads.length}
-          qualifiedLeads={qualifiedLeads}
-          convertedLeads={convertedLeads}
+      <LeadsStats
+        totalLeads={leads.length}
+        qualifiedLeads={qualifiedLeads}
+        convertedLeads={convertedLeads}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Leads"
+          description={`${leads.length} leads cadastrados`}
         />
+        <HuntlyCardContent className="p-0">
+          <LeadsList
+            leads={leads}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onConvert={handleConvert}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Leads ({leads.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LeadsList
-              leads={leads}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onConvert={handleConvert}
-            />
-          </CardContent>
-        </Card>
-
-        <ConvertLeadDialog
-          isOpen={isConvertDialogOpen}
-          onOpenChange={setIsConvertDialogOpen}
-          lead={convertingLead}
-          onConfirm={confirmConvert}
-        />
-      </div>
-    </>
+      <ConvertLeadDialog
+        isOpen={isConvertDialogOpen}
+        onOpenChange={setIsConvertDialogOpen}
+        lead={convertingLead}
+        onConfirm={confirmConvert}
+      />
+    </div>
   )
 }

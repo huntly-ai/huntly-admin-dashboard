@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowUp, ArrowDown, Minus, CheckSquare } from "lucide-react"
+import { priorityColors, getAvatarColor, iconColors } from "@/lib/design-tokens"
 
 interface Member {
   id: string
@@ -28,17 +29,18 @@ interface TaskCardProps {
 }
 
 const PriorityIcon = ({ priority }: { priority: string }) => {
+  const colorClass = priorityColors[priority]?.text || iconColors.default
   switch (priority) {
     case "URGENT":
-      return <ArrowUp className="h-3.5 w-3.5 text-red-600" />
+      return <ArrowUp className={`h-3.5 w-3.5 ${colorClass}`} />
     case "HIGH":
-      return <ArrowUp className="h-3.5 w-3.5 text-orange-500" />
+      return <ArrowUp className={`h-3.5 w-3.5 ${colorClass}`} />
     case "MEDIUM":
-      return <Minus className="h-3.5 w-3.5 text-yellow-500" />
+      return <Minus className={`h-3.5 w-3.5 ${colorClass}`} />
     case "LOW":
-      return <ArrowDown className="h-3.5 w-3.5 text-blue-500" />
+      return <ArrowDown className={`h-3.5 w-3.5 ${colorClass}`} />
     default:
-      return <Minus className="h-3.5 w-3.5 text-gray-400" />
+      return <Minus className={`h-3.5 w-3.5 ${iconColors.default}`} />
   }
 }
 
@@ -88,12 +90,12 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="bg-white p-3 rounded-md shadow-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md hover:border-gray-300 transition-all cursor-grab active:cursor-grabbing group"
+      className="bg-card p-3 rounded-md shadow-sm border border-border hover:bg-secondary/50 hover:shadow-md hover:border-zinc-600 transition-all cursor-grab active:cursor-grabbing group"
     >
       <div className="space-y-2.5">
         {/* Header: Title */}
         <div className="flex items-start gap-2">
-            <span className="text-sm text-gray-900 font-medium leading-tight line-clamp-3 group-hover:text-blue-600">
+            <span className="text-sm text-foreground font-medium leading-tight line-clamp-3 group-hover:text-blue-400">
                 {task.title}
             </span>
         </div>
@@ -102,9 +104,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag, index) => (
-              <span 
+              <span
                 key={index}
-                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 uppercase tracking-wide"
+                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-muted-foreground uppercase tracking-wide"
               >
                 {tag}
               </span>
@@ -116,9 +118,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         <div className="flex items-center justify-between pt-1">
            <div className="flex items-center gap-3">
              {/* Task Type Icon + Key */}
-             <div className="flex items-center gap-1.5 text-gray-500">
-                <div className="bg-blue-50 p-0.5 rounded">
-                    <CheckSquare className="h-3.5 w-3.5 text-blue-600" />
+             <div className="flex items-center gap-1.5 text-muted-foreground">
+                <div className="bg-blue-950 p-0.5 rounded">
+                    <CheckSquare className="h-3.5 w-3.5 text-blue-400" />
                 </div>
                 <span className="text-[10px] font-mono font-medium group-hover:underline">
                   TSK-{task.id.slice(-4).toUpperCase()}
@@ -126,7 +128,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
              </div>
 
              {/* Priority */}
-             <div className="flex items-center" title={`Priority: ${task.priority}`}>
+             <div className="flex items-center" title={`Prioridade: ${task.priority}`}>
                 <PriorityIcon priority={task.priority} />
              </div>
            </div>
@@ -135,22 +137,22 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
            {task.taskMembers && task.taskMembers.length > 0 ? (
              <div className="flex -space-x-2">
                 {task.taskMembers.slice(0, 3).map(tm => (
-                  <Avatar key={tm.member.id} className="h-6 w-6 border-2 border-white ring-1 ring-gray-100">
+                  <Avatar key={tm.member.id} className="h-6 w-6 border-2 border-card ring-1 ring-border">
                     <AvatarImage src={tm.member.avatar} />
-                    <AvatarFallback className="text-[9px] bg-blue-100 text-blue-700 font-bold">
+                    <AvatarFallback className={`text-[9px] font-bold ${getAvatarColor(tm.member.id)}`}>
                       {tm.member.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 ))}
                 {task.taskMembers.length > 3 && (
-                    <div className="h-6 w-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center ring-1 ring-gray-100">
-                        <span className="text-[9px] font-medium text-gray-600">+{task.taskMembers.length - 3}</span>
+                    <div className="h-6 w-6 rounded-full bg-secondary border-2 border-card flex items-center justify-center ring-1 ring-border">
+                        <span className="text-[9px] font-medium text-muted-foreground">+{task.taskMembers.length - 3}</span>
                     </div>
                 )}
              </div>
            ) : (
-               <div className="h-6 w-6 rounded-full border border-dashed border-gray-300 flex items-center justify-center">
-                   <span className="text-gray-300 text-[10px]">?</span>
+               <div className="h-6 w-6 rounded-full border border-dashed border-zinc-700 flex items-center justify-center">
+                   <span className="text-zinc-600 text-[10px]">?</span>
                </div>
            )}
         </div>

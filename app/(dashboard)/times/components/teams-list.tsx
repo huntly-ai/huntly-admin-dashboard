@@ -2,24 +2,9 @@
 
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, Users as UsersIcon, Crown } from "lucide-react"
-
-const roleLabels: Record<string, string> = {
-  DEVELOPER: "Desenvolvedor",
-  DESIGNER: "Designer",
-  PROJECT_MANAGER: "Gerente de Projeto",
-  PRODUCT_MANAGER: "Gerente de Produto",
-  QA_ENGINEER: "Engenheiro de QA",
-  DEVOPS: "DevOps",
-  DATA_SCIENTIST: "Cientista de Dados",
-  BUSINESS_ANALYST: "Analista de Negócios",
-  FOUNDER: "Fundador",
-  CEO: "CEO",
-  CTO: "CTO",
-  CFO: "CFO",
-  OTHER: "Outro",
-}
+import { Edit, Trash2, Users as UsersIcon, Crown, FolderKanban } from "lucide-react"
+import { HuntlyEmpty } from "@/components/huntly-ui"
+import { memberRoleLabels } from "@/lib/design-tokens"
 
 interface Member {
   id: string
@@ -59,15 +44,18 @@ function TeamsListComponent({
 }: TeamsListProps) {
   if (teams.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        Nenhum time cadastrado ainda. Clique em &quot;Novo Time&quot; para começar.
-      </p>
+      <div className="p-8">
+        <HuntlyEmpty
+          title="Nenhum time cadastrado"
+          description="Clique em 'Novo Time' para começar."
+        />
+      </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      {teams.map((team) => {
+    <div className="divide-y divide-zinc-800/50">
+      {teams.map((team, index) => {
         const leader = team.leadId
           ? team.teamMemberships.find(tm => tm.member.id === team.leadId)?.member
           : null
@@ -75,54 +63,64 @@ function TeamsListComponent({
         return (
           <div
             key={team.id}
-            className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <UsersIcon className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">{team.name}</h3>
-                  <Badge variant="outline">
+            <div className="flex items-start justify-between gap-4">
+              {/* Team Info */}
+              <div className="flex-1 min-w-0">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <UsersIcon className="h-4 w-4 text-blue-500" />
+                  <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                    {team.name}
+                  </h3>
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-zinc-700 text-zinc-400">
                     {team._count?.teamMemberships || 0} membros
-                  </Badge>
+                  </span>
                 </div>
 
+                {/* Description */}
                 {team.description && (
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
                     {team.description}
                   </p>
                 )}
 
+                {/* Leader */}
                 {leader && (
-                  <div className="flex items-center gap-2 mb-3 text-sm">
-                    <Crown className="h-4 w-4 text-yellow-600" />
-                    <span className="font-medium">Líder:</span>
-                    <span className="text-gray-600">{leader.name}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {roleLabels[leader.role]}
-                    </Badge>
+                  <div className="flex items-center gap-2 mb-3 text-xs">
+                    <Crown className="h-3.5 w-3.5 text-amber-500" />
+                    <span className="text-zinc-500">Líder:</span>
+                    <span className="text-zinc-300">{leader.name}</span>
+                    <span className="text-[10px] px-2 py-0.5 border border-zinc-700 text-zinc-500">
+                      {memberRoleLabels[leader.role] || leader.role}
+                    </span>
                   </div>
                 )}
 
                 {/* Members */}
                 {team.teamMemberships.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">
-                      Membros
-                    </p>
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mb-2">
+                      <UsersIcon className="h-3 w-3" />
+                      <span className="tracking-wide uppercase">Membros</span>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {team.teamMemberships.map((tm) => (
                         <div
                           key={tm.id}
-                          className="flex items-center gap-2 bg-white border rounded-md px-3 py-1.5"
+                          className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800/50 px-2.5 py-1.5"
                         >
-                          <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                          <div className="h-5 w-5 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white text-[10px] font-medium">
                             {tm.member.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-medium">{tm.member.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {roleLabels[tm.member.role]}
+                            <p className="text-xs text-zinc-300">{tm.member.name}</p>
+                            <p className="text-[10px] text-zinc-600">
+                              {memberRoleLabels[tm.member.role] || tm.member.role}
                             </p>
                           </div>
                         </div>
@@ -131,30 +129,35 @@ function TeamsListComponent({
                   </div>
                 )}
 
+                {/* Projects Count */}
                 {team._count && team._count.projectTeams > 0 && (
-                  <div className="mt-3 pt-3 border-t">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">{team._count.projectTeams}</span>{" "}
+                  <div className="flex items-center gap-2 text-xs text-zinc-500 pt-3 border-t border-zinc-800/50">
+                    <FolderKanban className="h-3.5 w-3.5 text-zinc-600" />
+                    <span>
+                      <span className="text-zinc-300 font-medium">{team._count.projectTeams}</span>
+                      {" "}
                       {team._count.projectTeams === 1 ? "projeto" : "projetos"} alocado(s)
-                    </p>
+                    </span>
                   </div>
                 )}
               </div>
 
-              <div className="flex gap-2">
+              {/* Actions */}
+              <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onEdit(team)}
+                  className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                   title="Editar Time"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onDelete(team.id)}
-                  className="text-red-600 hover:text-red-700"
+                  className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
                   title="Excluir Time"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -169,4 +172,3 @@ function TeamsListComponent({
 }
 
 export const TeamsList = memo(TeamsListComponent)
-

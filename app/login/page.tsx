@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 function LoginForm() {
   const router = useRouter()
@@ -19,7 +18,6 @@ function LoginForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // Check if already logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -29,7 +27,7 @@ function LoginForm() {
           router.push(redirect)
         }
       } catch {
-        // Not logged in, stay on login page
+        // Not logged in
       }
     }
     checkAuth()
@@ -54,7 +52,6 @@ function LoginForm() {
         return
       }
 
-      // Redirect to original page or dashboard
       const redirect = searchParams.get("redirect") || "/"
       router.push(redirect)
       router.refresh()
@@ -66,31 +63,63 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">H</span>
+    <div className="min-h-screen flex items-center justify-center bg-black p-4 grid-bg corner-accent">
+      {/* Decorative lines */}
+      <div className="fixed top-1/4 left-8 w-px h-32 bg-gradient-to-b from-transparent via-white/10 to-transparent hidden md:block" />
+      <div className="fixed bottom-1/4 right-8 w-px h-32 bg-gradient-to-b from-transparent via-white/10 to-transparent hidden md:block" />
+      <div className="fixed top-1/3 right-16 w-24 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden md:block" />
+      <div className="fixed bottom-1/3 left-16 w-24 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden md:block" />
+
+      {/* Login Card */}
+      <div className="relative w-full max-w-md group">
+        {/* Card with huntly style */}
+        <div className="relative bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all duration-300 p-8">
+          {/* Corner accents on card */}
+          <div className="absolute top-0 left-0 w-4 h-4 border-l border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-4 h-4 border-r border-t border-white/0 group-hover:border-white/30 transition-colors duration-300" />
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-l border-b border-white/0 group-hover:border-white/30 transition-colors duration-300" />
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-r border-b border-white/0 group-hover:border-white/30 transition-colors duration-300" />
+
+          {/* Header */}
+          <div className="text-center mb-8">
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 border border-zinc-700" />
+                <div className="absolute top-0 left-0 w-3 h-3 border-l border-t border-white/20" />
+                <div className="absolute bottom-0 right-0 w-3 h-3 border-r border-b border-white/20" />
+                <span className="font-display text-2xl font-medium text-white">H</span>
+              </div>
             </div>
+
+            {/* Title with decorative lines */}
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-white/30" />
+              <span className="text-white/50 text-xs tracking-widest">{"///"}</span>
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-white/30" />
+            </div>
+
+            <h1 className="font-display text-2xl font-light text-white mb-1">
+              <span className="font-medium animate-blink">_</span> Huntly <span className="font-medium">Dashboard</span>
+            </h1>
+
+            <p className="text-zinc-500 text-sm tracking-wide">
+              Entre com suas credenciais
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            Huntly Dashboard
-          </CardTitle>
-          <CardDescription className="text-center">
-            Entre com suas credenciais para acessar o sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+              <div className="bg-red-950/50 border border-red-900/50 text-red-400 px-4 py-3 text-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-xs tracking-[0.2em] uppercase text-zinc-500">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -99,11 +128,14 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                className="bg-black/50 border-zinc-800 focus:border-zinc-600 text-white placeholder:text-zinc-600 h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-xs tracking-[0.2em] uppercase text-zinc-500">
+                Senha
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -113,13 +145,13 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="pr-10"
+                  className="bg-black/50 border-zinc-800 focus:border-zinc-600 text-white placeholder:text-zinc-600 h-11 pr-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-zinc-500 hover:text-white transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                 >
@@ -128,9 +160,6 @@ function LoginForm() {
                   ) : (
                     <Eye className="h-4 w-4" />
                   )}
-                  <span className="sr-only">
-                    {showPassword ? "Ocultar senha" : "Ver senha"}
-                  </span>
                 </Button>
               </div>
             </div>
@@ -141,10 +170,11 @@ function LoginForm() {
                 checked={remember}
                 onCheckedChange={(checked) => setRemember(checked as boolean)}
                 disabled={loading}
+                className="border-zinc-700 data-[state=checked]:bg-white data-[state=checked]:border-white"
               />
-              <Label 
-                htmlFor="remember" 
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              <Label
+                htmlFor="remember"
+                className="text-sm text-zinc-400 cursor-pointer hover:text-white transition-colors"
               >
                 Manter conectado por 30 dias
               </Label>
@@ -152,41 +182,52 @@ function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full"
               disabled={loading}
+              className="w-full h-11 bg-white text-black hover:bg-zinc-200 font-medium tracking-wide transition-all duration-300"
             >
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+
+          {/* Hover line effect */}
+          <div className="absolute bottom-0 left-0 w-0 h-px bg-white/30 group-hover:w-full transition-all duration-500" />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2">
+        <p className="text-zinc-600 text-xs tracking-wider">
+          &copy; {new Date().getFullYear()} Huntly
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function LoadingState() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black p-4 grid-bg corner-accent">
+      <div className="relative w-full max-w-md">
+        <div className="relative bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 p-8">
+          <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 border border-zinc-700" />
+                <span className="font-display text-2xl font-medium text-white animate-pulse">H</span>
+              </div>
+            </div>
+            <p className="text-zinc-500 text-sm tracking-wide">Carregando...</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">H</span>
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-center">
-              Huntly Dashboard
-            </CardTitle>
-            <CardDescription className="text-center">
-              Carregando...
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    }>
+    <Suspense fallback={<LoadingState />}>
       <LoginForm />
     </Suspense>
   )
 }
-

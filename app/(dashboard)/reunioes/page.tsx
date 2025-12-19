@@ -1,13 +1,18 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MeetingsList } from "./components/meetings-list"
 import { MeetingFormDialog } from "./components/meeting-form-dialog"
 import { MeetingsStats } from "./components/meetings-stats"
 import { format } from "date-fns"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
 
-// Import FormData type from component
 type FormData = {
   title: string
   description: string
@@ -209,7 +214,6 @@ export default function MeetingsPage() {
     }
   }, [resetForm])
 
-  // Memoized calculations
   const upcomingMeetings = useMemo(
     () => meetings.filter(m => m.status === "SCHEDULED").length,
     [meetings]
@@ -221,26 +225,16 @@ export default function MeetingsPage() {
   )
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando reuniões...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando reuniões..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Reuniões</h1>
-            <p className="text-gray-500 mt-1">
-              Gerencie suas reuniões com leads e clientes
-            </p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Agenda"
+        title="Reuniões"
+        titleBold="& Compromissos"
+        action={
           <MeetingFormDialog
             isOpen={isDialogOpen}
             onOpenChange={handleDialogChange}
@@ -249,27 +243,28 @@ export default function MeetingsPage() {
             onFormChange={handleFormChange}
             onSubmit={handleSubmit}
           />
-        </div>
+        }
+      />
 
-        <MeetingsStats
-          totalMeetings={meetings.length}
-          upcomingMeetings={upcomingMeetings}
-          completedMeetings={completedMeetings}
+      <MeetingsStats
+        totalMeetings={meetings.length}
+        upcomingMeetings={upcomingMeetings}
+        completedMeetings={completedMeetings}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Reuniões"
+          description={`${meetings.length} reuniões cadastradas`}
         />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Reuniões ({meetings.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MeetingsList
-              meetings={meetings}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
+        <HuntlyCardContent className="p-0">
+          <MeetingsList
+            meetings={meetings}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }

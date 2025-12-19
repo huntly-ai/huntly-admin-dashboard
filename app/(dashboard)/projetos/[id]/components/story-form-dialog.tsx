@@ -134,7 +134,7 @@ export function StoryFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
           <DialogTitle>
             {editingStory ? "Editar História" : "Nova História"}
@@ -263,7 +263,7 @@ export function StoryFormDialog({
           {members.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">Membros Responsáveis</Label>
-              <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-gray-50">
+              <div className="border border-border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-secondary">
                 {members.map((member) => (
                   <div key={member.id} className="flex items-center space-x-2">
                     <Checkbox
@@ -283,7 +283,7 @@ export function StoryFormDialog({
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>

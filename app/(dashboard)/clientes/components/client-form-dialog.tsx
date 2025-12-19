@@ -21,12 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Plus } from "lucide-react"
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: "Ativo",
-  INACTIVE: "Inativo",
-  CHURNED: "Perdido",
-}
+import { clientStatusLabels } from "@/lib/design-tokens"
 
 interface FormData {
   name: string
@@ -66,12 +61,12 @@ function ClientFormDialogComponent({
           Novo Cliente
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-foreground">
             {editingClient ? "Editar Cliente" : "Novo Cliente"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Preencha os dados do cliente abaixo
           </DialogDescription>
         </DialogHeader>
@@ -85,6 +80,7 @@ function ClientFormDialogComponent({
                 required
                 value={formData.name}
                 onChange={(e) => onFormChange("name", e.target.value)}
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -96,6 +92,7 @@ function ClientFormDialogComponent({
                 required
                 value={formData.email}
                 onChange={(e) => onFormChange("email", e.target.value)}
+                className="bg-background border-border"
               />
             </div>
           </div>
@@ -109,6 +106,7 @@ function ClientFormDialogComponent({
                 value={formData.phone}
                 onChange={(e) => onFormChange("phone", e.target.value)}
                 maxLength={19}
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -119,6 +117,7 @@ function ClientFormDialogComponent({
                 value={formData.cnpj}
                 onChange={(e) => onFormChange("cnpj", e.target.value)}
                 maxLength={18}
+                className="bg-background border-border"
               />
             </div>
           </div>
@@ -131,6 +130,7 @@ function ClientFormDialogComponent({
                 placeholder="Nome da empresa"
                 value={formData.company}
                 onChange={(e) => onFormChange("company", e.target.value)}
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -140,6 +140,7 @@ function ClientFormDialogComponent({
                 placeholder="Cargo do contato"
                 value={formData.position}
                 onChange={(e) => onFormChange("position", e.target.value)}
+                className="bg-background border-border"
               />
             </div>
           </div>
@@ -153,6 +154,7 @@ function ClientFormDialogComponent({
                 placeholder="https://www.exemplo.com"
                 value={formData.website}
                 onChange={(e) => onFormChange("website", e.target.value)}
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -161,11 +163,11 @@ function ClientFormDialogComponent({
                 value={formData.status}
                 onValueChange={(value) => onFormChange("status", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(statusLabels).map(([value, label]) => (
+                  {Object.entries(clientStatusLabels).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>
@@ -176,22 +178,24 @@ function ClientFormDialogComponent({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Endereço</Label>
+            <Label htmlFor="address">Endereco</Label>
             <Input
               id="address"
-              placeholder="Rua, número, bairro, cidade - UF"
+              placeholder="Rua, numero, bairro, cidade - UF"
               value={formData.address}
               onChange={(e) => onFormChange("address", e.target.value)}
+              className="bg-background border-border"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Observações</Label>
+            <Label htmlFor="notes">Observacoes</Label>
             <Textarea
               id="notes"
               rows={4}
               value={formData.notes}
               onChange={(e) => onFormChange("notes", e.target.value)}
+              className="bg-background border-border"
             />
           </div>
 
@@ -212,4 +216,3 @@ function ClientFormDialogComponent({
 }
 
 export const ClientFormDialog = memo(ClientFormDialogComponent)
-

@@ -7,6 +7,13 @@ import { MembersList } from "./components/members-list"
 import { MemberFormDialog } from "./components/member-form-dialog"
 import { CreateUserDialog } from "./components/create-user-dialog"
 import { MembersStats } from "./components/members-stats"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
 
 interface TeamMembership {
   id: string
@@ -60,8 +67,7 @@ export default function MembersPage() {
     skills: "",
     notes: "",
   })
-  
-  // User creation dialog states
+
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false)
   const [selectedMemberForUser, setSelectedMemberForUser] = useState<Member | null>(null)
   const [userPassword, setUserPassword] = useState("")
@@ -159,11 +165,10 @@ export default function MembersPage() {
 
   const handleEdit = useCallback((member: Member) => {
     setEditingMember(member)
-    
-    // Parse roles from JSON
+
     const memberRoles = member.roles ? JSON.parse(member.roles) : [member.role]
     setSelectedRoles(memberRoles)
-    
+
     setFormData({
       name: member.name,
       email: member.email,
@@ -178,23 +183,21 @@ export default function MembersPage() {
     })
     setIsDialogOpen(true)
   }, [])
-  
+
   const toggleRole = useCallback((role: string) => {
     setSelectedRoles(prev => {
       if (prev.includes(role)) {
-        // Don't allow removing the last role
         if (prev.length === 1) return prev
         return prev.filter(r => r !== role)
       }
       return [...prev, role]
     })
-    
-    // Update primary role if needed
+
     if (!selectedRoles.includes(formData.role)) {
       setFormData(prev => ({ ...prev, role: selectedRoles[0] || role }))
     }
   }, [selectedRoles, formData.role])
-  
+
   const handleCreateUser = useCallback((member: Member) => {
     setSelectedMemberForUser(member)
     setUserPassword("")
@@ -202,23 +205,23 @@ export default function MembersPage() {
     setUserError("")
     setIsUserDialogOpen(true)
   }, [])
-  
+
   const handleUserSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setUserError("")
-    
+
     if (!selectedMemberForUser) return
-    
+
     if (userPassword !== userConfirmPassword) {
       setUserError("As senhas não coincidem")
       return
     }
-    
+
     if (userPassword.length < 6) {
       setUserError("A senha deve ter pelo menos 6 caracteres")
       return
     }
-    
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -229,16 +232,16 @@ export default function MembersPage() {
           memberId: selectedMemberForUser.id,
         }),
       })
-      
+
       const data = await response.json()
-      
+
       if (!response.ok) {
         setUserError(data.error || "Erro ao criar usuário")
         return
       }
-      
+
       setIsUserDialogOpen(false)
-      fetchMembers() // Refresh to show user is now linked
+      fetchMembers()
       alert("Usuário criado com sucesso!")
     } catch {
       setUserError("Erro ao conectar com o servidor")
@@ -253,114 +256,116 @@ export default function MembersPage() {
     }
   }, [])
 
-  // Memoized filtered arrays
+  const handleDialogChange = useCallback((open: boolean) => {
+    setIsDialogOpen(open)
+    if (!open) resetForm()
+  }, [resetForm])
+
   const activeMembers = useMemo(
     () => members.filter(m => m.status === "ACTIVE"),
     [members]
   )
-  
+
   const inactiveMembers = useMemo(
     () => members.filter(m => m.status !== "ACTIVE"),
     [members]
   )
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-600">Carregando membros...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando membros..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Membros da Equipe</h1>
-            <p className="text-gray-600 mt-1">
-              Gerencie os membros da equipe Huntly
-            </p>
-                </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Equipe"
+        title="Membros"
+        titleBold="da Equipe"
+        action={
+          <>
+            <MemberFormDialog
+              isOpen={isDialogOpen}
+              onOpenChange={handleDialogChange}
+              editingMember={editingMember}
+              formData={formData}
+              selectedRoles={selectedRoles}
+              onFormChange={handleFormChange}
+              onRoleToggle={toggleRole}
+              onSubmit={handleSubmit}
+            />
 
-          <MemberFormDialog
-            isOpen={isDialogOpen}
-            onOpenChange={(open) => {
-              setIsDialogOpen(open)
-              if (!open) resetForm()
-            }}
-            editingMember={editingMember}
-            formData={formData}
-            selectedRoles={selectedRoles}
-            onFormChange={handleFormChange}
-            onRoleToggle={toggleRole}
-            onSubmit={handleSubmit}
-          />
-          
-          <CreateUserDialog
-            isOpen={isUserDialogOpen}
-            onOpenChange={setIsUserDialogOpen}
-            memberName={selectedMemberForUser?.name || ""}
-            memberEmail={selectedMemberForUser?.email || ""}
-            password={userPassword}
-            confirmPassword={userConfirmPassword}
-            error={userError}
-            onPasswordChange={setUserPassword}
-            onConfirmPasswordChange={setUserConfirmPassword}
-            onSubmit={handleUserSubmit}
-                  />
-                </div>
-                
-        <MembersStats
-          totalMembers={members.length}
-          activeMembers={activeMembers.length}
-          inactiveMembers={inactiveMembers.length}
+            <CreateUserDialog
+              isOpen={isUserDialogOpen}
+              onOpenChange={setIsUserDialogOpen}
+              memberName={selectedMemberForUser?.name || ""}
+              memberEmail={selectedMemberForUser?.email || ""}
+              password={userPassword}
+              confirmPassword={userConfirmPassword}
+              error={userError}
+              onPasswordChange={setUserPassword}
+              onConfirmPasswordChange={setUserConfirmPassword}
+              onSubmit={handleUserSubmit}
+            />
+          </>
+        }
+      />
+
+      <MembersStats
+        totalMembers={members.length}
+        activeMembers={activeMembers.length}
+        inactiveMembers={inactiveMembers.length}
+      />
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Membros"
+          description={`${members.length} membros cadastrados`}
         />
+        <HuntlyCardContent className="p-0">
+          <Tabs defaultValue="all" className="w-full">
+            <div className="px-5 pt-4 border-b border-zinc-800/50">
+              <TabsList className="bg-zinc-900/50 border border-zinc-800/50">
+                <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                  Todos ({members.length})
+                </TabsTrigger>
+                <TabsTrigger value="active" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                  Ativos ({activeMembers.length})
+                </TabsTrigger>
+                <TabsTrigger value="inactive" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                  Inativos ({inactiveMembers.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          <Tabs defaultValue="all" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="all">
-                Todos ({members.length})
-              </TabsTrigger>
-              <TabsTrigger value="active">
-                Ativos ({activeMembers.length})
-              </TabsTrigger>
-              <TabsTrigger value="inactive">
-                Inativos ({inactiveMembers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="space-y-4">
-              <MembersList 
-                members={members} 
-                onEdit={handleEdit} 
+            <TabsContent value="all" className="mt-0">
+              <MembersList
+                members={members}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCreateUser={handleCreateUser}
               />
             </TabsContent>
 
-            <TabsContent value="active" className="space-y-4">
-              <MembersList 
-                members={activeMembers} 
-                onEdit={handleEdit} 
+            <TabsContent value="active" className="mt-0">
+              <MembersList
+                members={activeMembers}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCreateUser={handleCreateUser}
               />
             </TabsContent>
 
-            <TabsContent value="inactive" className="space-y-4">
-              <MembersList 
-                members={inactiveMembers} 
-                onEdit={handleEdit} 
+            <TabsContent value="inactive" className="mt-0">
+              <MembersList
+                members={inactiveMembers}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCreateUser={handleCreateUser}
               />
             </TabsContent>
           </Tabs>
-      </div>
-    </>
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }

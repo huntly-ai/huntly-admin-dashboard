@@ -188,7 +188,7 @@ export function TaskFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
           <DialogTitle>
             {editingTask ? "Editar Task" : "Nova Task"}
@@ -332,7 +332,7 @@ export function TaskFormDialog({
                   }
                 }}
                 placeholder="Digite uma tag e pressione Enter"
-                className="flex-1"
+                className="flex-1 bg-background border-border"
               />
               <Button type="button" onClick={handleAddTag} variant="outline">
                 Adicionar
@@ -343,13 +343,13 @@ export function TaskFormDialog({
                 {tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm"
+                    className="inline-flex items-center gap-1 bg-secondary text-foreground px-3 py-1 rounded text-sm"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-red-600"
+                      className="hover:text-red-400"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -363,7 +363,7 @@ export function TaskFormDialog({
           {members.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">Membros Alocados</Label>
-              <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-gray-50">
+              <div className="border border-border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-secondary">
                 {members.map((member) => (
                   <div key={member.id} className="flex items-center space-x-2">
                     <Checkbox
@@ -387,7 +387,7 @@ export function TaskFormDialog({
           {teams.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">Times Alocados</Label>
-              <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-gray-50">
+              <div className="border border-border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 bg-secondary">
                 {teams.map((team) => (
                   <div key={team.id} className="flex items-center space-x-2">
                     <Checkbox
@@ -408,7 +408,7 @@ export function TaskFormDialog({
           )}
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>

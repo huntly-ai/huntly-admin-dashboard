@@ -2,40 +2,17 @@
 
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, UserCheck } from "lucide-react"
+import { Edit, Trash2, UserCheck, Mail, Phone, Building2, Briefcase, Calendar, DollarSign } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { formatPhone } from "@/lib/utils/formatters"
-
-const statusLabels: Record<string, string> = {
-  NEW: "Novo",
-  CONTACTED: "Contactado",
-  QUALIFIED: "Qualificado",
-  PROPOSAL_SENT: "Proposta Enviada",
-  NEGOTIATION: "Negociação",
-  WON: "Ganho",
-  LOST: "Perdido",
-}
-
-const sourceLabels: Record<string, string> = {
-  WEBSITE: "Website",
-  REFERRAL: "Indicação",
-  SOCIAL_MEDIA: "Redes Sociais",
-  ZEROS_A_DIREITA: "Zeros à Direita",
-  EVENT: "Evento",
-  OTHER: "Outro",
-}
-
-const statusColors: Record<string, string> = {
-  NEW: "bg-blue-100 text-blue-800",
-  CONTACTED: "bg-purple-100 text-purple-800",
-  QUALIFIED: "bg-green-100 text-green-800",
-  PROPOSAL_SENT: "bg-yellow-100 text-yellow-800",
-  NEGOTIATION: "bg-orange-100 text-orange-800",
-  WON: "bg-emerald-100 text-emerald-800",
-  LOST: "bg-red-100 text-red-800",
-}
+import {
+  leadStatusColors,
+  leadStatusLabels,
+  leadSourceColors,
+  leadSourceLabels,
+} from "@/lib/design-tokens"
+import { HuntlyEmpty } from "@/components/huntly-ui"
 
 interface Lead {
   id: string
@@ -67,87 +44,112 @@ function LeadsListComponent({
 }: LeadsListProps) {
   if (leads.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        Nenhum lead cadastrado ainda. Clique em &quot;Novo Lead&quot; para começar.
-      </p>
+      <div className="p-8">
+        <HuntlyEmpty
+          title="Nenhum lead cadastrado"
+          description="Clique em 'Novo Lead' para começar a capturar oportunidades."
+        />
+      </div>
     )
   }
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)
+
   return (
-    <div className="space-y-3">
-      {leads.map((lead) => (
+    <div className="divide-y divide-zinc-800/50">
+      {leads.map((lead, index) => (
         <div
           key={lead.id}
-          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+          className="group/item p-5 hover:bg-zinc-900/30 transition-colors"
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="font-semibold text-lg">{lead.name}</h3>
-                <Badge className={statusColors[lead.status]}>
-                  {statusLabels[lead.status]}
-                </Badge>
-                <Badge variant="outline">{sourceLabels[lead.source]}</Badge>
+          <div className="flex items-start justify-between gap-4">
+            {/* Lead Info */}
+            <div className="flex-1 min-w-0">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[10px] tracking-wider text-zinc-600 font-mono">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <h3 className="font-display text-base font-medium text-zinc-200 group-hover/item:text-white transition-colors truncate">
+                  {lead.name}
+                </h3>
+                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${leadStatusColors[lead.status]}`}>
+                  {leadStatusLabels[lead.status]}
+                </span>
+                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] tracking-wide uppercase border ${leadSourceColors[lead.source]}`}>
+                  {leadSourceLabels[lead.source]}
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm text-gray-600">
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
                 {lead.email && (
-                  <div>
-                    <span className="font-medium">Email:</span> {lead.email}
+                  <div className="flex items-center gap-2 text-zinc-500">
+                    <Mail className="h-3.5 w-3.5 text-zinc-600" />
+                    <span className="truncate">{lead.email}</span>
                   </div>
                 )}
-                <div>
-                  <span className="font-medium">Telefone:</span> {formatPhone(lead.phone)}
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <Phone className="h-3.5 w-3.5 text-zinc-600" />
+                  <span>{formatPhone(lead.phone)}</span>
                 </div>
                 {lead.company && (
-                  <div>
-                    <span className="font-medium">Empresa:</span> {lead.company}
+                  <div className="flex items-center gap-2 text-zinc-500">
+                    <Building2 className="h-3.5 w-3.5 text-zinc-600" />
+                    <span className="truncate">{lead.company}</span>
                   </div>
                 )}
                 {lead.position && (
-                  <div>
-                    <span className="font-medium">Cargo:</span> {lead.position}
+                  <div className="flex items-center gap-2 text-zinc-500">
+                    <Briefcase className="h-3.5 w-3.5 text-zinc-600" />
+                    <span className="truncate">{lead.position}</span>
                   </div>
                 )}
                 {lead.estimatedValue && (
-                  <div>
-                    <span className="font-medium">Valor Estimado:</span>{" "}
-                    <span className="text-green-600 font-semibold">
-                      {new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      }).format(lead.estimatedValue)}
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+                    <span className="text-emerald-400 font-medium">
+                      {formatCurrency(lead.estimatedValue)}
                     </span>
                   </div>
                 )}
-                <div>
-                  <span className="font-medium">Criado em:</span>{" "}
-                  {format(new Date(lead.createdAt), "dd/MM/yyyy", { locale: ptBR })}
+                <div className="flex items-center gap-2 text-zinc-600">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="text-[11px]">
+                    {format(new Date(lead.createdAt), "dd/MM/yyyy", { locale: ptBR })}
+                  </span>
                 </div>
               </div>
 
+              {/* Notes */}
               {lead.notes && (
-                <p className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                <p className="mt-3 text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800/50 p-3 leading-relaxed">
                   {lead.notes}
                 </p>
               )}
 
+              {/* Converted Badge */}
               {lead.convertedToClientId && (
-                <div className="mt-2">
-                  <Badge className="bg-green-100 text-green-800">
-                    ✓ Convertido em Cliente
-                  </Badge>
+                <div className="mt-3">
+                  <span className="inline-flex items-center px-2 py-1 text-[10px] tracking-wide uppercase bg-emerald-950/50 text-emerald-400 border border-emerald-900/50">
+                    Convertido em Cliente
+                  </span>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-2 ml-4">
+            {/* Actions */}
+            <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
               {!lead.convertedToClientId && lead.status !== "WON" && (
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onConvert(lead)}
-                  className="text-green-600 hover:text-green-700"
+                  className="h-8 w-8 p-0 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-950/30"
                   title="Converter em Cliente"
                 >
                   <UserCheck className="h-4 w-4" />
@@ -155,17 +157,18 @@ function LeadsListComponent({
               )}
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onEdit(lead)}
+                className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                 title="Editar Lead"
               >
                 <Edit className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => onDelete(lead.id)}
-                className="text-red-600 hover:text-red-700"
+                className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-950/30"
                 title="Excluir Lead"
               >
                 <Trash2 className="h-4 w-4" />
@@ -179,4 +182,3 @@ function LeadsListComponent({
 }
 
 export const LeadsList = memo(LeadsListComponent)
-

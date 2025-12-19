@@ -275,8 +275,8 @@ export default function ProjectKanbanPage({
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando projeto...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando projeto...</p>
         </div>
       </div>
     )
@@ -302,8 +302,8 @@ export default function ProjectKanbanPage({
               Voltar
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{project.name}</h1>
-              <p className="text-gray-500 mt-1">
+              <h1 className="text-3xl font-bold text-foreground">{project.name}</h1>
+              <p className="text-muted-foreground mt-1">
                 {project.client.name}
                 {project.client.company && ` - ${project.client.company}`}
               </p>

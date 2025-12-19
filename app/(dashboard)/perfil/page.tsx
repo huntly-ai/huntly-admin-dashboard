@@ -1,16 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Mail, Phone, Briefcase, Calendar, Shield } from "lucide-react"
+import { Mail, Phone, Briefcase, Calendar, Shield, User } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { formatPhone } from "@/lib/utils/formatters"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+} from "@/components/huntly-ui"
+import { memberRoleLabels, memberStatusColors, memberStatusLabels, alertStyles } from "@/lib/design-tokens"
 
 interface UserProfile {
   id: string
@@ -28,28 +33,6 @@ interface UserProfile {
     skills?: string
     status: string
   }
-}
-
-const roleLabels: Record<string, string> = {
-  DEVELOPER: "Desenvolvedor",
-  DESIGNER: "Designer",
-  PROJECT_MANAGER: "Gerente de Projeto",
-  PRODUCT_MANAGER: "Gerente de Produto",
-  QA_ENGINEER: "Engenheiro de QA",
-  DEVOPS: "DevOps",
-  DATA_SCIENTIST: "Cientista de Dados",
-  BUSINESS_ANALYST: "Analista de Negócios",
-  FOUNDER: "Fundador",
-  CEO: "CEO",
-  CTO: "CTO",
-  CFO: "CFO",
-  OTHER: "Outro",
-}
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: "Ativo",
-  INACTIVE: "Inativo",
-  ON_LEAVE: "De Férias",
 }
 
 export default function PerfilPage() {
@@ -119,7 +102,7 @@ export default function PerfilPage() {
         newPassword: "",
         confirmPassword: "",
       })
-      
+
       setTimeout(() => {
         setPasswordSuccess(false)
       }, 5000)
@@ -129,268 +112,244 @@ export default function PerfilPage() {
   }
 
   if (loading) {
-    return (
-      <>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-            <p className="mt-4 text-gray-600">Carregando perfil...</p>
-          </div>
-        </div>
-      </>
-    )
+    return <HuntlyLoading text="Carregando perfil..." />
   }
 
   if (!user) {
     return (
-      <>
-        <Card>
-          <CardContent className="p-8">
-            <p className="text-center text-gray-500">Erro ao carregar perfil</p>
-          </CardContent>
-        </Card>
-      </>
+      <HuntlyCard>
+        <HuntlyCardContent className="p-8">
+          <p className="text-center text-zinc-500">Erro ao carregar perfil</p>
+        </HuntlyCardContent>
+      </HuntlyCard>
     )
   }
 
   return (
-    <>
-      <div className="space-y-6 max-w-4xl">
-        <div>
-          <h1 className="text-3xl font-bold">Meu Perfil</h1>
-          <p className="text-gray-600 mt-1">
-            Visualize suas informações e gerencie sua conta
-          </p>
-        </div>
+    <div className="space-y-8 max-w-4xl">
+      <SectionHeader
+        label="Conta"
+        title="Meu"
+        titleBold="Perfil"
+      />
 
-        {/* Profile Information */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
-                {user.member?.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <CardTitle className="text-2xl">
-                  {user.member?.name || "Usuário"}
-                </CardTitle>
-                <CardDescription className="text-base mt-1">
-                  {user.member ? roleLabels[user.member.role] : "Membro da equipe"}
-                </CardDescription>
-              </div>
+      {/* Profile Information */}
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Informações Pessoais"
+          description="Seus dados de perfil e informações de contato"
+        />
+        <HuntlyCardContent className="p-6">
+          {/* Profile Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-20 w-20 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-display text-2xl">
+              {user.member?.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {user.member && (
-              <>
-                {/* Status */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Status</Label>
-                  <div className="mt-2">
-                    <Badge
-                      variant="outline"
-                      className={
-                        user.member.status === "ACTIVE"
-                          ? "bg-green-50 text-green-700 border-green-200"
-                          : "bg-gray-50 text-gray-700 border-gray-200"
-                      }
-                    >
-                      {statusLabels[user.member.status]}
-                    </Badge>
-                  </div>
-                </div>
+            <div>
+              <h2 className="font-display text-2xl font-bold text-white mb-1">
+                {user.member?.name || "Usuário"}
+              </h2>
+              <p className="text-sm text-zinc-500">
+                {user.member ? memberRoleLabels[user.member.role] || user.member.role : "Membro da equipe"}
+              </p>
+            </div>
+          </div>
 
-                <Separator />
+          {user.member && (
+            <div className="space-y-6">
+              {/* Status */}
+              <div className="pb-6 border-b border-zinc-800/50">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-3">Status</p>
+                <span className={`inline-flex items-center px-2.5 py-1 text-xs ${memberStatusColors[user.member.status]}`}>
+                  {memberStatusLabels[user.member.status]}
+                </span>
+              </div>
 
-                {/* Contact Information */}
-                <div className="space-y-4">
-                  <Label className="text-sm font-medium text-gray-500">Informações de Contato</Label>
-                  
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <Mail className="h-5 w-5 text-gray-400" />
+              {/* Contact Information */}
+              <div className="pb-6 border-b border-zinc-800/50">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Informações de Contato</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-zinc-400">
+                    <Mail className="h-4 w-4 text-zinc-600" />
                     <span>{user.email}</span>
                   </div>
-
                   {user.member.phone && (
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Phone className="h-5 w-5 text-gray-400" />
+                    <div className="flex items-center gap-3 text-sm text-zinc-400">
+                      <Phone className="h-4 w-4 text-zinc-600" />
                       <span>{formatPhone(user.member.phone)}</span>
                     </div>
                   )}
                 </div>
-
-                {(user.member.department || user.member.hireDate) && (
-                  <>
-                    <Separator />
-
-                    {/* Work Information */}
-                    <div className="space-y-4">
-                      <Label className="text-sm font-medium text-gray-500">Informações Profissionais</Label>
-                      
-                      {user.member.department && (
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <Briefcase className="h-5 w-5 text-gray-400" />
-                          <span>{user.member.department}</span>
-                        </div>
-                      )}
-
-                      {user.member.hireDate && (
-                        <div className="flex items-center gap-3 text-gray-700">
-                          <Calendar className="h-5 w-5 text-gray-400" />
-                          <span>
-                            Na empresa desde {format(new Date(user.member.hireDate), "MMMM 'de' yyyy", { locale: ptBR })}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {user.member.roles && JSON.parse(user.member.roles).length > 1 && (
-                  <>
-                    <Separator />
-
-                    {/* All Roles */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-gray-500">Todos os Cargos</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {JSON.parse(user.member.roles).map((role: string, index: number) => (
-                          <Badge key={index} variant="outline">
-                            {roleLabels[role]}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {user.member.skills && (
-                  <>
-                    <Separator />
-
-                    {/* Skills */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-gray-500">Habilidades</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {user.member.skills.split(",").map((skill, index) => (
-                          <Badge key={index} variant="secondary">
-                            {skill.trim()}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {user.member.bio && (
-                  <>
-                    <Separator />
-
-                    {/* Bio */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-500">Bio</Label>
-                      <p className="text-gray-700">{user.member.bio}</p>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Change Password */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-blue-600" />
-              <div>
-                <CardTitle>Segurança</CardTitle>
-                <CardDescription>Altere sua senha de acesso</CardDescription>
               </div>
+
+              {/* Work Information */}
+              {(user.member.department || user.member.hireDate) && (
+                <div className="pb-6 border-b border-zinc-800/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Informações Profissionais</p>
+                  <div className="space-y-3">
+                    {user.member.department && (
+                      <div className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Briefcase className="h-4 w-4 text-zinc-600" />
+                        <span>{user.member.department}</span>
+                      </div>
+                    )}
+                    {user.member.hireDate && (
+                      <div className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Calendar className="h-4 w-4 text-zinc-600" />
+                        <span>
+                          Na empresa desde {format(new Date(user.member.hireDate), "MMMM 'de' yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* All Roles */}
+              {user.member.roles && JSON.parse(user.member.roles).length > 1 && (
+                <div className="pb-6 border-b border-zinc-800/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Todos os Cargos</p>
+                  <div className="flex flex-wrap gap-2">
+                    {JSON.parse(user.member.roles).map((role: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-2.5 py-1 text-xs border border-zinc-700 text-zinc-400"
+                      >
+                        {memberRoleLabels[role] || role}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Skills */}
+              {user.member.skills && (
+                <div className="pb-6 border-b border-zinc-800/50">
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Habilidades</p>
+                  <div className="flex flex-wrap gap-2">
+                    {user.member.skills.split(",").map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-2.5 py-1 text-xs bg-zinc-900/50 border border-zinc-800/50 text-zinc-400"
+                      >
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bio */}
+              {user.member.bio && (
+                <div>
+                  <p className="text-[10px] tracking-[0.3em] uppercase text-zinc-600 mb-4">Bio</p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">{user.member.bio}</p>
+                </div>
+              )}
             </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              {passwordError && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded text-sm">
-                  {passwordError}
-                </div>
-              )}
+          )}
+        </HuntlyCardContent>
+      </HuntlyCard>
 
-              {passwordSuccess && (
-                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded text-sm">
-                  Senha alterada com sucesso!
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Senha Atual</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.currentPassword}
-                  onChange={(e) =>
-                    setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                  }
-                  required
-                />
+      {/* Change Password */}
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title={
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-blue-500" />
+              <span>Segurança</span>
+            </div>
+          }
+          description="Altere sua senha de acesso"
+        />
+        <HuntlyCardContent className="p-6">
+          <form onSubmit={handlePasswordChange} className="space-y-6">
+            {passwordError && (
+              <div className={`px-4 py-3 text-sm ${alertStyles.error}`}>
+                {passwordError}
               </div>
+            )}
 
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Nova Senha</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.newPassword}
-                  onChange={(e) =>
-                    setPasswordData({ ...passwordData, newPassword: e.target.value })
-                  }
-                  required
-                />
-                <p className="text-xs text-gray-500">Mínimo de 6 caracteres</p>
+            {passwordSuccess && (
+              <div className={`px-4 py-3 text-sm ${alertStyles.success}`}>
+                Senha alterada com sucesso!
               </div>
+            )}
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) =>
-                    setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                  }
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword" className="text-xs text-zinc-400">Senha Atual</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                placeholder="••••••••"
+                value={passwordData.currentPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                }
+                required
+                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+              />
+            </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setPasswordData({
-                      currentPassword: "",
-                      newPassword: "",
-                      confirmPassword: "",
-                    })
-                    setPasswordError("")
-                    setPasswordSuccess(false)
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  Alterar Senha
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword" className="text-xs text-zinc-400">Nova Senha</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                placeholder="••••••••"
+                value={passwordData.newPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, newPassword: e.target.value })
+                }
+                required
+                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+              />
+              <p className="text-[10px] text-zinc-600">Mínimo de 6 caracteres</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-xs text-zinc-400">Confirmar Nova Senha</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={passwordData.confirmPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                }
+                required
+                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:ring-zinc-700"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-zinc-800/50">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setPasswordData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                  })
+                  setPasswordError("")
+                  setPasswordSuccess(false)
+                }}
+                className="text-zinc-500 hover:text-white hover:bg-zinc-800/50"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-white text-black hover:bg-zinc-200 font-medium"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Alterar Senha
+              </Button>
+            </div>
+          </form>
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }
-

@@ -1,10 +1,18 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { prepareValueForCurrencyInput } from "@/lib/utils/formatters"
 import { ContractsList } from "./components/contracts-list"
 import { ContractFormDialog } from "./components/contract-form-dialog"
+import {
+  SectionHeader,
+  HuntlyCard,
+  HuntlyCardHeader,
+  HuntlyCardContent,
+  HuntlyLoading,
+  StatCard,
+} from "@/components/huntly-ui"
+import { FileText, CheckCircle2, DollarSign } from "lucide-react"
 
 interface Client {
   id: string
@@ -146,10 +154,8 @@ export default function ContractsPage() {
         : "/api/contratos"
       const method = editingContract ? "PUT" : "POST"
 
-      // Convert totalValue to decimal
       const totalValueDecimal = (parseFloat(formData.totalValue) / 100).toFixed(2)
 
-      // Convert payment amounts to decimal
       const paymentsData = payments.map(p => ({
         installmentNumber: p.installmentNumber,
         amount: (parseFloat(p.amount) / 100).toFixed(2),
@@ -262,33 +268,43 @@ export default function ContractsPage() {
     })
   }, [])
 
+  const handleDialogChange = useCallback((open: boolean) => {
+    setIsDialogOpen(open)
+    if (!open) {
+      resetForm()
+    }
+  }, [resetForm])
+
   const activeContracts = useMemo(
     () => contracts.filter(c => c.status === "ACTIVE"),
     [contracts]
   )
 
+  const totalValue = useMemo(
+    () => activeContracts.reduce((sum, c) => sum + Number(c.totalValue), 0),
+    [activeContracts]
+  )
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando contratos...</p>
-        </div>
-      </div>
-    )
+    return <HuntlyLoading text="Carregando contratos..." />
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Contratos</h1>
-            <p className="text-gray-500 mt-1">Gerencie contratos e pagamentos</p>
-          </div>
+    <div className="space-y-8">
+      <SectionHeader
+        label="Jurídico"
+        title="Contratos"
+        titleBold="& Pagamentos"
+        action={
           <ContractFormDialog
             isOpen={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
+            onOpenChange={handleDialogChange}
             editingContract={editingContract}
             formData={formData}
             payments={payments}
@@ -302,57 +318,43 @@ export default function ContractsPage() {
             onSubmit={handleSubmit}
             onResetForm={resetForm}
           />
-        </div>
+        }
+      />
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total de Contratos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{contracts.length}</div>
-            </CardContent>
-          </Card>
-            <Card>
-              <CardHeader>
-              <CardTitle>Contratos Ativos</CardTitle>
-              </CardHeader>
-              <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {activeContracts.length}
-                              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Valor Total</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(
-                  activeContracts.reduce((sum, c) => sum + Number(c.totalValue), 0)
-                )}
-              </div>
-              </CardContent>
-            </Card>
-          </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Contratos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ContractsList
-              contracts={contracts}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard
+          label="Total de Contratos"
+          value={contracts.length}
+          icon={FileText}
+        />
+        <StatCard
+          label="Contratos Ativos"
+          value={activeContracts.length}
+          icon={CheckCircle2}
+          className="[&_.font-display]:text-emerald-400"
+        />
+        <StatCard
+          label="Valor Total Ativo"
+          value={formatCurrency(totalValue)}
+          icon={DollarSign}
+          className="[&_.font-display]:text-blue-400"
+        />
       </div>
-    </>
+
+      <HuntlyCard>
+        <HuntlyCardHeader
+          title="Lista de Contratos"
+          description={`${contracts.length} contratos cadastrados`}
+        />
+        <HuntlyCardContent className="p-0">
+          <ContractsList
+            contracts={contracts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </HuntlyCardContent>
+      </HuntlyCard>
+    </div>
   )
 }
