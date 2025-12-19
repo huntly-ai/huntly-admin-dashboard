@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { verifyAuth } from "@/lib/auth"
 import { TransactionType, TransactionCategory } from "@prisma/client"
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const searchParams = request.nextUrl.searchParams
     const type = searchParams.get("type")
     const category = searchParams.get("category")
@@ -52,6 +58,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const body = await request.json()
     
     const transaction = await prisma.transaction.create({

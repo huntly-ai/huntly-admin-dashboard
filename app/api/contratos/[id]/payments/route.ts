@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { PaymentStatus } from "@prisma/client"
+import { verifyAuth } from "@/lib/auth"
 
 export async function GET(
   request: NextRequest,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const params = await props.params
     const { id } = params
 
@@ -32,6 +38,11 @@ export async function POST(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const params = await props.params
     const { id } = params
     const body = await request.json()

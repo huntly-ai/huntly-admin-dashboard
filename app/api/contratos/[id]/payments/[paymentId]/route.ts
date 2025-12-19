@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { PaymentStatus } from "@prisma/client"
+import { verifyAuth } from "@/lib/auth"
 
 export async function PUT(
   request: NextRequest,
   props: { params: Promise<{ id: string; paymentId: string }> }
 ) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const params = await props.params
     const { paymentId } = params
     const body = await request.json()
@@ -41,6 +47,11 @@ export async function DELETE(
   props: { params: Promise<{ id: string; paymentId: string }> }
 ) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const params = await props.params
     const { paymentId } = params
 

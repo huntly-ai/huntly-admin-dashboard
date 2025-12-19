@@ -2,9 +2,11 @@ import bcrypt from "bcrypt"
 import { SignJWT, jwtVerify } from "jose"
 import { NextRequest } from "next/server"
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "huntly-secret-key-change-in-production"
-)
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not configured")
+}
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10)

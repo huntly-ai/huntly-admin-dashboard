@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ContractStatus } from "@prisma/client"
+import { verifyAuth } from "@/lib/auth"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const contracts = await prisma.contract.findMany({
       include: {
         client: {
@@ -58,6 +64,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
     const body = await request.json()
 
     // Generate contract number (format: CONT-YYYYMM-XXX)
