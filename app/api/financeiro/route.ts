@@ -43,6 +43,12 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        internalProject: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     })
 
@@ -74,6 +80,7 @@ export async function POST(request: NextRequest) {
         date: body.date ? new Date(body.date) : new Date(),
         projectId: body.projectId || null,
         clientId: body.clientId || null,
+        internalProjectId: body.internalProjectId || null,
         invoiceNumber: body.invoiceNumber,
         paymentMethod: body.paymentMethod,
         notes: body.notes,
@@ -86,6 +93,12 @@ export async function POST(request: NextRequest) {
           },
         },
         project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        internalProject: {
           select: {
             id: true,
             name: true,

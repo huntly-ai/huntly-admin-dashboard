@@ -86,6 +86,11 @@ interface Project {
   } | null
 }
 
+interface InternalProject {
+  id: string
+  name: string
+}
+
 interface FormData {
   type: string
   category: string
@@ -94,6 +99,7 @@ interface FormData {
   date: string
   clientId: string | null
   projectId: string | null
+  internalProjectId: string | null
   invoiceNumber: string
   paymentMethod: string
   notes: string
@@ -106,6 +112,7 @@ interface TransactionFormDialogProps {
   formData: FormData
   clients: Client[]
   projects: Project[]
+  internalProjects?: InternalProject[]
   onFormChange: (field: keyof FormData, value: string | null) => void
   onSubmit: (e: React.FormEvent) => void
 }
@@ -117,6 +124,7 @@ function TransactionFormDialogComponent({
   formData,
   clients,
   projects,
+  internalProjects = [],
   onFormChange,
   onSubmit,
 }: TransactionFormDialogProps) {
@@ -170,6 +178,46 @@ function TransactionFormDialogComponent({
     if (!formData.projectId) return null
     return projects.find((p) => p.id === formData.projectId)?.name
   }, [projects, formData.projectId])
+
+  const selectedInternalProjectName = useMemo(() => {
+    if (!formData.internalProjectId) return null
+    return internalProjects.find((p) => p.id === formData.internalProjectId)?.name
+  }, [internalProjects, formData.internalProjectId])
+
+  // Handle internal project change - clear client/project when selecting internal project
+  const handleInternalProjectChange = useCallback(
+    (value: string | null) => {
+      onFormChange("internalProjectId", value)
+      if (value) {
+        // Clear client project when selecting internal project
+        onFormChange("clientId", null)
+        onFormChange("projectId", null)
+      }
+    },
+    [onFormChange]
+  )
+
+  // Modified client change to clear internal project
+  const handleClientChangeWithClear = useCallback(
+    (value: string | null) => {
+      handleClientChange(value)
+      if (value) {
+        onFormChange("internalProjectId", null)
+      }
+    },
+    [handleClientChange, onFormChange]
+  )
+
+  // Modified project change to clear internal project
+  const handleProjectChangeWithClear = useCallback(
+    (value: string | null) => {
+      handleProjectChange(value)
+      if (value) {
+        onFormChange("internalProjectId", null)
+      }
+    },
+    [handleProjectChange, onFormChange]
+  )
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -278,8 +326,9 @@ function TransactionFormDialogComponent({
                 <Select
                   value={formData.clientId || "none"}
                   onValueChange={(value) =>
-                    handleClientChange(value === "none" ? null : value)
+                    handleClientChangeWithClear(value === "none" ? null : value)
                   }
+                  disabled={!!formData.internalProjectId}
                 >
                   <SelectTrigger className="flex-1">
                     <SelectValue>
@@ -301,7 +350,7 @@ function TransactionFormDialogComponent({
                     variant="ghost"
                     size="icon"
                     className="shrink-0"
-                    onClick={() => handleClientChange(null)}
+                    onClick={() => handleClientChangeWithClear(null)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -314,8 +363,9 @@ function TransactionFormDialogComponent({
                 <Select
                   value={formData.projectId || "none"}
                   onValueChange={(value) =>
-                    handleProjectChange(value === "none" ? null : value)
+                    handleProjectChangeWithClear(value === "none" ? null : value)
                   }
+                  disabled={!!formData.internalProjectId}
                 >
                   <SelectTrigger className="flex-1">
                     <SelectValue>
@@ -342,7 +392,7 @@ function TransactionFormDialogComponent({
                     variant="ghost"
                     size="icon"
                     className="shrink-0"
-                    onClick={() => handleProjectChange(null)}
+                    onClick={() => handleProjectChangeWithClear(null)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -350,6 +400,53 @@ function TransactionFormDialogComponent({
               </div>
             </div>
           </div>
+
+          {internalProjects.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="internalProjectId">
+                Projeto Interno
+                {(formData.clientId || formData.projectId) && (
+                  <span className="text-muted-foreground text-xs ml-2">
+                    (limpe cliente/projeto para selecionar)
+                  </span>
+                )}
+              </Label>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.internalProjectId || "none"}
+                  onValueChange={(value) =>
+                    handleInternalProjectChange(value === "none" ? null : value)
+                  }
+                  disabled={!!(formData.clientId || formData.projectId)}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue>
+                      {selectedInternalProjectName || "Selecione um projeto interno"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum projeto interno</SelectItem>
+                    {internalProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.internalProjectId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => handleInternalProjectChange(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

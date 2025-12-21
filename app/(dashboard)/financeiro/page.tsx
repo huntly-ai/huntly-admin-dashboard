@@ -32,6 +32,11 @@ interface Project {
   } | null
 }
 
+interface InternalProject {
+  id: string
+  name: string
+}
+
 interface Transaction {
   id: string
   type: string
@@ -41,6 +46,7 @@ interface Transaction {
   date: string
   client?: Client
   project?: Project
+  internalProject?: InternalProject
   invoiceNumber?: string
   paymentMethod?: string
   notes?: string
@@ -51,6 +57,7 @@ export default function FinanceiroPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [projects, setProjects] = useState<Project[]>([])
+  const [internalProjects, setInternalProjects] = useState<InternalProject[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -69,6 +76,7 @@ export default function FinanceiroPage() {
     date: new Date().toISOString().split("T")[0],
     clientId: null as string | null,
     projectId: null as string | null,
+    internalProjectId: null as string | null,
     invoiceNumber: "",
     paymentMethod: "",
     notes: "",
@@ -106,11 +114,24 @@ export default function FinanceiroPage() {
     }
   }, [])
 
+  const fetchInternalProjects = useCallback(async () => {
+    try {
+      const response = await fetch("/api/projetos-internos")
+      const data = await response.json()
+      if (Array.isArray(data)) {
+        setInternalProjects(data)
+      }
+    } catch (error) {
+      console.error("Error fetching internal projects:", error)
+    }
+  }, [])
+
   useEffect(() => {
     fetchTransactions()
     fetchClients()
     fetchProjects()
-  }, [fetchTransactions, fetchClients, fetchProjects])
+    fetchInternalProjects()
+  }, [fetchTransactions, fetchClients, fetchProjects, fetchInternalProjects])
 
   const resetForm = useCallback(() => {
     setEditingTransaction(null)
@@ -122,6 +143,7 @@ export default function FinanceiroPage() {
       date: new Date().toISOString().split("T")[0],
       clientId: null,
       projectId: null,
+      internalProjectId: null,
       invoiceNumber: "",
       paymentMethod: "",
       notes: "",
@@ -194,6 +216,7 @@ export default function FinanceiroPage() {
       date: transaction.date ? transaction.date.split("T")[0] : "",
       clientId: transaction.client?.id || null,
       projectId: transaction.project?.id || null,
+      internalProjectId: transaction.internalProject?.id || null,
       invoiceNumber: transaction.invoiceNumber || "",
       paymentMethod: transaction.paymentMethod || "",
       notes: transaction.notes || "",
@@ -288,6 +311,7 @@ export default function FinanceiroPage() {
               formData={formData}
               clients={clients}
               projects={projects}
+              internalProjects={internalProjects}
               onFormChange={handleFormChange}
               onSubmit={handleSubmit}
             />

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  Box,
   Calendar,
   DollarSign,
   FileText,
@@ -55,6 +56,11 @@ const navigation = {
       title: "Projetos",
       url: "/projetos",
       icon: FolderKanban,
+    },
+    {
+      title: "Projetos Internos",
+      url: "/projetos-internos",
+      icon: Box,
     },
     {
       title: "Contratos",

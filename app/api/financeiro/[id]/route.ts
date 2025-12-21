@@ -18,6 +18,7 @@ export async function GET(
       include: {
         client: true,
         project: true,
+        internalProject: true,
       },
     })
 
@@ -61,6 +62,7 @@ export async function PUT(
         date: body.date ? new Date(body.date) : undefined,
         projectId: body.projectId || null,
         clientId: body.clientId || null,
+        internalProjectId: body.internalProjectId || null,
         invoiceNumber: body.invoiceNumber,
         paymentMethod: body.paymentMethod,
         notes: body.notes,
@@ -73,6 +75,12 @@ export async function PUT(
           },
         },
         project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        internalProject: {
           select: {
             id: true,
             name: true,
