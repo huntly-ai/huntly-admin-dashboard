@@ -1,0 +1,960 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Huntly Admin Dashboard API",
+    "description": "API for managing leads, clients, projects, finances, and internal projects. Use API Keys for automated integrations.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Huntly",
+      "url": "https://huntlyai.xyz"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://admin.huntlyai.xyz/api",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Development"
+    }
+  ],
+  "security": [
+    { "ApiKeyAuth": [] },
+    { "CookieAuth": [] }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Authentication endpoints" },
+    { "name": "API Keys", "description": "Manage API keys for integrations" },
+    { "name": "Transactions", "description": "Financial transactions (income/expense)" },
+    { "name": "Internal Projects", "description": "Internal apps/products with financial tracking" },
+    { "name": "Tasks", "description": "Task management for internal projects" },
+    { "name": "Clients", "description": "Client management" },
+    { "name": "Projects", "description": "Client projects" },
+    { "name": "Leads", "description": "Sales leads" }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login to get authentication cookie",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" },
+                  "remember": { "type": "boolean", "default": false }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "headers": {
+              "Set-Cookie": {
+                "schema": { "type": "string" },
+                "description": "auth-token cookie"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api-keys": {
+      "get": {
+        "tags": ["API Keys"],
+        "summary": "List all API keys",
+        "responses": {
+          "200": {
+            "description": "List of API keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ApiKey" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["API Keys"],
+        "summary": "Create a new API key",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateApiKeyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API key created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiKeyCreated" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/financeiro": {
+      "get": {
+        "tags": ["Transactions"],
+        "summary": "List all transactions",
+        "description": "Get all financial transactions. Use query parameters to filter.",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/TransactionType" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/TransactionCategory" }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Transaction" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Transactions"],
+        "summary": "Create a transaction",
+        "description": "Create a new income or expense transaction. Can be linked to a client project or internal project.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateTransactionRequest" },
+              "examples": {
+                "expense": {
+                  "summary": "Log an expense",
+                  "value": {
+                    "type": "EXPENSE",
+                    "category": "INFRASTRUCTURE",
+                    "amount": 49.99,
+                    "description": "AWS hosting - December",
+                    "date": "2024-12-20",
+                    "paymentMethod": "CARTAO_CREDITO",
+                    "internalProjectId": "cm123..."
+                  }
+                },
+                "income": {
+                  "summary": "Log income",
+                  "value": {
+                    "type": "INCOME",
+                    "category": "SUBSCRIPTION",
+                    "amount": 29.90,
+                    "description": "Monthly subscription - User 123",
+                    "date": "2024-12-20",
+                    "paymentMethod": "PIX",
+                    "internalProjectId": "cm123..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/financeiro/{id}": {
+      "get": {
+        "tags": ["Transactions"],
+        "summary": "Get a transaction",
+        "parameters": [
+          { "$ref": "#/components/parameters/TransactionId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Transactions"],
+        "summary": "Update a transaction",
+        "parameters": [
+          { "$ref": "#/components/parameters/TransactionId" }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateTransactionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Transactions"],
+        "summary": "Delete a transaction",
+        "parameters": [
+          { "$ref": "#/components/parameters/TransactionId" }
+        ],
+        "responses": {
+          "200": { "description": "Transaction deleted" }
+        }
+      }
+    },
+    "/projetos-internos": {
+      "get": {
+        "tags": ["Internal Projects"],
+        "summary": "List internal projects",
+        "description": "Get all internal projects with financial summaries.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["ACTIVE", "ARCHIVED"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of internal projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/InternalProject" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Internal Projects"],
+        "summary": "Create internal project",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateInternalProjectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InternalProject" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projetos-internos/{id}": {
+      "get": {
+        "tags": ["Internal Projects"],
+        "summary": "Get internal project details",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project with tasks and transactions",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InternalProjectDetail" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Internal Projects"],
+        "summary": "Update internal project",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateInternalProjectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InternalProject" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Internal Projects"],
+        "summary": "Delete internal project",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "responses": {
+          "200": { "description": "Project deleted" },
+          "400": { "description": "Cannot delete project with transactions" }
+        }
+      }
+    },
+    "/projetos-internos/{id}/transactions": {
+      "get": {
+        "tags": ["Internal Projects"],
+        "summary": "List project transactions",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of transactions for this project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Transaction" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Internal Projects"],
+        "summary": "Create transaction for project",
+        "description": "Create a transaction automatically linked to this internal project.",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateProjectTransactionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projetos-internos/{id}/tasks": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "List project tasks",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Task" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tasks"],
+        "summary": "Create task",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateTaskRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projetos-internos/{id}/tasks/{taskId}": {
+      "put": {
+        "tags": ["Tasks"],
+        "summary": "Update task",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" },
+          { "$ref": "#/components/parameters/TaskId" }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateTaskRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Tasks"],
+        "summary": "Delete task",
+        "parameters": [
+          { "$ref": "#/components/parameters/InternalProjectId" },
+          { "$ref": "#/components/parameters/TaskId" }
+        ],
+        "responses": {
+          "200": { "description": "Task deleted" }
+        }
+      }
+    },
+    "/clientes": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "List all clients",
+        "responses": {
+          "200": {
+            "description": "List of clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Client" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projetos": {
+      "get": {
+        "tags": ["Projects"],
+        "summary": "List all client projects",
+        "responses": {
+          "200": {
+            "description": "List of projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Project" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leads": {
+      "get": {
+        "tags": ["Leads"],
+        "summary": "List all leads",
+        "responses": {
+          "200": {
+            "description": "List of leads",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Lead" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key for external integrations. Get one from the dashboard."
+      },
+      "CookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "auth-token",
+        "description": "JWT token set after login"
+      }
+    },
+    "parameters": {
+      "TransactionId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" }
+      },
+      "InternalProjectId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "Internal project CUID"
+      },
+      "TaskId": {
+        "name": "taskId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Not authenticated",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "email": { "type": "string" },
+              "member": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "role": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "TransactionType": {
+        "type": "string",
+        "enum": ["INCOME", "EXPENSE"],
+        "description": "INCOME = receita, EXPENSE = despesa"
+      },
+      "TransactionCategory": {
+        "type": "string",
+        "enum": [
+          "PROJECT_PAYMENT",
+          "CONSULTING",
+          "LICENSE",
+          "SUBSCRIPTION",
+          "OTHER_INCOME",
+          "SALARIES",
+          "INFRASTRUCTURE",
+          "SOFTWARE",
+          "MARKETING",
+          "OFFICE",
+          "TAXES",
+          "OTHER_EXPENSE"
+        ],
+        "description": "Income categories: PROJECT_PAYMENT, CONSULTING, LICENSE, SUBSCRIPTION, OTHER_INCOME. Expense categories: SALARIES, INFRASTRUCTURE, SOFTWARE, MARKETING, OFFICE, TAXES, OTHER_EXPENSE"
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": ["PIX", "BOLETO", "CARTAO_CREDITO", "TRANSFERENCIA", "CRIPTO"]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "$ref": "#/components/schemas/TransactionType" },
+          "category": { "$ref": "#/components/schemas/TransactionCategory" },
+          "amount": { "type": "number" },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "paymentMethod": { "$ref": "#/components/schemas/PaymentMethod" },
+          "notes": { "type": "string", "nullable": true },
+          "client": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          },
+          "project": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          },
+          "internalProject": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      },
+      "CreateTransactionRequest": {
+        "type": "object",
+        "required": ["type", "category", "amount", "description"],
+        "properties": {
+          "type": { "$ref": "#/components/schemas/TransactionType" },
+          "category": { "$ref": "#/components/schemas/TransactionCategory" },
+          "amount": { "type": "number", "description": "Amount in BRL" },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date", "description": "YYYY-MM-DD format" },
+          "paymentMethod": { "$ref": "#/components/schemas/PaymentMethod" },
+          "notes": { "type": "string" },
+          "clientId": { "type": "string", "description": "Link to client" },
+          "projectId": { "type": "string", "description": "Link to client project" },
+          "internalProjectId": { "type": "string", "description": "Link to internal project" },
+          "invoiceNumber": { "type": "string" }
+        }
+      },
+      "UpdateTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "type": { "$ref": "#/components/schemas/TransactionType" },
+          "category": { "$ref": "#/components/schemas/TransactionCategory" },
+          "amount": { "type": "number" },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "paymentMethod": { "$ref": "#/components/schemas/PaymentMethod" },
+          "notes": { "type": "string" }
+        }
+      },
+      "CreateProjectTransactionRequest": {
+        "type": "object",
+        "required": ["type", "category", "amount", "description"],
+        "properties": {
+          "type": { "$ref": "#/components/schemas/TransactionType" },
+          "category": { "$ref": "#/components/schemas/TransactionCategory" },
+          "amount": { "type": "number" },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "paymentMethod": { "$ref": "#/components/schemas/PaymentMethod" },
+          "notes": { "type": "string" }
+        }
+      },
+      "InternalProject": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "transactions": { "type": "integer" },
+              "tasks": { "type": "integer" }
+            }
+          },
+          "financials": {
+            "type": "object",
+            "properties": {
+              "totalIncome": { "type": "number" },
+              "totalExpense": { "type": "number" },
+              "profit": { "type": "number" }
+            }
+          }
+        }
+      },
+      "InternalProjectDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/InternalProject" },
+          {
+            "type": "object",
+            "properties": {
+              "tasks": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Task" }
+              },
+              "transactions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        ]
+      },
+      "CreateInternalProjectRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED"], "default": "ACTIVE" },
+          "color": { "type": "string", "description": "Hex color for UI" }
+        }
+      },
+      "UpdateInternalProjectRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED"] },
+          "color": { "type": "string" }
+        }
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]
+      },
+      "TaskPriority": {
+        "type": "string",
+        "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"]
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "status": { "$ref": "#/components/schemas/TaskStatus" },
+          "priority": { "$ref": "#/components/schemas/TaskPriority" },
+          "dueDate": { "type": "string", "format": "date-time", "nullable": true },
+          "completedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "estimatedHours": { "type": "number", "nullable": true },
+          "actualHours": { "type": "number", "nullable": true },
+          "order": { "type": "integer" }
+        }
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/TaskStatus" },
+          "priority": { "$ref": "#/components/schemas/TaskPriority" },
+          "dueDate": { "type": "string", "format": "date" },
+          "estimatedHours": { "type": "number" }
+        }
+      },
+      "UpdateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/TaskStatus" },
+          "priority": { "$ref": "#/components/schemas/TaskPriority" },
+          "dueDate": { "type": "string", "format": "date" },
+          "estimatedHours": { "type": "number" },
+          "actualHours": { "type": "number" }
+        }
+      },
+      "ApiKey": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "prefix": { "type": "string", "description": "Key prefix for identification" },
+          "permissions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "internalProjectId": { "type": "string", "nullable": true },
+          "internalProject": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          },
+          "lastUsedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateApiKeyRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "Friendly name for the key" },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "transactions:read",
+                "transactions:write",
+                "transactions:delete",
+                "internal-projects:read",
+                "internal-projects:write",
+                "tasks:read",
+                "tasks:write",
+                "tasks:delete",
+                "full-access"
+              ]
+            },
+            "default": ["transactions:read", "transactions:write"]
+          },
+          "internalProjectId": { "type": "string", "description": "Restrict key to specific project" },
+          "expiresIn": {
+            "type": "string",
+            "enum": ["7d", "30d", "90d", "1y", "never"],
+            "default": "never"
+          }
+        }
+      },
+      "ApiKeyCreated": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiKey" },
+          {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string", "description": "The full API key - shown only once!" },
+              "message": { "type": "string" }
+            }
+          }
+        ]
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "company": { "type": "string", "nullable": true },
+          "status": { "type": "string" }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string" },
+          "client": { "$ref": "#/components/schemas/Client" }
+        }
+      },
+      "Lead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      }
+    }
+  }
+}

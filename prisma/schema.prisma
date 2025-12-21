@@ -387,11 +387,14 @@ model TeamMember {
   suggestionVotes     SuggestionVote[]
   suggestionComments  SuggestionComment[]
 
+  // API Keys created by this member
+  apiKeys         ApiKey[]
+
   notes           String?
-  
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  
+
   @@index([status])
   @@index([role])
 }
@@ -820,6 +823,9 @@ model InternalProject {
   stories     InternalStory[]
   tasks       InternalTask[]
 
+  // API Keys scoped to this project
+  apiKeys     ApiKey[]
+
   // Metadata
   icon        String?               // Optional icon identifier
   color       String?               // Optional color for UI display
@@ -912,4 +918,36 @@ model InternalTask {
   @@index([status])
   @@index([priority])
   @@index([dueDate])
+}
+
+// ==================== API KEYS ====================
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String    // Friendly name for the key
+  key         String    @unique // The actual API key (hashed)
+  prefix      String    // First 8 chars for identification (e.g., "hntly_ab")
+
+  // Permissions
+  permissions String[]  // Array of permissions: ["transactions:read", "transactions:write", etc.]
+
+  // Scope
+  internalProjectId String?           // Optional: restrict to specific internal project
+  internalProject   InternalProject?  @relation(fields: [internalProjectId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+
+  // Audit
+  createdById String?
+  createdBy   TeamMember? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([key])
+  @@index([prefix])
+  @@index([isActive])
 }

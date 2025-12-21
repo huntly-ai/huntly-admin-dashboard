@@ -22,6 +22,7 @@ interface InternalProject {
   createdAt: string
   _count?: {
     transactions: number
+    tasks: number
   }
   financials?: {
     totalIncome: number
