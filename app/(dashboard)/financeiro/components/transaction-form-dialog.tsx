@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -103,6 +104,7 @@ interface FormData {
   invoiceNumber: string
   paymentMethod: string
   notes: string
+  isPaid: boolean
 }
 
 interface TransactionFormDialogProps {
@@ -113,7 +115,7 @@ interface TransactionFormDialogProps {
   clients: Client[]
   projects: Project[]
   internalProjects?: InternalProject[]
-  onFormChange: (field: keyof FormData, value: string | null) => void
+  onFormChange: (field: keyof FormData, value: string | null | boolean) => void
   onSubmit: (e: React.FormEvent) => void
 }
 
@@ -246,6 +248,8 @@ function TransactionFormDialogComponent({
                   onFormChange("type", value)
                   // Reset category when changing type
                   onFormChange("category", "")
+                  // Set isPaid default based on type
+                  onFormChange("isPaid", value === "INCOME" ? "true" : "false")
                 }}
                 required
               >
@@ -495,6 +499,24 @@ function TransactionFormDialogComponent({
               onChange={(e) => onFormChange("notes", e.target.value)}
             />
           </div>
+
+          {formData.type === "EXPENSE" && (
+            <div className="flex items-center gap-3 p-3 bg-muted/50 border border-border rounded-md">
+              <Checkbox
+                id="isPaid"
+                checked={formData.isPaid}
+                onCheckedChange={(checked) =>
+                  onFormChange("isPaid", checked ? "true" : "false")
+                }
+              />
+              <Label
+                htmlFor="isPaid"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Esta despesa já foi paga
+              </Label>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button

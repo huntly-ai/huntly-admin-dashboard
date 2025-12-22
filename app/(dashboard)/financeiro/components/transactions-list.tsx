@@ -12,6 +12,8 @@ import {
   FolderKanban,
   Receipt,
   CreditCard,
+  Check,
+  Clock,
 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -55,6 +57,7 @@ interface Transaction {
   invoiceNumber?: string
   paymentMethod?: string
   notes?: string
+  isPaid?: boolean
   createdAt: string
 }
 
@@ -62,6 +65,7 @@ interface TransactionsListProps {
   transactions: Transaction[]
   onEdit: (transaction: Transaction) => void
   onDelete: (transaction: Transaction) => void
+  onTogglePaid?: (transaction: Transaction) => void
 }
 
 function formatCurrency(value: number): string {
@@ -75,6 +79,7 @@ function TransactionsListComponent({
   transactions,
   onEdit,
   onDelete,
+  onTogglePaid,
 }: TransactionsListProps) {
   if (transactions.length === 0) {
     return (
@@ -116,6 +121,29 @@ function TransactionsListComponent({
                 <span className="inline-flex items-center px-2 py-0.5 text-[10px] border border-border text-muted-foreground dark:text-zinc-400">
                   {categoryLabels[transaction.category] || transaction.category}
                 </span>
+                {transaction.type === "EXPENSE" && (
+                  <button
+                    onClick={() => onTogglePaid?.(transaction)}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] tracking-wide uppercase transition-colors cursor-pointer ${
+                      transaction.isPaid
+                        ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                        : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                    }`}
+                    title={transaction.isPaid ? "Clique para marcar como pendente" : "Clique para marcar como pago"}
+                  >
+                    {transaction.isPaid ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        Pago
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-3 w-3" />
+                        Pendente
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
 
               {/* Amount */}

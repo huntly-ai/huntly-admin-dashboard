@@ -66,6 +66,7 @@ export async function PUT(
         invoiceNumber: body.invoiceNumber,
         paymentMethod: body.paymentMethod,
         notes: body.notes,
+        isPaid: body.isPaid !== undefined ? body.isPaid : undefined,
       },
       include: {
         client: {
@@ -108,6 +109,66 @@ export async function PUT(
       )
     }
     
+    return NextResponse.json(
+      { error: "Failed to update transaction" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await verifyAuth(request)
+    if (!auth.isValid) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
+    const { id } = await params
+    const body = await request.json()
+
+    // PATCH is used for partial updates (e.g., toggling isPaid)
+    const transaction = await prisma.transaction.update({
+      where: { id },
+      data: {
+        isPaid: body.isPaid,
+      },
+      include: {
+        client: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        internalProject: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+
+    return NextResponse.json(transaction)
+  } catch (error: unknown) {
+    console.error("Error patching transaction:", error)
+    const prismaError = error as { code?: string }
+
+    if (prismaError.code === "P2025") {
+      return NextResponse.json(
+        { error: "Transaction not found" },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json(
       { error: "Failed to update transaction" },
       { status: 500 }

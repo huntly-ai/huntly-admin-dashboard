@@ -50,6 +50,7 @@ interface Transaction {
   invoiceNumber?: string
   paymentMethod?: string
   notes?: string
+  isPaid?: boolean
   createdAt: string
 }
 
@@ -80,6 +81,7 @@ export default function FinanceiroPage() {
     invoiceNumber: "",
     paymentMethod: "",
     notes: "",
+    isPaid: true,
   })
 
   const fetchTransactions = useCallback(async () => {
@@ -147,6 +149,7 @@ export default function FinanceiroPage() {
       invoiceNumber: "",
       paymentMethod: "",
       notes: "",
+      isPaid: true,
     })
   }, [])
 
@@ -168,6 +171,7 @@ export default function FinanceiroPage() {
         body: JSON.stringify({
           ...formData,
           amount: amountDecimal,
+          isPaid: formData.isPaid,
         }),
       })
 
@@ -220,6 +224,7 @@ export default function FinanceiroPage() {
       invoiceNumber: transaction.invoiceNumber || "",
       paymentMethod: transaction.paymentMethod || "",
       notes: transaction.notes || "",
+      isPaid: transaction.isPaid ?? true,
     })
     setIsDialogOpen(true)
   }, [])
@@ -229,8 +234,39 @@ export default function FinanceiroPage() {
     setIsDeleteDialogOpen(true)
   }, [])
 
-  const handleFormChange = useCallback((field: keyof typeof formData, value: string | null) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleTogglePaid = useCallback(async (transaction: Transaction) => {
+    try {
+      const response = await fetch(`/api/financeiro/${transaction.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPaid: !transaction.isPaid }),
+      })
+
+      if (response.ok) {
+        // Update local state for immediate feedback
+        setTransactions((prev) =>
+          prev.map((t) =>
+            t.id === transaction.id ? { ...t, isPaid: !t.isPaid } : t
+          )
+        )
+      } else {
+        const error = await response.json()
+        alert(error.error || "Erro ao atualizar status")
+      }
+    } catch (error) {
+      console.error("Error toggling paid status:", error)
+      alert("Erro ao atualizar status")
+    }
+  }, [])
+
+  const handleFormChange = useCallback((field: keyof typeof formData, value: string | null | boolean) => {
+    if (field === "isPaid") {
+      // Handle isPaid as boolean
+      const boolValue = typeof value === "boolean" ? value : value === "true"
+      setFormData(prev => ({ ...prev, [field]: boolValue }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }, [])
 
   const handleDialogChange = useCallback((open: boolean) => {
@@ -336,6 +372,7 @@ export default function FinanceiroPage() {
             transactions={filteredTransactions}
             onEdit={handleEdit}
             onDelete={handleOpenDeleteDialog}
+            onTogglePaid={handleTogglePaid}
           />
         </HuntlyCardContent>
       </HuntlyCard>

@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     
+    // Default isPaid: true for INCOME, false for EXPENSE (unless specified)
+    const isPaid = body.isPaid !== undefined
+      ? body.isPaid
+      : body.type === "INCOME"
+
     const transaction = await prisma.transaction.create({
       data: {
         type: body.type,
@@ -84,6 +89,7 @@ export async function POST(request: NextRequest) {
         invoiceNumber: body.invoiceNumber,
         paymentMethod: body.paymentMethod,
         notes: body.notes,
+        isPaid,
       },
       include: {
         client: {
